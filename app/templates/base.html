@@ -1,0 +1,12 @@
+<nav>
+    <ul><li><a href="{{url_for('addhabit')}}">Add habit</a></li></ul>
+    <ul><li><a href="{{url_for('dashboard')}}"> Dashboard</a></li></ul>
+    <ul><li><a href="{{url_for('index')}}"></a></li></ul>
+</nav>
+<link href="{{ url_for('static',filename='css/style.css')}}" rel="stylesheet">
+{% block content%}
+
+{% endblock%}
+<footer>
+    This is the footer
+</footer>
