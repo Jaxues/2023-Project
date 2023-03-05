@@ -1,5 +1,7 @@
-.Habit{
+.Habit {
     background-color: green;
     margin: 15%;
     padding: 20%;
+    color: blueviolet;
+    font-size: 100;
 }
