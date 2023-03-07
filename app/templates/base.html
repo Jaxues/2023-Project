@@ -1,9 +1,11 @@
+<link href="{{ url_for('static',filename='css/style.css')}}" rel="stylesheet">
 <nav>
+    <h1 class="logo"> Hadit</h1>
     <ul><li><a href="{{url_for('addhabit')}}">Add habit</a></li></ul>
     <ul><li><a href="{{url_for('dashboard')}}"> Dashboard</a></li></ul>
     <ul><li><a href="{{url_for('index')}}"></a></li></ul>
+    <button action="{{url_for('login')}}" class="login"> Login</button>
 </nav>
-<link href="{{ url_for('static',filename='css/style.css')}}" rel="stylesheet">
 {% block content%}
 
 {% endblock%}

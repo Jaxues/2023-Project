@@ -1,7 +1,62 @@
+:root{
+    --primary_color:#f7faff;
+    --secondary_color:#1D1F1F;
+    --accent_color:#2D898B;
+}
+
+
 .Habit {
-    background-color: green;
+    background-color: var(--primary_color);
     margin: 15%;
     padding: 20%;
-    color: blueviolet;
+    color: var(--secondary_color);
     font-size: 100;
 }
+
+/* Styling for Navbar*/ 
+.hero{
+    height: 25px;
+    width:100%;
+    margin: 0;
+    padding: 0; 
+    background-color: var(--primary_color);
+}
+
+nav{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 25px;
+    padding-left: 10%;
+    padding-right: 10%;
+}
+
+.logo{
+    color: var(--accent_color);
+    font-size: 25px;
+    font-weight: 25%;
+}
+
+nav ul li{
+    list-style: none;
+    display: inline-block;
+    padding: 10px 20px;
+}
+ nav ul li a{
+    color: var(--secondary_color);
+    text-decoration: none;
+    font-weight: bold;
+ }
+
+ nav ul li a:hover{
+    color: var(--accent_color);
+    transition: .5s;
+ }
+
+ .login{
+    background: var(--accent_color);
+    padding: 12px 30px;
+    color: var(--primary_color);
+    font-size: 15px;
+    transition: .7s;
+ }
