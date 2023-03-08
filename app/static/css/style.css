@@ -15,11 +15,16 @@
 
 /* Styling for Navbar*/ 
 .hero{
-    height: 25px;
+    height: 25vh;
     width:100%;
     margin: 0;
     padding: 0; 
-    background-color: var(--primary_color);
+    background-color:var(--primary_color);
+    display: flex;
+}
+
+body{
+    margin:0;
 }
 
 nav{
@@ -41,6 +46,7 @@ nav ul li{
     list-style: none;
     display: inline-block;
     padding: 10px 20px;
+    margin:0;
 }
  nav ul li a{
     color: var(--secondary_color);
@@ -51,8 +57,10 @@ nav ul li{
  nav ul li a:hover{
     color: var(--accent_color);
     transition: .5s;
+    margin:0;
  }
 
+ 
  .login{
     background: var(--accent_color);
     padding: 12px 30px;
@@ -60,3 +68,4 @@ nav ul li{
     font-size: 15px;
     transition: .7s;
  }
+

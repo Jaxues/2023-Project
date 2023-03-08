@@ -1,5 +1,12 @@
 {% extends 'base.html' %}
 
 {% block content%}
-<p> This is the login page</p>
+<div class="body"> 
+<form method="post">
+    {{ form.csrf_token}}
+    {{ form.username}}
+    {{ form.password}}
+    {{ form.submit}}
+</form>
+</div>
 {% endblock %}

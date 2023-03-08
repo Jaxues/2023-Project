@@ -23,4 +23,7 @@ def addhabit():
 
 @app.route('/login', methods=['get','post'])
 def login():
-    return render_template('login.html')
+    form=forms.loginform()
+    if form.validate_on_submit():
+        return redirect(url_for('dashboard'))
+    return render_template('login.html', form=form)
