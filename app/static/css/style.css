@@ -61,7 +61,7 @@ nav ul li{
  }
 
  
- .login{
+.login{
     background: var(--accent_color);
     padding: 12px 30px;
     color: var(--primary_color);
