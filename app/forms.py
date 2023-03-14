@@ -16,3 +16,7 @@ class RegisterForm(FlaskForm):
     password1=PasswordField('Password', validators=[DataRequired()])
     password2=PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password1')])
     register=SubmitField('register')
+
+class HabitCheck(FlaskForm):
+    check=BooleanField('check')
+    submit=SubmitField('submit')

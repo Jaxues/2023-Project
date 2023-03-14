@@ -15,7 +15,8 @@ def index():
 @app.route('/dashboard')
 def dashboard():
     Habits=habits.query.all()
-    return render_template('dashboard.html', Habits=Habits)
+    form=forms.HabitCheck()
+    return render_template('dashboard.html', Habits=Habits, form=form)
 
 @app.route('/addhabit', methods=['get','post'])
 def addhabit():
@@ -39,9 +40,10 @@ def login():
 def register():
     form=forms.RegisterForm()
     if form.validate_on_submit():
-        newuser=users(username=form.username.data, email=form.email.data)
-        newuser.password_hash(form.password1.data)
-        db.session.add(newuser)
-        db.session.commit()
-        return redirect(url_for('login'))
+     newuser = users(username=form.username.data, email=form.email.data)
+     newuser.set_password(form.password1.data)
+     print(newuser)
+     db.session.add(newuser)
+     db.session.commit()
+     return redirect(url_for('login'))
     return render_template('register.html', form=form)

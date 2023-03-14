@@ -2,7 +2,15 @@
 {% block content%}
 <body>
 {% for Habit in Habits %}
- <div class="Habit">{{ Habit.name }}</div>  
+ <div class="Habit">{{ Habit.name }}
+<br>
+<div>
+{{ form.csrf_token() }}
+ {{ form.check }}
+ <br>
+ {{ form.submit(class_='submit')}}
+</div>
+</div> 
 {% endfor %}
 </body>
 {% endblock%}

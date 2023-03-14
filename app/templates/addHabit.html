@@ -1,8 +1,10 @@
 {% extends 'base.html'%}
 {% block content%}
 <form method="post">
+    <p> Enter your Habit</p>
     {{form.csrf_token}}
     {{ form.name}}
-    <input type="submit" value="submit">
+    <br>
+    {{ form.submit}}
 </form>
 {% endblock%}

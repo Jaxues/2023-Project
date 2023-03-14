@@ -8,14 +8,14 @@
 .Habit {
     background-color: var(--primary_color);
     margin: 15%;
-    padding: 20%;
+    padding:5%;
     color: var(--secondary_color);
-    font-size: 100;
+    font-size: 24;
 }
 
 /* Styling for Navbar*/ 
 .hero{
-    height: 25vh;
+    height: 10vh;
     width:100%;
     margin: 0;
     padding: 0; 
@@ -23,9 +23,6 @@
     display: flex;
 }
 
-body{
-    margin:0;
-}
 
 nav{
     display: flex;
@@ -42,6 +39,10 @@ nav{
     font-weight: 25%;
 }
 
+.logo a{
+    text-decoration: none;
+    color:var(--accent_color);
+}
 nav ul li{
     list-style: none;
     display: inline-block;
@@ -52,6 +53,7 @@ nav ul li{
     color: var(--secondary_color);
     text-decoration: none;
     font-weight: bold;
+    font-size: 30px;
  }
 
  nav ul li a:hover{
@@ -69,3 +71,56 @@ nav ul li{
     transition: .7s;
  }
 
+div a{
+    color: var(--secondary_color);
+    text-decoration: none;
+}
+
+div a:hover{
+    color: var(--accent_color);
+    transition: 0.2s;
+}
+form{
+    margin-left: 50%;
+}
+
+.register{
+    background-color: var(--accent_color);
+    text-align: center;
+    color: var(--primary_color);
+    margin:50px;
+
+}
+
+.register:hover{
+    transition:2s;
+}
+
+p {
+    color:var(--secondary_color);
+    font-family: font-family "Comic Sans MS", "Comic Sans", cursive;
+}
+
+.submit{
+    background-color: var(--accent_color);
+    color: var(--primary_color);
+    text-align: center;
+}
+
+.submit:hover{
+    transition: 2s;
+}
+
+.footer{
+    display: flex;
+    background-color: var(--primary_color);
+    width: 100%;
+    margin:0;
+    padding:0;
+    margin-top: 5%;
+    position:absolute;
+}
+
+body{
+    margin:0;
+}

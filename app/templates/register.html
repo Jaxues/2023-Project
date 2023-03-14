@@ -2,10 +2,32 @@
 {% block content%}
     <form method="post">
         {{form.csrf_token}}
+        <br>
+        <p> Enter your username</p>
+        <br>
         {{form.username}}
+        <br>
+        <br>
+        <p> Enter your email</p>
+        <br> 
         {{form.email}}
+        <br>
+         <br>
+        <p> Enter your password</p>
+        <br>
+        
         {{form.password1}}
+        <br>
+         <br>
+        <p> Re-enter your password</p>
+        <br>
+        
         {{form.password2}}
-        {{form.register}}
+        <br>
+        <br>
+        {{form.register(class_='register')}}
     </form>
+    <div>
+        <a href="{{url_for('login')}}"> Already have an account?</a>
+    </div>
 {% endblock %}
