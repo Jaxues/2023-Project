@@ -6,7 +6,7 @@ class habits(db.Model):
     id=db.Column(db.Integer, primary_key=True)
     name=db.Column(db.String)
     userid=db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    user=db.relationship('User',backref='habits')
+    user=db.relationship('users',backref='habits')
 
 class users(db.Model, UserMixin):
     id=db.Column(db.Integer, primary_key=True, autoincrement=True)
