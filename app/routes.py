@@ -1,7 +1,7 @@
 from app import app, forms, db, login_manager
 from flask import render_template, url_for, redirect, flash
 from app.models import habits, users
-from flask_login import login_required, logout_user, login_user
+from flask_login import login_required, current_user,logout_user, login_user
 from werkzeug.security import check_password_hash
 @login_manager.user_loader
 def load_user(user_id):
@@ -25,7 +25,7 @@ def dashboard():
 def addhabit():
     form=forms.HabitForm()
     if form.validate_on_submit():
-        NewHabit=habits(name=form.name.data, userid=users.get_id())
+        NewHabit=habits(name=form.name.data, userid=current_user.id)
         db.session.add(NewHabit)
         db.session.commit()
         return redirect(url_for('dashboard'))
@@ -40,6 +40,7 @@ def login():
             if check_password_hash(user.password_hash,form.password.data):
                 login_user(user)
                 flash("Login Succeesful")
+                print(current_user.id)
                 return redirect(url_for('dashboard'))
             else:
                 flash("Wrong password")
@@ -61,7 +62,7 @@ def register():
     return render_template('register.html', form=form)
 
 
-@app.route('/logout', methods=['post'])
+@app.route('/logout', methods=['get'])
 @login_required
 def logut():
     logout_user()

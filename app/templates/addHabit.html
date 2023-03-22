@@ -1,10 +1,12 @@
 {% extends 'base.html'%}
 {% block content%}
+
 <form method="post">
     <p> Enter your Habit</p>
     {{form.csrf_token}}
     {{ form.name}}
     <br>
-    {{ form.submit}}
+    {{ form.submit(class_='submit')}}
 </form>
+<p> Please sign in to add habit</p>
 {% endblock%}
