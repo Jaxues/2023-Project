@@ -7,9 +7,10 @@
 <br>
 <div>
 {{ form.csrf_token() }}
- {{ form.check }}
+ {{ form.check }}<label> Have you done {{ Habit.name}} today?</label>
  <br>
- {{ form.submit(class_='submit')}}
+ {{ form.submit(class_='submit', action='{{redirect(url_for("dashboard"))}}')}}
+
 </div>
 </div> 
 {% endfor %}
