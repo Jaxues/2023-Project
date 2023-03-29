@@ -1,3 +1,4 @@
+
 from app import app, forms, db, login_manager
 from flask import render_template, url_for, redirect, flash, request
 from app.models import habits, users
@@ -94,7 +95,7 @@ def page_not_found(error):
 
 @app.errorhandler(405)
 def method_not_allowed(error):
-    return render_template('error.html', error_code=405, error_description='Method Not Allowed', error_message='Sorry, the method you used to access this page is not allowed.'), 405
+    return render_template('error.html', error_code=406, error_description='Method Not Allowed', error_message='Sorry, the method you used to access this page is not allowed.'), 405
 
 @app.errorhandler(500)
 def internal_server_error(error):
