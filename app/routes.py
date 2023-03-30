@@ -18,23 +18,22 @@ def index():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    Habits=habits.query.all()
+    Habits=habits.query.filter_by(userid=current_user.id)
     form=forms.HabitCheck()
     return render_template('dashboard.html', Habits=Habits, form=form)
 
-
-
-@app.route('/addhabit', methods=['get','post'])
+@app.route('/addhabit', methods=['GET', 'POST'])
 @login_required
 def addhabit():
-    form=forms.HabitForm()
+    form = forms.HabitForm()
     if form.validate_on_submit():
-        NewHabit=habits(name=form.name.data, userid=current_user.id)
+        NewHabit = habits(name=form.name.data, userid=current_user.id)
         db.session.add(NewHabit)
         db.session.commit()
-        flash('Habit added to database')
+        flash('Habit added successfully!', 'success')
         return redirect(url_for('dashboard'))
     return render_template('addHabit.html', form=form)
+
 
 @app.route('/login', methods=['get','post'])
 def login():
@@ -73,7 +72,7 @@ def register():
 
 @app.route('/logout', methods=['get'])
 @login_required
-def logut():
+def logout():
     logout_user()
     return redirect(url_for('index'))
 

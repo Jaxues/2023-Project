@@ -1,7 +1,16 @@
 {% extends 'base.html' %}
 
 {% block content%}
-<div class="body"> 
+<div class="body">
+
+{% if current_user.is_authenticated %}
+<div class="userinfo">
+     <h1> Welcome {{current_user.username}}</h1>
+    <p> Username:{{current_user.email}}</p>
+    <p> Date Joined:{{current_user.date_joined}}</p>
+    <button><a href="{{url_for('logout')}}"> Logout</a></button>
+</div>
+{% else %}
 <form method="post">
     {{ form.csrf_token}}
     <br>
@@ -16,5 +25,6 @@
 <div>
     <a href="{{url_for('register')}}">Don't have an account?</a>
 </div>
+{% endif%}
 </div>
 {% endblock %}

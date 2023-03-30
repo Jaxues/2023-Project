@@ -67,6 +67,7 @@ nav ul li a:hover{
     font-size: 15px;
     transition: .7s;
     border-radius: 30px;
+    text-align: center;
  }
 
 div a{
@@ -89,6 +90,10 @@ form{
 .register:hover{
     transition:2s;
 }
+.logininfo{
+    text-align: center;
+}
+
 input[type=text]{
     margin: 10px;
     padding: 10px;
@@ -106,8 +111,9 @@ input[type=password]{
 .submit{
     background-color: var(--accent_color);
     color: var(--primary_color);
-    text-align: center;
     border-radius: 30px;
+    text-align: center;
+    margin-left: 10%;
 }
 /**/
 .submit:hover{
@@ -122,6 +128,7 @@ input[type=password]{
 }
 footer{
     margin-top: auto;
+    text-align: center;
 }
 
 /**/
@@ -138,6 +145,15 @@ p {
 }
 /**/
 
+.userinfo{
+    text-align: center;
+    background-color: var(--primary_color);
+}
+
+.userinfo a {
+    color: var(--secondary_color);
+    text-decoration: none;
+}
 /*Styling for error handler*/
 
 /* Error header Styling*/

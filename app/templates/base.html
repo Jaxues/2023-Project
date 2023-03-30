@@ -2,9 +2,16 @@
 <nav class="hero">
     <ul></ul>
     <h1 class="logo"> <a href="{{url_for('index')}}">Hadit</a></h1>
+    {% if current_user.is_authenticated %}
     <ul><li><a href="{{url_for('addhabit')}}">Add habit</a></li></ul>
     <ul><li><a href="{{url_for('dashboard')}}"> Dashboard</a></li></ul>
     <ul><li></li></ul>
+    {% else%}
+    <ul><li></li></ul>
+    <ul><li></li></ul>
+    <ul><li></li></ul>
+    <ul><li></li></ul>
+    {% endif%}
     <a href="{{url_for('login')}}"><button class="login"> Login</button></a>
     <ul></ul>
 </nav>
