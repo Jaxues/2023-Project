@@ -1,10 +1,11 @@
-
 from app import app, forms, db, login_manager
 from flask import render_template, url_for, redirect, flash, request
 from app.models import habits, users
 from flask_login import login_required, current_user,logout_user, login_user
 from werkzeug.security import check_password_hash
 from sqlalchemy.exc import IntegrityError
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return users.query.get(user_id)
