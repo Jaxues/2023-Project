@@ -1,9 +1,10 @@
 from app import app
 from flask_wtf import FlaskForm
 from wtforms.validators import DataRequired, Email, Length, EqualTo
-from wtforms import StringField, SubmitField, PasswordField, BooleanField
+from wtforms import StringField, SubmitField, PasswordField, BooleanField,TextAreaField, RadioField
 class HabitForm(FlaskForm):
     name=StringField('name',validators=[DataRequired()])
+    reason=TextAreaField('reason')
     submit=SubmitField('submit')
 class LoginForm(FlaskForm):
     username=StringField('username', validators=[DataRequired()])
@@ -20,3 +21,6 @@ class RegisterForm(FlaskForm):
 class HabitCheck(FlaskForm):
     check=BooleanField('check')
     submit=SubmitField('submit')
+
+class YesNo(FlaskForm):
+    options=RadioField(choices=(['y','Yes'],['n','No']))

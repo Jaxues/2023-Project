@@ -1,10 +1,13 @@
 {% extends 'base.html'%}
 {% block content%}
 <form method="post" class="body">
-    <p> Enter your Habit</p>
-    {{form.csrf_token}}
-    {{ form.name}}
-    <br>
-    {{ form.submit(class_='submit')}}
+
+  <p> Enter your Habit</p>
+  {{form.csrf_token}}
+  {{ form.name}}
+  <p> What is the reason you want to do this habit?</p>
+  {{ form.reason }}
+  <br>
+  {{ form.submit(class_='submit')}}
 </form>
 {% endblock%}

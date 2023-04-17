@@ -30,6 +30,7 @@ Methods:
 class habits(db.Model):
     id=db.Column(db.Integer, primary_key=True)
     name=db.Column(db.String)
+    reason=db.Column(db.String)
     userid=db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     user=db.relationship('users',backref='habits')
 

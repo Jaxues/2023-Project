@@ -28,17 +28,25 @@ def dashboard():
 def addhabit():
     form = forms.HabitForm()
     if form.validate_on_submit():
-        NewHabit = habits(name=form.name.data, userid=current_user.id)
-        db.session.add(NewHabit)
-        db.session.commit()
-        flash('Habit added successfully!', 'success')
-        return redirect(url_for('dashboard'))
+        checkhabit=habits.query.filter_by(userid=current_user.id, name=form.name.data.title()).first()
+        if checkhabit:
+            flash('You already have this habit')
+            return redirect(url_for('addhabit'))
+        else:
+            NewHabit = habits(name=form.name.data.title(), reason=form.reason.data.title(),userid=current_user.id)
+            db.session.add(NewHabit)
+            db.session.commit()
+            flash('Habit added successfully!', 'success')
+            return redirect(url_for('dashboard'))
     return render_template('addHabit.html', form=form)
 
 
 @app.route('/login', methods=['get','post'])
 def login():
     form=forms.LoginForm()
+    if current_user.is_authenticated:
+        flash("Your already logged in silly :)")
+        return redirect(url_for('info'))
     if form.validate_on_submit():
         user=users.query.filter_by(username=form.username.data).first()
         if user:
@@ -53,7 +61,14 @@ def login():
             flash("User doesn't exist")
     return render_template('login.html', form=form)
 
-
+@app.route('/info')
+def info():
+    if current_user.is_authenticated:
+        form=forms.YesNo()
+        return render_template('info.html', form=form)
+    else:
+        flash("You haven't logged on you can't access this page")
+        return redirect(url_for('login'))
 @app.route('/register', methods=['get', 'post'])
 def register():
     form=forms.RegisterForm()
@@ -77,6 +92,9 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
+
+
+"""
 @app.errorhandler(400)
 def bad_request(error):
     return render_template('error.html', error_code=400, error_description='Bad Request', error_message='Sorry, there was a problem with your request.'), 400
@@ -113,3 +131,4 @@ def handle_all_other_errors(error):
     db.session.rollback()
     flash('An error occurred')
     return render_template('error.html', error_code=500, error_description='Internal Server Error', error_message='Sorry, there was an internal server error.'), 500
+"""

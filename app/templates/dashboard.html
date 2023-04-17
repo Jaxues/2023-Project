@@ -3,15 +3,12 @@
 <body>
 {% for Habit in Habits %}
  <div class="Habit"><h1>{{ Habit.name }}</h1>
-<h2> User:{{Habit.user.username}}</h2>
+<p> Reason: {{ Habit.reason }}</p>
 <br>
-<div>
 {{ form.csrf_token() }}
  {{ form.check }}<label> Have you done {{ Habit.name}} today?</label>
  <br>
  {{ form.submit(class_='submit', action='{{redirect(url_for("dashboard"))}}')}}
-
-</div>
 </div> 
 {% endfor %}
 </body>
