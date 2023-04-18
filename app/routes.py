@@ -94,7 +94,6 @@ def logout():
 
 
 
-"""
 @app.errorhandler(400)
 def bad_request(error):
     return render_template('error.html', error_code=400, error_description='Bad Request', error_message='Sorry, there was a problem with your request.'), 400
@@ -131,4 +130,3 @@ def handle_all_other_errors(error):
     db.session.rollback()
     flash('An error occurred')
     return render_template('error.html', error_code=500, error_description='Internal Server Error', error_message='Sorry, there was an internal server error.'), 500
-"""

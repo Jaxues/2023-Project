@@ -1,9 +1,22 @@
 /* CSS Color Palette*/
 :root{
+
+    --background_color:#ffff;
     --primary_color:#f7faff;
     --secondary_color:#1D1F1F;
     --accent_color:#2D898B;
+    --alert_color:#FFC107;
+    --button_color:var(--primary_color);
+    }
+[data-theme='dark']{
+    --background_color:#282a36;
+    --primary_color:#44475a;
+    --secondary_color:#f8f8f2;
+    --accent_color:#ff79c6; 
+    --alert_color:#ff5555;
+    --button_color:#f8f8f2;
 }
+
 
 /* Styling for Habit Dashbaord*/
 .Habit {
@@ -63,6 +76,7 @@ nav ul li a:hover{
 
  /* Styling for Login*/
 .button{
+    display: block;
     background: var(--accent_color);
     padding: 12px 30px;
     color: var(--primary_color);
@@ -80,9 +94,7 @@ div a:hover{
     color: var(--accent_color);
     transition: 0.2s;
 }
-form{
-    margin-left: 50%;
-}
+
 .register{
     background-color: var(--accent_color);
     text-align: center;
@@ -111,17 +123,22 @@ input[type=password]{
 }
 
 .submit{
+    display: block;
+    margin: 0 auto;
     background-color: var(--accent_color);
-    color: var(--primary_color);
+    color: var(--button_color);
     border-radius: 30px;
     text-align: center;
-    margin-left: 10%;
 }
 /**/
 .submit:hover{
     transition: 2s;
 }
 
+.recaptcha{
+    display:block;
+    margin:0 auto;
+}
 
 /* Styling for footer*/
 .footer{
@@ -147,7 +164,10 @@ body{
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    background-color: var(--background_color);
 }
+
+
 
 .body{
     text-align: center;
@@ -163,18 +183,23 @@ p {
 .userinfo{
     background-color: var(--primary_color);
     text-align: center;
+    margin-left:40%;
+    margin-top: 20vh;
     position: fixed;
     padding: 50px;
-    margin-left: 40%;
-    margin-top: 5%;
     border-radius: 30px;
 }
 
-.button a{
-    color: var(--primary_color);
+.button {
+    color: var(--button_color);
     text-align: center;
     text-decoration: none;
 }
+
+button{
+    color:var(--secondary_color);
+}
+
 /*Styling for error handler*/
 
 /* Error header Styling*/
@@ -195,16 +220,27 @@ p {
 }
 
 .flashes{
-    background-color: var(--accent_color);
     text-align: center;
     list-style: none;
-    color: var(--primary_color);
+    color: var(--alert_color);
     position: fixed;
-    top: 25%; 
+    top: 10.45vh; 
     left: 50%; 
+    transform: translateX(-50%);
     max-width: 300px; 
     padding: 10px; 
     border-radius: 30px; 
     position: absolute;
 }
 
+#icon{
+    width: 30px;
+}
+
+label{
+    color: var(--secondary_color);
+}
+
+h1{
+    color: var(--secondary_color);
+}

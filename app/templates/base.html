@@ -6,19 +6,19 @@
     <ul><li><a href="{{url_for('addhabit')}}">Add habit</a></li></ul>
     <ul><li><a href="{{url_for('dashboard')}}"> Dashboard</a></li></ul>
     <ul><li></li></ul>
-    <a href="{{url_for('login')}}"><button class="button"> Info</button></a>
+    <button onclick="window.location.href='{{ url_for('info') }}'" class="button"> Info</button>
     {% else%}
     <ul><li></li></ul>
     <ul><li></li></ul>
     <ul><li></li></ul>
     <ul><li></li></ul>
-    <button class="button"><a href="{{url_for('login')}}">Login</a></button>
+    <button onclick="window.location.href='{{ url_for('login') }}'" class="button">Login</a></button>
     {% endif%}
     <ul></ul>
 </nav>
 {% with messages = get_flashed_messages() %}
   {% if messages %}
-    <ul class=flashes>
+    <ul class='flashes'>
     {% for message in messages %}
       <li>{{ message }}</li>
     {% endfor %}
@@ -30,14 +30,9 @@
 {% endblock%}
 <footer class="footer">    
   {% if current_user.is_authenticated %}
-    <p> Do you want to recieve email reminders</p>
-    {% for subfield in form.option %}
-    <tr>
-        <td>{{ subfield }}</td>
-        <td>{{ subfield.label }}</td>
-    </tr>
-    {% endfor %}
-  {% else %}
+    <p> Want extra customizability go to Info page</p>
+      {% else %}
     <p> Sign in to get access to special features like email reminders, streaks, and habit tracking</p>
   {% endif%}
 </footer>
+<script src="{{url_for('static', filename='js/themedefaut.js')}}"></script>

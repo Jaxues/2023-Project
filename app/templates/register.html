@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block content%}
-    <form method="post">
+<div class="body">    
+<form method="post">
         {{form.csrf_token}}
         <br>
         <p> Enter your username</p>
@@ -24,10 +25,13 @@
         
         {{form.password2}}
         <br>
+       
+            {{form.recaptcha(class_='recaptcha')}}
+       
         <br>
-        {{form.register(class_='register')}}
+        {{form.register(class_='submit')}}
     </form>
-    <div>
+    
         <a href="{{url_for('login')}}"> Already have an account?</a>
     </div>
 {% endblock %}

@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content%}
+<div class="body">
 <form method="post">
     {{ form.csrf_token}}
     <br>
@@ -12,7 +13,6 @@
     <br>
     {{ form.submit(class_='submit')}}
 </form>
-<div class="body">
-    <a href="{{url_for('register')}}">Don't have an account?</a>
+<a href="{{url_for('register')}}">Don't have an account?</a>
 </div>
 {% endblock %}

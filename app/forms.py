@@ -1,5 +1,5 @@
 from app import app
-from flask_wtf import FlaskForm
+from flask_wtf import FlaskForm, Recaptcha,RecaptchaField
 from wtforms.validators import DataRequired, Email, Length, EqualTo
 from wtforms import StringField, SubmitField, PasswordField, BooleanField,TextAreaField, RadioField
 class HabitForm(FlaskForm):
@@ -16,6 +16,7 @@ class RegisterForm(FlaskForm):
     email=StringField('email', validators=[DataRequired(), Email()])
     password1=PasswordField('Password', validators=[DataRequired()])
     password2=PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password1')])
+    recaptcha=RecaptchaField('Recaptcha',validators=[Recaptcha()])
     register=SubmitField('register')
 
 class HabitCheck(FlaskForm):

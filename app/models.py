@@ -26,7 +26,14 @@ Methods:
 - check_password(password): Checks if the provided password matches the hashed password stored in the password_hash column.
 """
 
+"""
 
+
+class streak(db.Model):
+    userid=db.Column(db.Integer, primary_key=True, foriegn_key=True)
+    habitid=db.Column(db.Integer, primary_key=True, foriegn_key=True)
+    date=db.Column(db.DateTime, default=datetime.utcnow)
+"""
 class habits(db.Model):
     id=db.Column(db.Integer, primary_key=True)
     name=db.Column(db.String)
@@ -48,3 +55,4 @@ class users(db.Model, UserMixin):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+    #streak=db.relationship('habits', secondary=streak, backref='User Streak')
