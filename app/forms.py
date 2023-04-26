@@ -19,9 +19,7 @@ class RegisterForm(FlaskForm):
     recaptcha=RecaptchaField('Recaptcha',validators=[Recaptcha()])
     register=SubmitField('register')
 
-class HabitCheck(FlaskForm):
-    check=BooleanField('check')
-    submit=SubmitField('submit')
 
 class YesNo(FlaskForm):
     options=RadioField(choices=(['y','Yes'],['n','No']))
+    submit=SubmitField('Submit')

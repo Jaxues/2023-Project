@@ -1,0 +1,12 @@
+{% extends 'base.html'%}
+{% block content%}
+<!-- Loop to go through FAQ question and create details and summary for them-->
+<body>
+{% for question, answer in faqs.items() %}
+    <details>
+        <summary>{{ question }}</summary>
+        <p>{{ answer }}</p>
+    </details>
+{% endfor %}
+</body>
+{% endblock%}

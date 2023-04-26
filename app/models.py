@@ -26,24 +26,19 @@ Methods:
 - check_password(password): Checks if the provided password matches the hashed password stored in the password_hash column.
 """
 
-"""
-
-
-class streak(db.Model):
-    userid=db.Column(db.Integer, primary_key=True, foriegn_key=True)
-    habitid=db.Column(db.Integer, primary_key=True, foriegn_key=True)
-    date=db.Column(db.DateTime, default=datetime.utcnow)
-"""
 class habits(db.Model):
+    __tablename__ = 'habits'
     id=db.Column(db.Integer, primary_key=True)
-    name=db.Column(db.String)
-    reason=db.Column(db.String)
-    userid=db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    user=db.relationship('users',backref='habits')
+    name=db.Column(db.String(50))
+    reason=db.Column(db.String(128))
+    user_id=db.Column(db.Integer, db.ForeignKey('users.id'))
+    users=db.relationship('users', secondary='streak', backref='habits')
+    
 
 class users(db.Model, UserMixin):
+    __tablename__ = 'users'
     id=db.Column(db.Integer, primary_key=True, autoincrement=True)
-    username=db.Column(db.String, unique=True)
+    username=db.Column(db.String(50), unique=True)
     password_hash=db.Column(db.String)
     email=db.Column(db.String, unique=True)
     date_joined=db.Column(db.DateTime, default=datetime.utcnow)
@@ -55,4 +50,14 @@ class users(db.Model, UserMixin):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
-    #streak=db.relationship('habits', secondary=streak, backref='User Streak')
+    streak=db.relationship('habits', secondary='streak', backref='user_streak')
+
+class streak(db.Model):
+    __tablename__ = 'streak'
+    id=db.Column(db.Integer, primary_key=True)
+    user_id=db.Column(db.Integer,db.ForeignKey('users.id'), nullable=False)
+    habit_id=db.Column(db.Integer, db.ForeignKey('habits.id'), nullable=False)
+    date=db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    is_consecutive=db.Column(db.Integer, default=False)
+    user = db.relationship('users', backref='streaks')
+    habit = db.relationship('habits', backref='streaks')
