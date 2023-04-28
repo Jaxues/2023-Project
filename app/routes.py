@@ -1,6 +1,6 @@
 from app import app, forms, db, login_manager
 from flask import render_template, url_for, redirect, flash, request
-from app.models import habits, users
+from app.models import habits, users, streak
 from flask_login import login_required, current_user,logout_user, login_user
 from werkzeug.security import check_password_hash
 from sqlalchemy.exc import IntegrityError
@@ -70,13 +70,6 @@ def logout():
 def index():
     return render_template('index.html')
 
-"""
-Habit routes
-
-
-
-
-"""
 
 
 @app.route('/addhabit', methods=['GET', 'POST'])
@@ -84,12 +77,12 @@ Habit routes
 def addhabit():
     form = forms.HabitForm()
     if form.validate_on_submit():
-        checkhabit=habits.query.filter_by(userid=current_user.id, name=form.name.data.title()).first()
+        checkhabit=habits.query.filter_by(user_id=current_user.id, name=form.name.data.title()).first()
         if checkhabit:
             flash('You already have this habit')
             return redirect(url_for('addhabit'))
         else:
-            NewHabit = habits(name=form.name.data.title(), reason=form.reason.data.title(),userid=current_user.id)
+            NewHabit = habits(name=form.name.data.title(), reason=form.reason.data.title(),user_id=current_user.id)
             db.session.add(NewHabit)
             db.session.commit()
             flash('Habit added successfully!', 'success')
@@ -99,10 +92,16 @@ def addhabit():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    Habits=habits.query.filter_by(userid=current_user.id)
+    Habits=habits.query.filter_by(user_id=current_user.id)
     form=forms.YesNo()
     return render_template('dashboard.html', Habits=Habits, form=form)
 
+@app.route('/streaks')
+@login_required
+def streaks():
+    Streaks=streak.query.filter_by(user_id=current_user.id)
+    print(Streaks)
+    return render_template('streak.html', Streaks=Streaks)
 
 
 @app.route('/info')
@@ -134,7 +133,7 @@ def faq():
 def cats():
     return render_template('cats.html')
 
-"""
+
 @app.errorhandler(400)
 def bad_request(error):
     return render_template('error.html', error_code=400, error_description='Bad Request', error_message='Sorry, there was a problem with your request.'), 400
@@ -171,4 +170,3 @@ def handle_all_other_errors(error):
     db.session.rollback()
     flash('An error occurred')
     return render_template('error.html', error_code=500, error_description='Internal Server Error', error_message='Sorry, there was an internal server error.'), 500
-"""
