@@ -2,17 +2,17 @@
 
 {% block content%}
 <div class="body">
-<form method="post">
-    {{ form.csrf_token}}
-    <br>
-    <p> Username</p>
-    {{ form.username(class_='logininput')}}
-    <br>
-    <p> Password</p>
-    {{ form.password(class_='logininput')}}
-    <br>
-    {{ form.submit(class_='submit')}}
-</form>
-<a href="{{url_for('register')}}">Don't have an account?</a>
+    <form method="post">
+        {{ form.csrf_token}}
+        <br>
+        <p> Username</p>
+        {{ form.username(class_='logininput')}}
+        <br>
+        <p> Password</p>
+        {{ form.password(class_='logininput')}}
+        <br>
+        {{ form.submit(class_='submit')}}
+    </form>
+    <a href="{{url_for('register')}}">Don't have an account?</a>
 </div>
 {% endblock %}

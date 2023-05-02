@@ -1,68 +1,45 @@
-from app import db
-from datetime import datetime
-from flask_login import UserMixin
-from werkzeug.security import check_password_hash, generate_password_hash
+from app import db # import database object
+from datetime import datetime # import datetime modules
+from flask_login import UserMixin # import Usermixin class from flask_login
+from werkzeug.security import check_password_hash, generate_password_hash # import Check_password_hash and generate_password_hash from werkzeug.security 
 
-"""
-This module contains Flask SQLAlchemy models for the application.
-
-Classes:
-- habits: SQLAlchemy model for the habits table.
-- users: SQLAlchemy model for the users table, using the UserMixin for authentication.
-
-Attributes:
-- id: Integer primary key for both tables.
-- name: String column for habits table.
-- userid: Integer foreign key referencing id column in users table.
-- user: Relationship between habits and users table.
-- username: String column for username in users table, must be unique.
-- password_hash: String column for storing hashed passwords in users table.
-- email: String column for email in users table, must be unique.
-- date_joined: DateTime column for storing date and time of user registration in users table.
-
-Methods:
-- get_id(): Returns the id of the user for Flask-Login authentication.
-- set_password(password): Hashes the provided password and stores it in the password_hash column.
-- check_password(password): Checks if the provided password matches the hashed password stored in the password_hash column.
-"""
+ 
+class habits(db.Model): # define 'habits' table
+    __tablename__ = "habits" # add 'habits' tablename
+    id = db.Column(db.Integer, primary_key=True) # create primary key for habits table
+    name = db.Column(db.String(50)) # create name column for table
+    reason = db.Column(db.String(128)) # create reason column for table
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id")) # create foreign key for user_id in user table 
+    users = db.relationship("users", secondary="streak", backref="habits") # establish one to many relationship with users table
 
 
-class habits(db.Model):
-    __tablename__ = 'habits'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50))
-    reason = db.Column(db.String(128))
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    users = db.relationship('users', secondary='streak', backref='habits')
+class users(db.Model, UserMixin): # define 'users' table and include UserMixin class
+    __tablename__ = "users" # add 'users' tablename
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True) # create primary key for user table stored as integer
+    username = db.Column(db.String(50), unique=True) # column for usernames stored as string. With maximum length of 50. 
+    password_hash = db.Column(db.String) # column for user password hash stored as string.
+    email = db.Column(db.String, unique=True) # column for user email stored as string
+    date_joined = db.Column(db.DateTime, default=datetime.utcnow) # column for recording when user joined. Stored as datetime object. Defualt to current date. 
 
-
-class users(db.Model, UserMixin):
-    __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    username = db.Column(db.String(50), unique=True)
-    password_hash = db.Column(db.String)
-    email = db.Column(db.String, unique=True)
-    date_joined = db.Column(db.DateTime, default=datetime.utcnow)
-
-    def get_id(self):
+    def get_id(self): # function that returns own id
         return self.id
 
-    def set_password(self, password):
+    def set_password(self, password): # function that generates password hash when called
         self.password_hash = generate_password_hash(password)
 
-    def check_password(self, password):
+    def check_password(self, password): # function that generates password hash when called
         return check_password_hash(self.password_hash, password)
-    streak = db.relationship(
-        'habits', secondary='streak', backref='user_streak')
+
+    streak = db.relationship("habits", secondary="streak", backref="user_streak") # establish many to many relationship with 'streak' table
 
 
-class streak(db.Model):
-    __tablename__ = 'streak'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    habit_id = db.Column(db.Integer, db.ForeignKey(
-        'habits.id'), nullable=False)
-    date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    is_consecutive = db.Column(db.Integer, default=False)
-    user = db.relationship('users', backref='streaks')
-    habit = db.relationship('habits', backref='streaks')
+class streak(db.Model): # define 'streak' table
+    __tablename__ = "streak" # add 'streak' as tablename
+    id = db.Column(db.Integer, primary_key=True) # create primary key for streak table. Stored as integer
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False) # Foreign key column for user id
+    habit_id = db.Column(db.Integer, db.ForeignKey("habits.id"), nullable=False) # Foreign key column for habit id
+    date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False) # column to record when habit is recorded. Stored as a datetime object. Defualts to current date. 
+    is_consecutive = db.Column(db.Integer, default=False) # column to record current streak for users habit
+    user = db.relationship("users", backref="streaks") # establish relationship with 'user' table
+    habit = db.relationship("habits", backref="streaks")  # establish relationship with 'habits' table
+

@@ -1,11 +1,11 @@
 {% extends 'base.html'%}
 
 {% block content%}
-    {% for streak in Streaks %}
-    <div>
-        <p>{{streak.user_id}}</p>
-        <p> {{streak.habit_id}}</p>
-        <p> {{streak.date}}</p>
-    </div>
-    {% endfor %}
+{% for streak in Streaks %}
+<div>
+    <p>{{streak.user_id}}</p>
+    <p> {{streak.habit_id}}</p>
+    <p> {{streak.date}}</p>
+</div>
+{% endfor %}
 {% endblock %}

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content%}
-<div class="body">    
-<form method="post">
+<div class="body">
+    <form method="post">
         {{form.csrf_token}}
         <br>
         <p> Enter your username</p>
@@ -10,28 +10,28 @@
         <br>
         <br>
         <p> Enter your email</p>
-        <br> 
+        <br>
         {{form.email}}
         <br>
-         <br>
+        <br>
         <p> Enter your password</p>
         <br>
-        
+
         {{form.password1}}
         <br>
-         <br>
+        <br>
         <p> Re-enter your password</p>
         <br>
-        
+
         {{form.password2}}
         <br>
-       
-            {{form.recaptcha(class_='recaptcha')}}
-       
+
+        {{form.recaptcha(class_='recaptcha')}}
+
         <br>
         {{form.register(class_='submit')}}
     </form>
-    
-        <a href="{{url_for('login')}}"> Already have an account?</a>
-    </div>
+
+    <a href="{{url_for('login')}}"> Already have an account?</a>
+</div>
 {% endblock %}

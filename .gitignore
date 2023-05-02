@@ -1,3 +1,5 @@
 .env
 *.md
-Hadit.db
+instance/
+migratios/
+__pycache__/
