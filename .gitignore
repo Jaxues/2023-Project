@@ -1,5 +1,5 @@
 .env
 *.md
 instance/
-migratios/
+migrations/
 __pycache__/

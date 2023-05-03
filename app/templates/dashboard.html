@@ -1,15 +1,16 @@
 {% extends 'base.html'%}
 {% block content%}
-<form method="post">
-    {% for Habit in Habits %}
-    <div class="Habit" id={{Habit.id}}>
-        <h1>{{ Habit.name }}</h1>
-        <p> Reason: {{ Habit.reason }}</p>
+
+{% for Habit in Habits %}
+<div class="Habit">
+    <h1>{{ Habit.name }}</h1>
+    <p> Reason: {{ Habit.reason }}</p>
+    <form method="post">
         {{ form.csrf_token}}
-        {{ form.hidden_id}}
-        <button></button>
-    </div>
-    {% endfor %}
-</form>
-<script href="{{url_for('static', filename='js/selecthabit.js')}}"></script>
+        {{ form.hidden_id(value=Habit.id)}}
+        {{ form.submit(class_='button') }}
+    </form>
+</div>
+{% endfor %}
+<script src="{{url_for('static', filename='js/selecthabit.js')}}"></script>
 {% endblock%}

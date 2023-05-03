@@ -36,3 +36,7 @@ class RegisterForm(FlaskForm):
 class YesNo(FlaskForm):
     options = RadioField(choices=(["y", "Yes"], ["n", "No"]))
     submit = SubmitField("Submit")
+
+class StreakForm(FlaskForm):
+    hidden_id=HiddenField(name='habit_id')
+    submit=SubmitField('Done')

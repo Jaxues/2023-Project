@@ -6,9 +6,20 @@
     <p> Date Joined:{{current_user.date_joined}}</p>
 
     <br>
+
+
     <tr>
+        {% if current_user.email_notifications %}
+        <td>
+            <p>You currently have email notifcations enabled</p>
+        </td>
+        {% else %}
+        <td>
+            <p> You don't have email notifications enabled</p>
+        </td>
+        {%endif %}
         <p>Do you want email reminders?</p>
-        <form>
+        <form method="post" action="{{url_for('subscribe')}}">
             {% for option in form.options %}
             <td>{{ option }}</td>
             <td>{{ option.label }}</td>
@@ -18,7 +29,7 @@
 
     </tr>
     <br>
-    <label> Do you want to change theme?</label><img href="{{url_for('static',filename='images/moon.png')}}" id="icon">
+    <label> Do you want to change theme?</label><img src="{{url_for('static',filename='images/moon.png')}}" id="icon">
     <button onclick="window.location.href='{{ url_for('logout') }}'" class="submit">Logout</button>
 </div>
 <script src="{{url_for('static', filename='js/themeswitcher.js')}}"></script>

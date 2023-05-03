@@ -1,6 +1,5 @@
 from app import app, forms, db, login_manager
-from app.function import testfunction
-from flask import render_template, url_for, redirect, flash, request
+from flask import render_template, url_for, redirect, flash, jsonify, request
 from app.models import habits, users, streak
 from flask_login import login_required, current_user, logout_user, login_user
 from werkzeug.security import check_password_hash
@@ -130,21 +129,21 @@ def addhabit():
 @login_required
 def dashboard():
     Habits = habits.query.filter_by(user_id=current_user.id)
-    form = forms.YesNo()
+    form = forms.StreakForm()
     if form.validate_on_submit():
-        print('Hello World')
-        flash('Habit succesfully checked off')
-        return render_template("dashboard.html", Habits=Habits, form=form)
+        new_entry=streak(user_id=current_user.id, habit_id=form.hidden_id.data)
+        db.session.add(new_entry)
+        db.session.commit()
+        return redirect(url_for('streaks'))
     return render_template("dashboard.html", Habits=Habits, form=form)
 
 
-@app.route("/streaks")
+
+@app.route("/streaks", methods=['get', 'post'])
 @login_required
 def streaks():
     Streaks = streak.query.filter_by(user_id=current_user.id)
-    print(Streaks)
     return render_template("streak.html", Streaks=Streaks)
-
 
 @app.route("/info")
 def info():
@@ -155,6 +154,16 @@ def info():
         flash("You haven't logged on you can't access this page")
         return redirect(url_for("login"))
 
+# Email perferences to subscribe user to email
+@app.route("/subscribe", methods=['get', 'post'])
+@login_required
+def subscribe():
+    email_user=users.query.filter_by(id=current_user.id).first()
+    email_user.email_notifactions=True
+    db.session.add(email_user)
+    db.session.commit()
+    flash('Email perferences updated')
+    return redirect(url_for('info'))
 
 @app.route("/faq", methods=["get"])
 def faq():
@@ -175,7 +184,7 @@ def faq():
 def cats():
     return render_template("cats.html")
 
-
+"""
 @app.errorhandler(400)
 def bad_request(error):
     return (
@@ -275,3 +284,4 @@ def handle_all_other_errors(error):
         ),
         500,
     )
+"""

@@ -20,7 +20,7 @@ class users(db.Model, UserMixin): # define 'users' table and include UserMixin c
     password_hash = db.Column(db.String) # column for user password hash stored as string.
     email = db.Column(db.String, unique=True) # column for user email stored as string
     date_joined = db.Column(db.DateTime, default=datetime.utcnow) # column for recording when user joined. Stored as datetime object. Defualt to current date. 
-
+    email_notifactions=db.Column(db.Boolean, default=False, name='email_notifactions')
     def get_id(self): # function that returns own id
         return self.id
 
