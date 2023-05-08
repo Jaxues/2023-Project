@@ -4,50 +4,51 @@ from app.models import habits, users, streak
 from flask_login import login_required, current_user, logout_user, login_user
 from werkzeug.security import check_password_hash
 from sqlalchemy.exc import IntegrityError
+from datetime import datetime, date
 
 
-
-@login_manager.user_loader 
+@login_manager.user_loader
 # Define userloader to Users ID
-def load_user(user_id): 
-    # Create function 
-    return users.query.get(user_id) # Returns current users_id from 'users' table
+def load_user(user_id):
+    # Create function
+    # Returns current users_id from 'users' table
+    return users.query.get(user_id)
 
 
-@app.route("/login", methods=["get", "post"]) 
+@app.route("/login", methods=["get", "post"])
 # define login route
-def login(): 
-    # Create login function 
-    form = forms.LoginForm() 
+def login():
+    # Create login function
+    form = forms.LoginForm()
     # Set form variable to be equal to Loginform class from forms.py
-    if current_user.is_authenticated:   
+    if current_user.is_authenticated:
         # If current users is already logged in flash message
         flash("Your already logged in silly :)")
         return redirect(url_for("info"))
-    if form.validate_on_submit(): 
+    if form.validate_on_submit():
         # Once user has submited form check with logic
-        user = users.query.filter_by(username=form.username.data).first() 
+        user = users.query.filter_by(username=form.username.data).first()
         # See if user exists
-        if user: 
+        if user:
             # If user exists continue
-            if check_password_hash(user.password_hash, form.password.data): 
+            if check_password_hash(user.password_hash, form.password.data):
                 # See if entered password from user is same as stored hashed password
-                login_user(user) 
+                login_user(user)
                 # If successful log in user
-                flash("Login Succeesful") 
+                flash("Login Succeesful")
                 # Alert user that proccess was succesful
-                return redirect(url_for("dashboard")) 
+                return redirect(url_for("dashboard"))
             # Return to page where user can see most recent habits
             else:
                 flash("Wrong password")
                 # If user entered password is incorrect. Won't log in user
         else:
-            flash("User doesn't exist") 
+            flash("User doesn't exist")
             # If user isn't created alert user
     return render_template("login.html", form=form)
 
 
-@app.route("/register", methods=["get", "post"]) 
+@app.route("/register", methods=["get", "post"])
 # Define register route
 def register():
     form = forms.RegisterForm()
@@ -56,7 +57,7 @@ def register():
         # Once user has succesfully submited form
         newuser = users(username=form.username.data, email=form.email.data)
         # set newuser variable to be equal to have username and email to same as entered credentials
-        newuser.set_password(form.password1.data) 
+        newuser.set_password(form.password1.data)
         # Set password hash for new user
         print(newuser)
         # Validate that newuser is created correctly
@@ -69,7 +70,6 @@ def register():
         If user already exists rollback database and alert user
         
         """
-
 
         try:
             db.session.commit()
@@ -88,7 +88,8 @@ Once routed will logout user from session and then return them to index page
 
 """
 
-@app.route("/logout", methods=["get"]) 
+
+@app.route("/logout", methods=["get"])
 @login_required
 def logout():
     logout_user()
@@ -125,18 +126,30 @@ def addhabit():
     return render_template("addHabit.html", form=form)
 
 
-@app.route("/dashboard", methods=['GET','POST'])
+@app.route("/dashboard", methods=['GET', 'POST'])
 @login_required
 def dashboard():
     Habits = habits.query.filter_by(user_id=current_user.id)
     form = forms.StreakForm()
     if form.validate_on_submit():
-        new_entry=streak(user_id=current_user.id, habit_id=form.hidden_id.data)
-        db.session.add(new_entry)
-        db.session.commit()
-        return redirect(url_for('streaks'))
-    return render_template("dashboard.html", Habits=Habits, form=form)
+        habit_id = form.hidden_id.data
+        current_date = datetime.utcnow().date()
+        check_entry = streak.query.filter_by(
+            user_id=current_user.id, habit_id=habit_id, date=current_date).first()
+        print(check_entry)
+        if check_entry:
+            flash("You have already reccorded your habit for today. ")
+            print(check_entry)
+            return redirect(url_for('dashboard'))
 
+        else:
+            new_entry = streak(user_id=current_user.id,
+                               habit_id=form.hidden_id.data)
+            db.session.add(new_entry)
+            new_entry.check_consecutive()  # Call the method to check consecutive streaks
+            db.session.commit()
+            return redirect(url_for('streaks'))
+    return render_template("dashboard.html", Habits=Habits, form=form)
 
 
 @app.route("/streaks", methods=['get', 'post'])
@@ -144,6 +157,7 @@ def dashboard():
 def streaks():
     Streaks = streak.query.filter_by(user_id=current_user.id)
     return render_template("streak.html", Streaks=Streaks)
+
 
 @app.route("/info")
 def info():
@@ -155,15 +169,18 @@ def info():
         return redirect(url_for("login"))
 
 # Email perferences to subscribe user to email
+
+
 @app.route("/subscribe", methods=['get', 'post'])
 @login_required
 def subscribe():
-    email_user=users.query.filter_by(id=current_user.id).first()
-    email_user.email_notifactions=True
+    email_user = users.query.filter_by(id=current_user.id).first()
+    email_user.email_notifactions = True
     db.session.add(email_user)
     db.session.commit()
     flash('Email perferences updated')
     return redirect(url_for('info'))
+
 
 @app.route("/faq", methods=["get"])
 def faq():
@@ -183,6 +200,7 @@ def faq():
 @app.route("/cats", methods=["get"])
 def cats():
     return render_template("cats.html")
+
 
 """
 @app.errorhandler(400)

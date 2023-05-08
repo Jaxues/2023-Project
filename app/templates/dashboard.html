@@ -5,10 +5,10 @@
 <div class="Habit">
     <h1>{{ Habit.name }}</h1>
     <p> Reason: {{ Habit.reason }}</p>
-    <form method="post">
+    <form method="post" onsubmit="document.getElementById('{{ form.submit.id }}').disabled=true;">
         {{ form.csrf_token}}
         {{ form.hidden_id(value=Habit.id)}}
-        {{ form.submit(class_='button') }}
+        {{ form.submit(class_='button', id='submit-btn') }}
     </form>
 </div>
 {% endfor %}
