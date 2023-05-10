@@ -67,13 +67,3 @@ class streak(db.Model):  # define 'streak' table
                             overlaps="habits,user_streak,users")
     __table_args__ = (db.UniqueConstraint(
         'user_id', 'habit_id', 'date', name='_user_habit_date_uc'),)
-
-    def check_consecutive(self):
-        # Get the previous streak for the same habit and user
-        prev_streak = streak.query.filter_by(
-            user_id=self.user_id, habit_id=self.habit_id).order_by(streak.date.desc()).first()
-        # Check if the previous streak was recorded yesterday
-        if prev_streak and prev_streak.date == self.date - timedelta(days=1):
-            self.is_consecutive = prev_streak.is_consecutive + 1
-        else:
-            self.is_consecutive = 1

@@ -4,7 +4,7 @@ from app.models import habits, users, streak
 from flask_login import login_required, current_user, logout_user, login_user
 from werkzeug.security import check_password_hash
 from sqlalchemy.exc import IntegrityError
-from datetime import datetime, date
+from app.function import get_local_date, check_consecutive
 
 
 @login_manager.user_loader
@@ -59,7 +59,7 @@ def register():
         # set newuser variable to be equal to have username and email to same as entered credentials
         newuser.set_password(form.password1.data)
         # Set password hash for new user
-        print(newuser)
+        print(newuser.password_hash)
         # Validate that newuser is created correctly
         db.session.add(newuser)
 
@@ -133,22 +133,29 @@ def dashboard():
     form = forms.StreakForm()
     if form.validate_on_submit():
         habit_id = form.hidden_id.data
-        current_date = datetime.utcnow().date()
+        current_date = get_local_date()
+        print(current_date)
         check_entry = streak.query.filter_by(
             user_id=current_user.id, habit_id=habit_id, date=current_date).first()
-        print(check_entry)
         if check_entry:
             flash("You have already reccorded your habit for today. ")
             print(check_entry)
             return redirect(url_for('dashboard'))
 
+        check_date = streak.query.filter_by(
+            user_id=current_user.id, habit_id=habit_id).order_by(streak.date.desc()).first()
+
+        if check_date:
+            streak_score = check_consecutive(check_date)
+            new_entry = streak(user_id=current_user.id,
+                               habit_id=habit_id, is_consecutive=streak_score)
         else:
             new_entry = streak(user_id=current_user.id,
-                               habit_id=form.hidden_id.data)
-            db.session.add(new_entry)
-            new_entry.check_consecutive()  # Call the method to check consecutive streaks
-            db.session.commit()
-            return redirect(url_for('streaks'))
+                               habit_id=habit_id, is_consecutive=1)
+        db.session.add(new_entry)
+        db.session.commit()
+        # Call the method to check consecutive streaks
+        return redirect(url_for('streaks'))
     return render_template("dashboard.html", Habits=Habits, form=form)
 
 
@@ -192,7 +199,7 @@ def faq():
         "Can I use this app on multiple devices?": "Yes, Hadit is a website created using Flask, HTML, CSS, and Javascript. And is capable of running on any modern webbrowser without any need for any special configuration. Just sign into your account and your informaton should sync from you account seamlessly. ",
         "Is my personal information secure on this app?": "Yes. Hadit hashes all the passwords from users as well as encrypting any text entered for the reason user input for habits. To try to ensure users privacy.",
         "What happens if I encounter an error or bug?": "If a red message occurs this may be a sign that you might need to check your input to see if there are any errors. This could be from entering a duplicate habit, the incorrect password, or a username that doesn't exist. Else users would be redirected to a error page where you can be taken back to the website afterwards. ",
-        "What types of customizability do you current offer": "Currently Hadit offers the ability to change from Light to Dark mode in the user info page. As well there is a page for cats incase you want to look at some adorable cutie pies. ",
+        "What types of customisability do you current offer": "Currently Hadit offers the ability to change from Light to Dark mode in the user info page. As well there is a page for cats in case you want to look at some adorable cutie pies. ",
     }
     return render_template("faq.html", faqs=faqs)
 
@@ -202,7 +209,6 @@ def cats():
     return render_template("cats.html")
 
 
-"""
 @app.errorhandler(400)
 def bad_request(error):
     return (
@@ -302,4 +308,3 @@ def handle_all_other_errors(error):
         ),
         500,
     )
-"""
