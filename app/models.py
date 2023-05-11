@@ -3,14 +3,20 @@ from datetime import datetime, timedelta  # import datetime modules
 from flask_login import UserMixin  # import Usermixin class from flask_login
 # import Check_password_hash and generate_password_hash from werkzeug.security
 from werkzeug.security import check_password_hash, generate_password_hash
+from sqlalchemy_utils import EncryptedType
+from os import environ
+
+encryption_key = environ.get('encryption_key')
 
 
 class habits(db.Model):  # define 'habits' table
     __tablename__ = "habits"  # add 'habits' tablename
     # create primary key for habits table
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50))  # create name column for table
-    reason = db.Column(db.String(128))  # create reason column for table
+    # create name column for table
+    name = db.Column(EncryptedType(db.String(50), encryption_key))
+    # create reason column for table
+    reason = db.Column(EncryptedType(db.String(128), encryption_key))
     # create foreign key for user_id in user table
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     # establish one to many relationship with users table
@@ -22,11 +28,12 @@ class users(db.Model, UserMixin):  # define 'users' table and include UserMixin 
     # create primary key for user table stored as integer
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     # column for usernames stored as string. With maximum length of 50.
-    username = db.Column(db.String(50), unique=True)
+    username = db.Column(EncryptedType(
+        db.String(50), encryption_key), unique=True)
     # column for user password hash stored as string.
     password_hash = db.Column(db.String)
     # column for user email stored as string
-    email = db.Column(db.String, unique=True)
+    email = db.Column(EncryptedType(db.String, encryption_key), unique=True)
     # column for recording when user joined. Stored as datetime object. Defualt to current date.
     date_joined = db.Column(db.DateTime, default=datetime.utcnow)
     email_notifactions = db.Column(

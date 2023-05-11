@@ -2,10 +2,10 @@
 :root {
 
     --background_color: #ffff;
-    --primary_color: #f7faff;
+    --primary_color: #f5f5f5;
     --secondary_color: #1D1F1F;
-    --accent_color: #287D80;
-    --button_color: var(--primary_color);
+    --accent_color: #0074be;
+    --button_color: var(--background_color);
     --success_color: #00ff00;
     --error_color: #ff0000;
 }
@@ -14,7 +14,7 @@
     --background_color: #282a36;
     --primary_color: #44475a;
     --secondary_color: #f8f8f2;
-    --accent_color: #ff79c6;
+    --accent_color: #ff94cf;
     --button_color: var(--secondary_color);
     --succes_color: #50fa7b;
     --error_color: #ff5555;
@@ -165,8 +165,8 @@ textarea {
 }
 
 .recaptcha {
-    display: block;
-    margin: 0 auto;
+    display: flex;
+    justify-content: center;
 }
 
 /* Styling for footer*/
@@ -290,4 +290,38 @@ summary {
 a {
     color: var(--accent_color);
     text-decoration: none;
+}
+
+/* Styles for mobile devices */
+@media only screen and (max-width: 600px) {
+    .Habit {
+        font-size: 20px;
+        margin: 10px;
+    }
+
+    .hero {
+        height: 8vh;
+    }
+
+    /* Adjust other styles for mobile */
+}
+
+/* Styles for tablets and small screens */
+@media only screen and (min-width: 601px) and (max-width: 1024px) {
+    .Habit {
+        font-size: 22px;
+        margin: 15px;
+    }
+
+    /* Adjust other styles for tablets and small screens */
+}
+
+/* Styles for larger screens */
+@media only screen and (min-width: 1025px) {
+    .Habit {
+        font-size: 24px;
+        margin: 20px;
+    }
+
+    /* Adjust other styles for larger screens */
 }

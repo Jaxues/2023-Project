@@ -4,7 +4,8 @@ from app.models import habits, users, streak
 from flask_login import login_required, current_user, logout_user, login_user
 from werkzeug.security import check_password_hash
 from sqlalchemy.exc import IntegrityError
-from app.function import get_local_date, check_consecutive
+from app.function import get_local_date, check_consecutive, heatmap_data
+from better_profanity import profanity
 
 
 @login_manager.user_loader
@@ -55,13 +56,19 @@ def register():
     # Set form variable to be equal to RegisterForm class from forms.py
     if form.validate_on_submit():
         # Once user has succesfully submited form
-        newuser = users(username=form.username.data, email=form.email.data)
+        profanity_username = profanity.contains_profanity(form.username.data)
+        profanity_password = profanity.contains_profanity(form.password1.data)
+        profanity_email = profanity.contains_profanity(form.email.data)
+        if profanity_username or profanity_password or profanity_email:
+            flash('Details contain profanity please remove it')
+            return redirect(url_for('register'))
+        else:
+            newuser = users(username=form.username.data, email=form.email.data)
         # set newuser variable to be equal to have username and email to same as entered credentials
-        newuser.set_password(form.password1.data)
+            newuser.set_password(form.password1.data)
         # Set password hash for new user
-        print(newuser.password_hash)
-        # Validate that newuser is created correctly
-        db.session.add(newuser)
+
+            db.session.add(newuser)
 
         """
         
@@ -114,15 +121,23 @@ def addhabit():
             flash("You already have this habit")
             return redirect(url_for("addhabit"))
         else:
-            NewHabit = habits(
-                name=form.name.data.title(),
-                reason=form.reason.data.title(),
-                user_id=current_user.id,
-            )
-            db.session.add(NewHabit)
-            db.session.commit()
-            flash("Habit added successfully!", "success")
-            return redirect(url_for("dashboard"))
+            profanity_check_habit = profanity.contains_profanity(
+                form.name.data)
+            profanity_check_reason = profanity.contains_profanity(
+                form.reason.data)
+            if profanity_check_habit or profanity_check_reason:
+                flash('This contains profanity please remove this.')
+                return redirect(url_for('addhabit'))
+            else:
+                NewHabit = habits(
+                    name=form.name.data.title(),
+                    reason=form.reason.data.title(),
+                    user_id=current_user.id,
+                )
+                db.session.add(NewHabit)
+                db.session.commit()
+                flash("Habit added successfully!", "success")
+                return redirect(url_for("dashboard"))
     return render_template("addHabit.html", form=form)
 
 
@@ -142,16 +157,19 @@ def dashboard():
             print(check_entry)
             return redirect(url_for('dashboard'))
 
-        check_date = streak.query.filter_by(
-            user_id=current_user.id, habit_id=habit_id).order_by(streak.date.desc()).first()
+        check_date = streak.query.filter(
+            streak.user_id == current_user.id,
+            streak.habit_id == habit_id,
+            streak.date < current_date
+        ).order_by(streak.date.desc()).first()
 
         if check_date:
             streak_score = check_consecutive(check_date)
             new_entry = streak(user_id=current_user.id,
-                               habit_id=habit_id, is_consecutive=streak_score)
+                               habit_id=habit_id, date=current_date, is_consecutive=streak_score)
         else:
             new_entry = streak(user_id=current_user.id,
-                               habit_id=habit_id, is_consecutive=1)
+                               habit_id=habit_id, date=current_date, is_consecutive=1)
         db.session.add(new_entry)
         db.session.commit()
         # Call the method to check consecutive streaks
@@ -163,7 +181,10 @@ def dashboard():
 @login_required
 def streaks():
     Streaks = streak.query.filter_by(user_id=current_user.id)
-    return render_template("streak.html", Streaks=Streaks)
+    heatmap = heatmap_data(Streaks)
+    for i in heatmap:
+        print(i)
+    return render_template("streak.html", heatmap_data=heatmap)
 
 
 @app.route("/info")
@@ -194,7 +215,7 @@ def faq():
     faqs = {
         "What is this app about?": "Hadit is a habit tracker meant to help neurodivergent people as well as thoose with psychological conditions. By offering a customizable and more engaging way for people to achieve there habits",
         "How do I create an account?": "Go onto signup page. Enter your email, username, password. And then do recaptcha to make sure your not a robot. Afterwards if all your details are valid you should be logged in.",
-        "How do I add a new habit?": "First sign into your account or create a new account. Afterwards navigate to add habit route and enter the details or your habit and optionally enter the reason you want to do your habit.",
+        "How do I add a new habit?": "First sign into your account or create a new account.<a href="+url_for('register')+" </a> Afterwards navigate to add habit route and enter the details or your habit and optionally enter the reason you want to do your habit.",
         "How do I check off a completed habit?": "Make sure you are signed into your account. Navigate to dashboard and then select the checkbox if you have done your habit.",
         "Can I use this app on multiple devices?": "Yes, Hadit is a website created using Flask, HTML, CSS, and Javascript. And is capable of running on any modern webbrowser without any need for any special configuration. Just sign into your account and your informaton should sync from you account seamlessly. ",
         "Is my personal information secure on this app?": "Yes. Hadit hashes all the passwords from users as well as encrypting any text entered for the reason user input for habits. To try to ensure users privacy.",
@@ -204,12 +225,7 @@ def faq():
     return render_template("faq.html", faqs=faqs)
 
 
-@app.route("/cats", methods=["get"])
-def cats():
-    return render_template("cats.html")
-
-
-@app.errorhandler(400)
+"""
 def bad_request(error):
     return (
         render_template(
@@ -308,3 +324,4 @@ def handle_all_other_errors(error):
         ),
         500,
     )
+"""

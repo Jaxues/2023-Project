@@ -25,13 +25,14 @@
 
         {{form.password2}}
         <br>
-
-        {{form.recaptcha(class_='recaptcha')}}
-
+        <div class="recaptcha">
+            {{form.recaptcha}}
+        </div>
         <br>
         {{form.register(class_='submit')}}
     </form>
 
     <a href="{{url_for('login')}}"> Already have an account?</a>
+    <br>
 </div>
 {% endblock %}
