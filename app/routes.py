@@ -1,11 +1,13 @@
 from app import app, forms, db, login_manager
-from flask import render_template, url_for, redirect, flash, jsonify, request
+from flask import render_template, url_for, redirect, flash
 from app.models import habits, users, streak
 from flask_login import login_required, current_user, logout_user, login_user
 from werkzeug.security import check_password_hash
 from sqlalchemy.exc import IntegrityError
-from app.function import get_local_date, check_consecutive, heatmap_data
+from app.function import get_local_date, check_consecutive, heatmap_data, heatmap_date_checker
 from better_profanity import profanity
+import plotly.graph_objects as go
+import plotly.offline as pyo
 
 
 @login_manager.user_loader
@@ -145,6 +147,7 @@ def addhabit():
 @login_required
 def dashboard():
     Habits = habits.query.filter_by(user_id=current_user.id)
+    Streaks = streak.query.filter_by(user_id=current_user.id)
     form = forms.StreakForm()
     if form.validate_on_submit():
         habit_id = form.hidden_id.data
@@ -174,23 +177,43 @@ def dashboard():
         db.session.commit()
         # Call the method to check consecutive streaks
         return redirect(url_for('streaks'))
-    return render_template("dashboard.html", Habits=Habits, form=form)
+    return render_template("dashboard.html", Habits=Habits, Streaks=Streaks, form=form)
 
 
 @app.route("/streaks", methods=['get', 'post'])
 @login_required
 def streaks():
-    Streaks = streak.query.filter_by(user_id=current_user.id)
+    Streaks = streak.query.filter_by(user_id=current_user.id).all()
     heatmap = heatmap_data(Streaks)
-    for i in heatmap:
-        print(i)
-    return render_template("streak.html", heatmap_data=heatmap)
+    print(heatmap)
+    heatmap_check = heatmap_date_checker(Streaks)
+    print(heatmap_check)
+    dates = list(heatmap_check.keys())
+    habits_done = list(heatmap_check.values())
+    fig = go.Figure(data=go.Heatmap(
+        x=dates,
+        y=['Habits Done'],
+        z=[habits_done],
+        colorscale='YlGnBu',
+        hovertemplate='Date: %{x}<br>Habits Done: %{z}'
+    ))
+
+    fig.update_layout(
+        title='Habit Tracker Heatmap',
+        xaxis_title='Date',
+        yaxis_title=''
+    )
+    return fig.show(), render_template("streak.html", heatmap_data=heatmap, heatmap_html=heatmap_html)
 
 
 @app.route("/info")
 def info():
     if current_user.is_authenticated:
         form = forms.YesNo()
+        if form.validate_on_submit():
+            email_perference = form.options.data
+            print(email_perference)
+            return (redirect('subscribe'))
         return render_template("info.html", form=form)
     else:
         flash("You haven't logged on you can't access this page")

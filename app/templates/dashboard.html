@@ -1,6 +1,6 @@
 {% extends 'base.html'%}
 {% block content%}
-<title> This is the dashbaord pahe where users ca see there habits and track them</title>
+<title> Dashboard </title>
 {% for Habit in Habits %}
 <div class="Habit">
     <h1>{{ Habit.name }}</h1>
@@ -12,5 +12,4 @@
     </form>
 </div>
 {% endfor %}
-<script src="{{url_for('static', filename='js/selecthabit.js')}}"></script>
 {% endblock%}

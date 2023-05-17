@@ -20,6 +20,7 @@
         {%endif %}
         <p>Do you want email reminders?</p>
         <form method="post" action="{{url_for('subscribe')}}">
+            {{ form.csrf_token}}
             {% for option in form.options %}
             <td>{{ option }}</td>
             <td>{{ option.label }}</td>

@@ -1,7 +1,5 @@
-from cryptography import fernet
 from datetime import datetime
 import pytz
-from flask import jsonify
 # Get local date for location
 
 
@@ -35,3 +33,13 @@ def heatmap_data(data):
         streak = i.is_consecutive
         heatmap_dict.append({'date': date, 'streak': streak})
     return heatmap_dict
+
+
+def heatmap_date_checker(data):
+    days_done = {}
+    for x in data:
+        if x.date in days_done:
+            days_done[x.date] += 1
+        else:
+            days_done[x.date] = 1
+    return days_done

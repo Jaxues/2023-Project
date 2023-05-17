@@ -1,86 +1,30 @@
 {% extends 'base.html'%}
 
+<head>
+    <title> Habit Streaks</title>
+    <script src="https://cdn.plot.ly/plotly-2.20.0.min.js"></script>
+    <script src="{{url_for('static', filename='js/testgraph.js')}}"></script>
+</head>
 {% block content%}
-<!-- Include the Chart.js library -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<details>
+    <summary>Test Graph</summary>
+    {{ heatmap_html | safe }}
+</details>
 
-<!-- Add a canvas element to the HTML where the chart will be rendered -->
-<canvas id="heatmap"></canvas>
 
-<script>
-    // Retrieve the heatmap data from the Flask route
-    const heatmapData = {{ heatmap_data| safe }};
 
-    // Define the color gradient for the green scale
-    const greenGradient = [
-        '#e8f5e9',
-        '#c8e6c9',
-        '#a5d6a7',
-        '#81c784',
-        '#66bb6a',
-        '#4caf50',
-        '#43a047',
-        '#388e3c',
-        '#2e7d32',
-        '#1b5e20'
-    ];
+<details>
+    <summary> Habit Table</summary>
+    <table>
+        <th> {{current_user.id}} Streak</th>
+        {% for data in heatmap_data%}
+        <tr>
+            <td>Streak:{{data.streak}}</td>
+            <td> Date:{{data.date}}</td>
+        </tr>
 
-    // Create a new Chart.js heatmap chart using the heatmap data
-    new Chart('heatmap', {
-        type: 'heatmap',
-        data: {
-            datasets: [{
-                data: heatmapData,
-                borderWidth: 1,
-                borderColor: 'rgba(0, 0, 0, 0.1)',
-                backgroundColor: function (value, context) {
-                    // Set the color of each cell based on the streak value
-                    const streak = value.streak;
-                    if (streak === 0) {
-                        return '#ffffff'; // white
-                    } else {
-                        // Calculate the index based on the streak value and the length of the gradient array
-                        const index = Math.min(streak, greenGradient.length - 1);
-                        return greenGradient[index];
-                    }
-                },
-            }],
-        },
-        options: {
-            // Configure the appearance of the chart
-            scales: {
-                xAxes: [{
-                    type: 'time',
-                    time: {
-                        unit: 'day',
-                        displayFormats: {
-                            day: 'MMM D',
-                        },
-                    },
-                }],
-                yAxes: [{
-                    ticks: {
-                        reverse: true,
-                    },
-                }],
-            },
-            tooltips: {
-                enabled: false,
-            },
-            legend: {
-                display: false,
-            },
-            layout: {
-                padding: {
-                    top: 10,
-                    right: 20,
-                    bottom: 20,
-                    left: 10,
-                },
-            },
-        },
-    });
-</script>
+        {% endfor%}
 
-<p class="body"> Nothing here yet will be page for charts and other metrics</p>
+    </table>
+</details>
 {% endblock %}
