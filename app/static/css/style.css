@@ -16,7 +16,7 @@
     --secondary_color: #f8f8f2;
     --accent_color: #ff94cf;
     --button_color: var(--secondary_color);
-    --succes_color: #50fa7b;
+    --success_color: #50fa7b;
     --error_color: #ff5555;
 }
 
@@ -231,6 +231,11 @@ button {
     color: var(--secondary_color);
 }
 
+ul li button {
+    list-style: none;
+    align-items: space-between;
+}
+
 /*Styling for error handler*/
 
 /* Error header Styling*/
@@ -243,17 +248,21 @@ button {
 
 /* Set error message style */
 .error {
-    color: var(--secondary_color);
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 20px;
     text-align: center;
+    color: var(--error_color);
+    position: fixed;
+    top: 10.45vh;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 300px;
+    position: absolute;
+
+
 }
 
-.good {
+.success {
     text-align: center;
-    list-style: none;
-    color: var(--succes_color);
+    color: var(--success_color);
     position: fixed;
     top: 10.45vh;
     left: 50%;
@@ -304,4 +313,22 @@ td {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+ul {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+ul li button {
+    padding: 8px 16px;
+    background-color: var(--accent_color);
+}
+
+ul li a {
+    text-decoration: none;
+    color: var(--secondary_color);
+    padding: 8px;
 }

@@ -30,14 +30,12 @@
   {% endif%}
   <ul></ul>
 </nav>
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-<ul class='good'>
-  {% for message in messages %}
-  <li>{{ message }}</li>
-  {% endfor %}
-</ul>
-{% endif %}
+{% with messages = get_flashed_messages(with_categories=True) %}
+{% for message, css_class in messages%}
+<div class="{{ css_class }}">
+  {{message}}
+</div>
+{% endfor %}
 {% endwith %}
 {% block content%}
 

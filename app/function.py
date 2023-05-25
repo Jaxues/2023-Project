@@ -1,5 +1,7 @@
 from datetime import datetime
 import pytz
+import schedule
+import time
 # Get local date for location
 
 
@@ -38,8 +40,13 @@ def heatmap_data(data):
 def heatmap_date_checker(data):
     days_done = {}
     for x in data:
+        date_str = x.date.strftime('%Y-%m-%d')
         if x.date in days_done:
-            days_done[x.date] += 1
+            days_done[date_str] += 1
         else:
-            days_done[x.date] = 1
+            days_done[date_str] = 1
     return days_done
+
+
+def email_user(users):
+    schedule.every().day()

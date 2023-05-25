@@ -1,13 +1,13 @@
 from app import app, forms, db, login_manager
-from flask import render_template, url_for, redirect, flash
+from flask import render_template, url_for, redirect, flash, jsonify
 from app.models import habits, users, streak
 from flask_login import login_required, current_user, logout_user, login_user
 from werkzeug.security import check_password_hash
 from sqlalchemy.exc import IntegrityError
 from app.function import get_local_date, check_consecutive, heatmap_data, heatmap_date_checker
 from better_profanity import profanity
-import plotly.graph_objects as go
-import plotly.offline as pyo
+import schedule
+import time
 
 
 @login_manager.user_loader
@@ -26,7 +26,7 @@ def login():
     # Set form variable to be equal to Loginform class from forms.py
     if current_user.is_authenticated:
         # If current users is already logged in flash message
-        flash("Your already logged in silly :)")
+        flash("error", "Your already logged in silly :)")
         return redirect(url_for("info"))
     if form.validate_on_submit():
         # Once user has submited form check with logic
@@ -38,7 +38,7 @@ def login():
                 # See if entered password from user is same as stored hashed password
                 login_user(user)
                 # If successful log in user
-                flash("Login Succeesful")
+                flash("success", "Login Succeesful")
                 # Alert user that proccess was succesful
                 return redirect(url_for("dashboard"))
             # Return to page where user can see most recent habits
@@ -62,7 +62,7 @@ def register():
         profanity_password = profanity.contains_profanity(form.password1.data)
         profanity_email = profanity.contains_profanity(form.email.data)
         if profanity_username or profanity_password or profanity_email:
-            flash('Details contain profanity please remove it')
+            flash('error', 'Details contain profanity please remove it')
             return redirect(url_for('register'))
         else:
             newuser = users(username=form.username.data, email=form.email.data)
@@ -85,7 +85,7 @@ def register():
             return redirect(url_for("login"))
         except IntegrityError:
             db.session.rollback()
-            flash("User already exists")
+            flash("error", "User already exists")
     return render_template("register.html", form=form)
 
 
@@ -120,7 +120,7 @@ def addhabit():
         ).first()
         print('Habit Added')
         if checkhabit:
-            flash("You already have this habit")
+            flash("error", "You already have this habit")
             return redirect(url_for("addhabit"))
         else:
             profanity_check_habit = profanity.contains_profanity(
@@ -138,7 +138,7 @@ def addhabit():
                 )
                 db.session.add(NewHabit)
                 db.session.commit()
-                flash("Habit added successfully!", "success")
+                flash("success", "Habit added successfully!")
                 return redirect(url_for("dashboard"))
     return render_template("addHabit.html", form=form)
 
@@ -152,11 +152,10 @@ def dashboard():
     if form.validate_on_submit():
         habit_id = form.hidden_id.data
         current_date = get_local_date()
-        print(current_date)
         check_entry = streak.query.filter_by(
             user_id=current_user.id, habit_id=habit_id, date=current_date).first()
         if check_entry:
-            flash("You have already reccorded your habit for today. ")
+            flash("error", "You have already reccorded your habit for today. ")
             print(check_entry)
             return redirect(url_for('dashboard'))
 
@@ -176,34 +175,43 @@ def dashboard():
         db.session.add(new_entry)
         db.session.commit()
         # Call the method to check consecutive streaks
-        return redirect(url_for('streaks'))
+        flash('success', 'Streak successfully recorded')
     return render_template("dashboard.html", Habits=Habits, Streaks=Streaks, form=form)
 
 
-@app.route("/streaks", methods=['get', 'post'])
+@app.route("/delete/<int:id>")
 @login_required
-def streaks():
-    Streaks = streak.query.filter_by(user_id=current_user.id).all()
-    heatmap = heatmap_data(Streaks)
-    print(heatmap)
-    heatmap_check = heatmap_date_checker(Streaks)
-    print(heatmap_check)
-    dates = list(heatmap_check.keys())
-    habits_done = list(heatmap_check.values())
-    fig = go.Figure(data=go.Heatmap(
-        x=dates,
-        y=['Habits Done'],
-        z=[habits_done],
-        colorscale='YlGnBu',
-        hovertemplate='Date: %{x}<br>Habits Done: %{z}'
-    ))
+def delete(id):
+    habit_to_delete = habits.query.filter_by(
+        id=id).first()
+    if habit_to_delete.id != current_user.id:
+        flash('error',"You don't own this habit. You can't delete it")
+        return redirect(url_for('dashboard'))
+    db.session.delete(habit_to_delete)
+    db.session.commit()
+    flash('success', 'Habit successfully deleted.')
+    return redirect(url_for('dashboard'))
 
-    fig.update_layout(
-        title='Habit Tracker Heatmap',
-        xaxis_title='Date',
-        yaxis_title=''
-    )
-    return fig.show(), render_template("streak.html", heatmap_data=heatmap, heatmap_html=heatmap_html)
+
+@app.route("/update/<int:id>", methods=['GET', 'POST'])
+@login_required
+def update(id):
+    form = forms.UpdateForm()
+    current_habit=habits.query.filter_by(user_id=id)
+    if current_habit.id != current_user.id:
+        flash('error', "You don't own this habit you can't update it.")
+        return redirect(url_for('dashboard'))
+    if form.validate_on_submit():
+        habit = habits.query.filter_by(id=id).first()
+        updated_reason = form.reason.data
+        if profanity(updated_reason):
+            flash('error','This updated reason contains profanity please remove it if you wish to update it.')
+            return redirect(url_for('dashboard')) 
+        habit.reason = updated_reason
+        db.session.commit()
+        flash('success', 'Reason succesfully updated')
+        return redirect(url_for('dashboard'))
+    return render_template('Update.html', form=form, current_habit=current_habit)
 
 
 @app.route("/info")
@@ -222,14 +230,17 @@ def info():
 # Email perferences to subscribe user to email
 
 
-@app.route("/subscribe", methods=['get', 'post'])
+@app.route("/subscribe", methods=['GET', 'POST'])
 @login_required
 def subscribe():
     email_user = users.query.filter_by(id=current_user.id).first()
-    email_user.email_notifactions = True
+    if email_user.email_notifactions == True:
+        email_user.email_notifcations = False
+    elif email_user.email_notifactions == False:
+        email_user.email_notifactions = True
     db.session.add(email_user)
     db.session.commit()
-    flash('Email perferences updated')
+    flash('success', 'Email perferences updated')
     return redirect(url_for('info'))
 
 
@@ -248,83 +259,102 @@ def faq():
     return render_template("faq.html", faqs=faqs)
 
 
-"""
+
 def bad_request(error):
-    return (
-        render_template(
-            "error.html",
-            error_code=400,
-            error_description="Bad Request",
-            error_message="Sorry, there was a problem with your request.",
-        ),
-        400,
-    )
+    if app.config['TESTING']:
+        pass
+    else:
+        return (
+            render_template(
+                "error.html",
+                error_code=400,
+                error_description="Bad Request",
+                error_message="Sorry, there was a problem with your request.",
+            ),
+            400,
+        )
 
 
 @app.errorhandler(401)
 def unauthorized(error):
-    return (
-        render_template(
-            "error.html",
-            error_code=401,
-            error_description="Unauthorized",
-            error_message="Sorry, you don't have access to this page.",
-        ),
-        401,
-    )
+    if app.config['TESTING']:
+        pass
+    else:
+ 
+        return (
+            render_template(
+                "error.html",
+                error_code=401,
+                error_description="Unauthorized",
+                error_message="Sorry, you don't have access to this page.",
+            ),
+            401,
+        )
 
 
 @app.errorhandler(403)
 def forbidden(error):
-    return (
-        render_template(
-            "error.html",
-            error_code=403,
-            error_description="Forbidden",
-            error_message="Sorry, you don't have permission to access this page.",
-        ),
-        403,
-    )
+    if app.config['TESTING']:
+        pass
+    else:
+        return (
+            render_template(
+                "error.html",
+                error_code=403,
+                error_description="Forbidden",
+                error_message="Sorry, you don't have permission to access this page.",
+            ),
+            403,
+        )
 
 
 @app.errorhandler(404)
 def page_not_found(error):
-    return (
-        render_template(
-            "error.html",
-            error_code=404,
-            error_description="Page Not Found",
-            error_message="Sorry, we couldn't find the page you were looking for.",
-        ),
-        404,
-    )
+    if app.config['TESTING']:
+        pass
+    else:
+        return (
+                render_template(
+                    "error.html",
+                    error_code=404,
+                    error_description="Page Not Found",
+                    error_message="Sorry, we couldn't find the page you were looking for.",
+                ),
+                404,
+            )
 
 
 @app.errorhandler(405)
 def method_not_allowed(error):
-    return (
-        render_template(
-            "error.html",
-            error_code=406,
-            error_description="Method Not Allowed",
-            error_message="Sorry, the method you used to access this page is not allowed.",
-        ),
-        405,
-    )
+    if app.config['TESTING']:
+        pass
+    else:
+        return (
+            render_template(
+                "error.html",
+                error_code=406,
+                error_description="Method Not Allowed",
+                error_message="Sorry, the method you used to access this page is not allowed.",
+            ),
+            405,
+        )
 
 
 @app.errorhandler(500)
 def internal_server_error(error):
     db.session.rollback()
-    return (
-        render_template(
-            "error.html",
-            error_code=500,
-            error_description="Internal Server Error",
-            error_message="Sorry, there was an internal server error.",
-        ),
-        500,
-    )
+    if app.config['TESTING']:
+            pass
+    else:
+        return (
+                render_template(
+                    "error.html",
+                    error_code=500,
+                    error_description="Internal Server Error",
+                    error_message="Sorry, there was an internal server error.",
+                ),
+                500,
+            )
 
 
 @app.errorhandler(IntegrityError)
@@ -337,14 +367,15 @@ def handle_integrity_error(error):
 @app.errorhandler(Exception)
 def handle_all_other_errors(error):
     db.session.rollback()
-    flash("An error occurred")
-    return (
-        render_template(
+    flash("An error occurred") 
+    if app.config['TESTING']:
+        pass
+    else:
+        return ( render_template(
             "error.html",
             error_code=500,
             error_description="Internal Server Error",
-            error_message="Sorry, there was an internal server error.",
-        ),
-        500,
-    )
-"""
+            error_message="Sorry, there was an internal server error.",),
+            500,
+        )
+

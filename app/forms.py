@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm, Recaptcha, RecaptchaField
-from wtforms.validators import DataRequired, Email, EqualTo
+from wtforms.validators import DataRequired, Email, EqualTo, Length
 from wtforms import (
     StringField,
     SubmitField,
@@ -12,7 +12,7 @@ from wtforms import (
 
 class HabitForm(FlaskForm):
     name = StringField("name", validators=[DataRequired()])
-    reason = TextAreaField("reason")
+    reason = TextAreaField("reason", validators=[DataRequired(), Length(8,64)])
     submit = SubmitField("submit")
 
 
@@ -25,10 +25,10 @@ class LoginForm(FlaskForm):
 
 
 class RegisterForm(FlaskForm):
-    username = StringField("username", validators=[DataRequired()])
+    username = StringField("username", validators=[DataRequired(), Length(6,24)])
     email = StringField("email", validators=[DataRequired(), Email()])
     # Email field for user and checks if email follows valid patternn with Email() validator
-    password1 = PasswordField("Password", validators=[DataRequired()])
+    password1 = PasswordField("Password", validators=[DataRequired(), Length(12,64)])
     password2 = PasswordField(
         "Confirm Password", validators=[DataRequired(), EqualTo("password1")]
     )
@@ -49,5 +49,5 @@ class StreakForm(FlaskForm):
 
 
 class UpdateForm(FlaskForm):
-    option = StringField(name='value', validators=[DataRequired()])
+    reason = TextAreaField(name='updated_reason', validators=[DataRequired(), Length(8,64)])
     submit = SubmitField('update')
