@@ -6,8 +6,6 @@ from werkzeug.security import check_password_hash
 from sqlalchemy.exc import IntegrityError
 from app.function import get_local_date, check_consecutive, heatmap_data, heatmap_date_checker
 from better_profanity import profanity
-import schedule
-import time
 
 
 @login_manager.user_loader
@@ -43,10 +41,10 @@ def login():
                 return redirect(url_for("dashboard"))
             # Return to page where user can see most recent habits
             else:
-                flash("Wrong password")
+                flash("error","Wrong password")
                 # If user entered password is incorrect. Won't log in user
         else:
-            flash("User doesn't exist")
+            flash("error","User doesn't exist")
             # If user isn't created alert user
     return render_template("login.html", form=form)
 
@@ -128,7 +126,7 @@ def addhabit():
             profanity_check_reason = profanity.contains_profanity(
                 form.reason.data)
             if profanity_check_habit or profanity_check_reason:
-                flash('This contains profanity please remove this.')
+                flash('error','This contains profanity please remove this.')
                 return redirect(url_for('addhabit'))
             else:
                 NewHabit = habits(
@@ -184,7 +182,7 @@ def dashboard():
 def delete(id):
     habit_to_delete = habits.query.filter_by(
         id=id).first()
-    if habit_to_delete.id != current_user.id:
+    if habit_to_delete.user_id != current_user.id:
         flash('error',"You don't own this habit. You can't delete it")
         return redirect(url_for('dashboard'))
     db.session.delete(habit_to_delete)
@@ -197,14 +195,18 @@ def delete(id):
 @login_required
 def update(id):
     form = forms.UpdateForm()
-    current_habit=habits.query.filter_by(user_id=id)
-    if current_habit.id != current_user.id:
+    current_habit=habits.query.filter_by(id=id).first()
+    if current_habit is None:
+        flash("error","This habit doesn't exist you can't delete this")
+        return redirect(url_for('dashboard'))
+    if current_habit.user_id != current_user.id:
         flash('error', "You don't own this habit you can't update it.")
         return redirect(url_for('dashboard'))
     if form.validate_on_submit():
         habit = habits.query.filter_by(id=id).first()
         updated_reason = form.reason.data
-        if profanity(updated_reason):
+        check_profanity_reason=profanity.contains_profanity(updated_reason)
+        if check_profanity_reason:
             flash('error','This updated reason contains profanity please remove it if you wish to update it.')
             return redirect(url_for('dashboard')) 
         habit.reason = updated_reason
@@ -255,11 +257,11 @@ def faq():
         "Is my personal information secure on this app?": "Yes. Hadit hashes all the passwords from users as well as encrypting any text entered for the reason user input for habits. To try to ensure users privacy.",
         "What happens if I encounter an error or bug?": "If a red message occurs this may be a sign that you might need to check your input to see if there are any errors. This could be from entering a duplicate habit, the incorrect password, or a username that doesn't exist. Else users would be redirected to a error page where you can be taken back to the website afterwards. ",
         "What types of customisability do you current offer": "Currently Hadit offers the ability to change from Light to Dark mode in the user info page. As well there is a page for cats in case you want to look at some adorable cutie pies. ",
+        "Do I need to do neurodivergent or have a psychological condition to use this app":"No, of course not. Hadit is primaryily devolped for this audience but in doing so it also tries to make itself more accessible to everyone."
     }
     return render_template("faq.html", faqs=faqs)
 
-
-
+"""
 def bad_request(error):
     if app.config['TESTING']:
         pass
@@ -273,7 +275,6 @@ def bad_request(error):
             ),
             400,
         )
-
 
 @app.errorhandler(401)
 def unauthorized(error):
@@ -378,4 +379,4 @@ def handle_all_other_errors(error):
             error_message="Sorry, there was an internal server error.",),
             500,
         )
-
+    """

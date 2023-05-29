@@ -20,7 +20,7 @@ class habits(db.Model):  # define 'habits' table
     # create foreign key for user_id in user table
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     # establish one to many relationship with users table
-    users = db.relationship("users", secondary="streak", cascade="all,delete",backref="habits")
+    users = db.relationship("users", secondary="streak",backref="habits")
 
 
 class users(db.Model, UserMixin):  # define 'users' table and include UserMixin class
@@ -51,7 +51,7 @@ class users(db.Model, UserMixin):  # define 'users' table and include UserMixin 
 
     # establish many to many relationship with 'streak' table
     streak = db.relationship(
-        "habits", secondary="streak",cascade="all,delete", backref="user_streak")
+        "habits", secondary="streak", backref="user_streak")
 
 
 class streak(db.Model):  # define 'streak' table
