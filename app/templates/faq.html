@@ -6,7 +6,7 @@
     {% for question, answer in faqs.items() %}
     <details>
         <summary>{{ question }}</summary>
-        <p>{{ answer }}</p>
+        <p>{{ answer | safe }}</p>
     </details>
     {% endfor %}
 </body>

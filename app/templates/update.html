@@ -1,8 +1,9 @@
 {% extends 'base.html'%}
 {% block content%}
 <form method="POST" class="userinfo">
+    <h1> Reason</h1>
     {{ form.csrf_token()}}
-    {{ form.reason(value=current_habit.reason)}}
+    {{ form.reason(value=current_habit.reason) }}
     {{ form.submit(class_='submit')}}
 </form>
 {% endblock%}

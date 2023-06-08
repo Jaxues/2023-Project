@@ -2,15 +2,21 @@
 {% block content%}
 <div class="body">
     <form method="post">
+       {% for field, errors in form.errors.items() %}
+    <ul class="error">
+      {% for error in errors %}
+        <br>
+        <li>{{ error }}</li>
+      {% endfor %}
+    </ul>
+  {% endfor %} 
+
+
         {{form.csrf_token}}
-        <br>
         <p> Enter your username</p>
-        <br>
         {{form.username}}
         <br>
-        <br>
         <p> Enter your email</p>
-        <br>
         {{form.email}}
         <br>
         <br>

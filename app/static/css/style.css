@@ -5,7 +5,7 @@
     --primary_color: #f5f5f5;
     --secondary_color: #1D1F1F;
     --accent_color: #0074be;
-    --button_color: var(--background_color);
+    --button_color: #ffff;
     --success_color: #00ff00;
     --error_color: #ff0000;
 }
@@ -15,7 +15,7 @@
     --primary_color: #44475a;
     --secondary_color: #f8f8f2;
     --accent_color: #ff94cf;
-    --button_color: var(--secondary_color);
+    --button_color: #44475a;
     --success_color: #50fa7b;
     --error_color: #ff5555;
 }
@@ -86,13 +86,13 @@ nav ul li a:hover {
 /* Styling for Login*/
 .button {
     display: block;
-    background: var(--accent_color);
     padding: 12px 30px;
-    color: var(--primary_color);
     font-size: 15px;
     transition: .7s;
     border-radius: 30px;
     text-align: center;
+    background: var(--accent_color);
+    color: var(--primary_color);
 }
 
 div a {
@@ -122,6 +122,10 @@ div a:hover {
 
 input {
     color: var(--secondary_color);
+}
+
+button {
+    color: var(--button_color)
 }
 
 input[type=text] {
@@ -227,10 +231,6 @@ p {
     text-decoration: none;
 }
 
-button {
-    color: var(--secondary_color);
-}
-
 ul li button {
     list-style: none;
     align-items: space-between;
@@ -250,14 +250,23 @@ ul li button {
 .error {
     text-align: center;
     color: var(--error_color);
-    position: fixed;
-    top: 10.45vh;
+    margin-top: 10px;
     left: 50%;
     transform: translateX(-50%);
     max-width: 300px;
-    position: absolute;
+    position: relative;
 
 
+}
+
+.error ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.error ul li {
+  margin-bottom: 5px;
 }
 
 .success {
@@ -279,6 +288,7 @@ label {
 
 h1 {
     color: var(--secondary_color);
+    text-align: center;
 }
 
 h2 {
@@ -289,11 +299,13 @@ details {
     text-align: center;
     margin: 20px;
     background: var(--primary_color);
+    border-radius: 20px;
 }
 
 summary {
     color: var(--secondary_color);
     font-size: large;
+    border-radius: 20px;
 }
 
 a {
@@ -327,8 +339,8 @@ ul li button {
     background-color: var(--accent_color);
 }
 
-ul li a {
+ul li button a {
     text-decoration: none;
-    color: var(--secondary_color);
+    color: var(--button_color);
     padding: 8px;
 }

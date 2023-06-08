@@ -20,7 +20,8 @@ class habits(db.Model):  # define 'habits' table
     # create foreign key for user_id in user table
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     # establish one to many relationship with users table
-    users = db.relationship("users", secondary="streak",backref="habits")
+    user = db.relationship("users", secondary="streak",backref="habits")
+    streak = db.relationship('streak', backref='related_habits')
 
 
 class users(db.Model, UserMixin):  # define 'users' table and include UserMixin class
@@ -33,7 +34,7 @@ class users(db.Model, UserMixin):  # define 'users' table and include UserMixin 
     # column for user password hash stored as string.
     password_hash = db.Column(db.String)
     # column for user email stored as string
-    email = db.Column(EncryptedType(db.String, encryption_key), unique=True)
+    email = db.Column(EncryptedType(db.String(50), encryption_key), unique=True)
     # column for recording when user joined. Stored as datetime object. Defualt to current date.
     date_joined = db.Column(db.DateTime, default=datetime.utcnow)
     email_notifactions = db.Column(
@@ -73,4 +74,6 @@ class streak(db.Model):  # define 'streak' table
     habit = db.relationship("habits", backref="streaks",
                             overlaps="habits,user_streak,users")
     __table_args__ = (db.UniqueConstraint(
-        'user_id', 'habit_id', 'date', name='_user_habit_date_uc'),)
+        'user_id', 'habit_id', 'date', name='_user_habit_date_uc'),) 
+
+    

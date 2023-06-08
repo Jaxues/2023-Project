@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="1000" height="1000" viewBox="0 0 1000 1000" xml:space="preserve">
+<desc>Created with Fabric.js 3.5.0</desc>
+<defs>
+</defs>
+<rect x="0" y="0" width="100%" height="100%" fill="rgba(255,255,255,0)"/>
+<g transform="matrix(0.2549 0 0 0.2549 500.0183 500.0183)" id="595407">
+<g style="" vector-effect="non-scaling-stroke">
+		<g transform="matrix(1.5625 0 0 1.5625 188.6717 -84.9689)" id="324689">
+<path style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; is-custom-font: none; font-file-url: none; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;" transform=" translate(-376.7499, -201.6199)" d="M 510.073 140.297 c -3.859 -19.984 -13.641 -39.25 -29.078 -54.703 c -10.313 -10.297 -22.328 -18.078 -35.047 -23.25 c -19.172 -7.766 -40.063 -9.719 -60.079 -5.828 c -20.031 3.859 -39.25 13.625 -54.688 29.078 l -38.188 38.172 c -0.422 0.438 -0.797 0.844 -1.203 1.313 c 0.156 -0.063 -11.672 12 -11.781 12.125 c -23.969 23.938 12.719 65.594 40 38.359 c 0.078 -0.094 0.203 0.125 0.359 0.172 l 50.469 -50.5 c 4.922 -4.875 10.469 -8.516 16.469 -10.906 c 8.984 -3.688 18.875 -4.609 28.313 -2.75 c 9.469 1.828 18.313 6.313 25.704 13.656 c 4.938 4.938 8.516 10.531 10.938 16.484 c 3.641 8.953 4.578 18.906 2.75 28.313 c -1.859 9.453 -6.328 18.344 -13.688 25.719 L 359.088 278 c -4.938 4.891 -10.5 8.547 -16.469 10.938 c -8.953 3.656 -18.891 4.563 -28.328 2.75 c -9.469 -1.859 -18.344 -6.344 -25.688 -13.688 c -4.016 -4.016 -7.125 -8.438 -9.438 -13.125 c -0.266 -0.063 -0.5 -0.125 -0.766 -0.188 c -5.484 -1.063 -11.359 -0.438 -16.484 1.688 c -3.578 1.453 -6.813 3.656 -9.578 6.438 l -1.625 1.656 c -8.313 10.094 -14.891 24.391 -1.766 43.188 c 10.281 10.313 22.297 18.078 35.047 23.234 c 19.156 7.766 40.031 9.719 60.047 5.844 c 19.984 -3.859 39.25 -13.641 54.703 -29.078 l 82.25 -82.234 c 10.266 -10.313 18.078 -22.297 23.25 -35.047 C 511.995 181.156 513.933 160.313 510.073 140.297 z" stroke-linecap="round"/>
+</g>
+		<g transform="matrix(1.5625 0 0 1.5625 -188.6633 80.6911)" id="89955">
+<path style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; is-custom-font: none; font-file-url: none; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;" transform=" translate(-135.2555, -307.6424)" d="M 192.026 333.734 c -0.109 0.063 -0.266 -0.125 -0.391 -0.172 L 141.182 384 c -4.922 4.922 -10.5 8.547 -16.484 10.969 c -8.953 3.641 -18.906 4.563 -28.297 2.75 c -9.469 -1.859 -18.328 -6.328 -25.703 -13.719 c -4.922 -4.906 -8.531 -10.469 -10.969 -16.453 c -3.641 -8.953 -4.563 -18.891 -2.719 -28.297 c 1.844 -9.469 6.328 -18.344 13.688 -25.703 l 82.25 -82.25 c 4.906 -4.922 10.469 -8.547 16.453 -10.938 c 8.953 -3.656 18.859 -4.594 28.297 -2.766 c 9.469 1.859 18.344 6.344 25.734 13.703 c 3.969 4.016 7.109 8.438 9.422 13.125 c 0.266 0.063 0.484 0.109 0.734 0.172 c 5.484 1.031 11.375 0.453 16.5 -1.672 c 3.578 -1.453 6.813 -3.656 9.594 -6.469 l 1.594 -1.641 c 8.344 -10.094 14.922 -24.422 1.766 -43.203 c -10.281 -10.281 -22.266 -18.063 -35.016 -23.219 c -19.172 -7.766 -40.031 -9.734 -60.047 -5.844 c -20.016 3.875 -39.281 13.641 -54.703 29.094 l -82.25 82.234 c -10.281 10.297 -18.078 22.297 -23.25 35.047 C -0.005 328.125 -1.943 348.953 1.948 369 c 3.859 19.984 13.641 39.25 29.078 54.656 c 10.281 10.281 22.297 18.125 35.047 23.266 c 19.188 7.781 40.063 9.688 60.047 5.813 c 20.016 -3.813 39.281 -13.594 54.703 -29.078 l 38.172 -38.125 c 0.422 -0.484 0.828 -0.875 1.219 -1.313 c -0.141 0.031 11.703 -12.031 11.781 -12.125 C 255.979 348.109 219.26 306.469 192.026 333.734 z" stroke-linecap="round"/>
+</g>
+		<g transform="matrix(1.5625 0 0 1.5625 -2.5226 -299.3039)" id="666974">
+<polygon style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; is-custom-font: none; font-file-url: none; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;" points="14.1405,-27.0545 -13.3755,-30.1175 -14.1405,28.3205 2.1095,30.1175 "/>
+</g>
+		<g transform="matrix(1.5625 0 0 1.5625 -147.5547 -242.5539)" id="75990">
+<polygon style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; is-custom-font: none; font-file-url: none; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;" points="28.711,16.0625 -9.742,-27.9375 -28.711,-7.7655 17.523,27.9375 "/>
+</g>
+		<g transform="matrix(1.5625 0 0 1.5625 -14.5836 299.2922)" id="680930">
+<polygon style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; is-custom-font: none; font-file-url: none; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;" points="-14.1405,27.062 13.3755,30.125 14.1405,-28.313 -2.1095,-30.125 "/>
+</g>
+		<g transform="matrix(1.5625 0 0 1.5625 130.4602 242.5297)" id="917636">
+<polygon style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; is-custom-font: none; font-file-url: none; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;" points="-28.7185,-16.016 9.7345,27.953 28.7185,7.765 -17.5465,-27.953 "/>
+</g>
+</g>
+</g>
+<g transform="matrix(24.6073 0 0 24.6073 500 599.9205)" id="539929">
+<g style="" vector-effect="non-scaling-stroke">
+		<g transform="matrix(1 0 0 1 0 -4)" id="59089">
+<circle style="stroke: rgb(0,0,0); stroke-width: 2; stroke-dasharray: none; stroke-linecap: round; stroke-dashoffset: 0; stroke-linejoin: round; stroke-miterlimit: 4; is-custom-font: none; font-file-url: none; fill: none; fill-rule: nonzero; opacity: 1;" cx="0" cy="0" r="7"/>
+</g>
+		<g transform="matrix(1 0 0 1 0 6.44)" id="949832">
+<polyline style="stroke: rgb(0,0,0); stroke-width: 2; stroke-dasharray: none; stroke-linecap: round; stroke-dashoffset: 0; stroke-linejoin: round; stroke-miterlimit: 4; is-custom-font: none; font-file-url: none; fill: none; fill-rule: nonzero; opacity: 1;" points="-3.79,-4.55 -5,4.56 0,1.56 5,4.56 3.79,-4.56 "/>
+</g>
+</g>
+</g>
+</svg>
