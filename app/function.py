@@ -48,5 +48,8 @@ def heatmap_date_checker(data):
     return days_done
 
 
-def email_user(users):
-    schedule.every().day()
+def habit_points(user_streak):
+    total_points = 100
+    if user_streak:
+        total_points += user_streak*5
+    return total_points

@@ -1,6 +1,7 @@
 {% extends 'base.html'%}
 {% block content%}
 <title> Dashboard </title>
+{% if Habits%}
 {% if id==1%}
 {% for Habit in Habits.limit(habits_first_page) %}
 <div class="Habit">
@@ -76,6 +77,8 @@
 <a href="{{url_for('dashboard',id=id-1)}}" class="previous-page"> ← Previous page</a>
 <p>{{id}}</p>
 <a href="{{url_for('dashboard',id=id+1)}}">Next page →</a>
-
+{% endif%}
+{% else %}
+<p> No habits currently added to do so go to <a href="{{url_for('adhabit')}}"> add habit page</a> to do so</p>
 {% endif%}
 {% endblock%}

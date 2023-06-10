@@ -4,8 +4,7 @@ from app.models import habits, users, streak
 from flask_login import login_required, current_user, logout_user, login_user
 from werkzeug.security import check_password_hash
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm.exc import StaleDataError
-from app.function import get_local_date, check_consecutive, heatmap_data, heatmap_date_checker
+from app.function import get_local_date, check_consecutive, heatmap_data, heatmap_date_checker, habit_points
 from better_profanity import profanity
 from math import ceil
 
@@ -194,8 +193,7 @@ def dashboard(id):
             user_id=current_user.id, habit_id=habit_id, date=current_date).first()
         if check_entry:
             flash("error", "You have already reccorded your habit for today. ")
-            print(check_entry)
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('dashboard', id=1))
 
         check_date = streak.query.filter(
             streak.user_id == current_user.id,
@@ -207,13 +205,24 @@ def dashboard(id):
             streak_score = check_consecutive(check_date)
             new_entry = streak(user_id=current_user.id,
                                habit_id=habit_id, date=current_date, is_consecutive=streak_score)
+
         else:
             new_entry = streak(user_id=current_user.id,
                                habit_id=habit_id, date=current_date, is_consecutive=1)
+        user_streak = streak.query.filter_by(id=current_user.id, habit_id=habit_id).order_by(
+            streak.date.desc()).first()
+        if user_streak:
+            add_points = habit_points(user_streak.is_conescutive)
+        else:
+            add_points = habit_points(0)
+
+        current_user.user_points = current_user.user_points + add_points
+        db.session.commit()
         db.session.add(new_entry)
         db.session.commit()
         # Call the method to check consecutive streaks
-        flash('success', 'Streak successfully recorded')
+        flash('success', 'Streak successfully recorded you earn {} points'.format(
+            add_points))
     return render_template("dashboard.html", Habits=Habits, Streaks=Streaks, form=form, user_streaks=user_streaks, id=id, habits_first_page=habits_first_page, habits_per_page=habits_pages, total_pages=total_pages)
 
 
@@ -306,7 +315,7 @@ def faq():
         "Can I use this app on multiple devices?": "Yes, Hadit is a website created using Flask, HTML, CSS, and Javascript. And is capable of running on any modern webbrowser without any need for any special configuration. Just sign into your account and your informaton should sync from you account seamlessly. ",
         "Is my personal information secure on this app?": "Yes. Hadit hashes all the passwords from users as well as encrypting any text entered for the reason user input for habits. To try to ensure users privacy. for more information go to <a href=" + url_for('privacy')+"> privacy page </a> for more information",
         "What happens if I encounter an error or bug?": "If a red message occurs this may be a sign that you might need to check your input to see if there are any errors. This could be from entering a duplicate habit, the incorrect password, or a username that doesn't exist. Else users would be redirected to a error page where you can be taken back to the website afterwards. ",
-        "What types of customisability do you current offer": "Currently Hadit offers the ability to change from Light to Dark mode in the user info page. As well there is a page for cats in case you want to look at some adorable cutie pies. ",
+        "What types of customisability do you current offer": "Currently Hadit offers the ability to change from Light to Dark mode in the user info page. As well there is a page for cats. ",
         "Do I need to do neurodivergent or have a psychological condition to use this app": "No, of course not. Hadit is primaryily devolped for this audience but in doing so it also tries to make itself more accessible to everyone.",
         "What are some words censored in the profanity filter": " Due to using an external api I can't control what words are censored. This is not to supress peoples expression but as a precaution to stop offensive statements."
     }
@@ -331,99 +340,81 @@ def privacy():
 
 """
 def bad_request(error):
-    if app.config['TESTING']:
-        pass
-    else:
-        return (
-            render_template(
-                "error.html",
-                error_code=400,
-                error_description="Bad Request",
-                error_message="Sorry, there was a problem with your request.",
-            ),
-            400,
-        )
+    return (
+        render_template(
+            "error.html",
+            error_code=400,
+            error_description="Bad Request",
+            error_message="Sorry, there was a problem with your request.",
+        ),
+        400,
+    )
+
 
 @app.errorhandler(401)
 def unauthorized(error):
-    if app.config['TESTING']:
-        pass
-    else:
- 
-        return (
-            render_template(
-                "error.html",
-                error_code=401,
-                error_description="Unauthorized",
-                error_message="Sorry, you don't have access to this page.",
-            ),
-            401,
-        )
+    return (
+        render_template(
+            "error.html",
+            error_code=401,
+            error_description="Unauthorized",
+            error_message="Sorry, you don't have access to this page.",
+        ),
+        401,
+    )
 
 
 @app.errorhandler(403)
 def forbidden(error):
-    if app.config['TESTING']:
-        pass
-    else:
-        return (
-            render_template(
-                "error.html",
-                error_code=403,
-                error_description="Forbidden",
-                error_message="Sorry, you don't have permission to access this page.",
-            ),
-            403,
-        )
+    return (
+        render_template(
+            "error.html",
+            error_code=403,
+            error_description="Forbidden",
+            error_message="Sorry, you don't have permission to access this page.",
+        ),
+        403,
+    )
 
 
 @app.errorhandler(404)
 def page_not_found(error):
-    if app.config['TESTING']:
-        pass
-    else:
-        return (
-                render_template(
-                    "error.html",
-                    error_code=404,
-                    error_description="Page Not Found",
-                    error_message="Sorry, we couldn't find the page you were looking for.",
-                ),
-                404,
-            )
+    return (
+        render_template(
+            "error.html",
+            error_code=404,
+            error_description="Page Not Found",
+            error_message="Sorry, we couldn't find the page you were looking for.",
+        ),
+        404,
+    )
 
 
 @app.errorhandler(405)
 def method_not_allowed(error):
-    if app.config['TESTING']:
-        pass
-    else:
-        return (
-            render_template(
-                "error.html",
-                error_code=406,
-                error_description="Method Not Allowed",
-                error_message="Sorry, the method you used to access this page is not allowed.",
-            ),
-            405,
-        )
+    return (
+        render_template(
+            "error.html",
+            error_code=406,
+            error_description="Method Not Allowed",
+            error_message="Sorry, the method you used to access this page is not allowed.",
+        ),
+        405,
+    )
 
 
 @app.errorhandler(500)
 def internal_server_error(error):
     db.session.rollback()
-    if app.config['TESTING']:
-            pass
-    else:
-        return (
-                render_template(
-                    "error.html",
-                    error_code=500,
-                    error_description="Internal Server Error",
-                    error_message="Sorry, there was an internal server error.",
-                ),
-                500,
-            )
+    return (
+        render_template(
+            "error.html",
+            error_code=500,
+            error_description="Internal Server Error",
+            error_message="Sorry, there was an internal server error.",
+        ),
+        500,
+    )
 
 
 @app.errorhandler(IntegrityError)
@@ -436,20 +427,17 @@ def handle_integrity_error(error):
 @app.errorhandler(Exception)
 def handle_all_other_errors(error):
     db.session.rollback()
-    flash("An error occurred") 
-    if app.config['TESTING']:
-        pass
-    else:
-        return ( render_template(
+    flash("An error occurred")
+    return (render_template(
             "error.html",
             error_code=500,
             error_description="Internal Server Error",
             error_message="Sorry, there was an internal server error.",),
             500,
-        )
+            )
+
+
 @app.route('/cat')
 def catpage():
     return render_template('cats.html')
-
-
 """
