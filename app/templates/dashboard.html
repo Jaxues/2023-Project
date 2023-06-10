@@ -1,7 +1,8 @@
 {% extends 'base.html'%}
 {% block content%}
 <title> Dashboard </title>
-{% for Habit in Habits %}
+{% if id==1%}
+{% for Habit in Habits.limit(habits_first_page) %}
 <div class="Habit">
     <h1>{{ Habit.name }}</h1>
     <p> Reason: {{ Habit.reason }}</p>
@@ -22,4 +23,59 @@
     </form>
 </div>
 {% endfor %}
+{% if total_pages >1%}
+<a href="{{url_for('dashboard', id=2)}}">Next Page →</a>
+{% endif%}
+
+
+{% elif id==total_pages%}
+{% for Habit in Habits.offset((id-2)* habits_per_page + habits_first_page).limit(habits_per_page)%}
+<div class="Habit">
+    <h1>{{ Habit.name }}</h1>
+    <p> Reason: {{ Habit.reason }}</p>
+    <p> Recent Streak: </p>
+    <p> Last recorded day: </p>
+    <form method="post" onsubmit="document.getElementById('{{ form.submit.id }}').disabled=true;">
+        {{ form.csrf_token}}
+        {{ form.hidden_id(value=Habit.id)}}
+        <ul>
+            <li>{{ form.submit(class_='button', id='submit-btn') }}</li>
+            <li><button class="button"><a href="{{url_for('update', id=Habit.id)}}"> Update</a></button>
+            </li>
+            <li>
+                <button class="button"><a href="{{url_for('delete',id=Habit.id)}}">Delete</a></button>
+            </li>
+
+        </ul>
+    </form>
+</div>
+{% endfor%}
+<a href="{{url_for('dashboard',id=id-1)}}" class="previous-page"> ← Previous page</a>
+{% else %}
+{% for Habit in Habits.offset((id-2)* habits_per_page + habits_first_page).limit(habits_per_page)%}
+<div class="Habit">
+    <h1>{{ Habit.name }}</h1>
+    <p> Reason: {{ Habit.reason }}</p>
+    <p> Recent Streak: </p>
+    <p> Last recorded day: </p>
+    <form method="post" onsubmit="document.getElementById('{{ form.submit.id }}').disabled=true;">
+        {{ form.csrf_token}}
+        {{ form.hidden_id(value=Habit.id)}}
+        <ul>
+            <li>{{ form.submit(class_='button', id='submit-btn') }}</li>
+            <li><button class="button"><a href="{{url_for('update', id=Habit.id)}}"> Update</a></button>
+            </li>
+            <li>
+                <button class="button"><a href="{{url_for('delete',id=Habit.id)}}">Delete</a></button>
+            </li>
+
+        </ul>
+    </form>
+</div>
+{% endfor%}
+<a href="{{url_for('dashboard',id=id-1)}}" class="previous-page"> ← Previous page</a>
+<p>{{id}}</p>
+<a href="{{url_for('dashboard',id=id+1)}}">Next page →</a>
+
+{% endif%}
 {% endblock%}

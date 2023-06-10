@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import StaleDataError
 from app.function import get_local_date, check_consecutive, heatmap_data, heatmap_date_checker
 from better_profanity import profanity
+from math import ceil
 
 
 @login_manager.user_loader
@@ -39,13 +40,13 @@ def login():
                 # If successful log in user
                 flash("success", "Login Succeesful")
                 # Alert user that proccess was succesful
-                return redirect(url_for("dashboard"))
+                return redirect(url_for("dashboard", id=1))
             # Return to page where user can see most recent habits
             else:
-                flash("error","Wrong password")
+                flash("error", "Wrong password")
                 # If user entered password is incorrect. Won't log in user
         else:
-            flash("error","User doesn't exist")
+            flash("error", "User doesn't exist")
             # If user isn't created alert user
     return render_template("login.html", form=form)
 
@@ -74,7 +75,7 @@ def register():
             newuser.set_password(form.password1.data)
         # Set password hash for new user
             if form.password1.data != form.password2.data:
-                flash('error',"Password's don't match check them again.")
+                flash('error', "Password's don't match check them again.")
                 return redirect(url_for('regiter'))
             db.session.add(newuser)
 
@@ -94,7 +95,7 @@ def register():
             flash("error", "User already exists")
             return redirect(url_for('register'))
         except:
-            flash('error',"There was an error in adding user. Pleae try again")
+            flash('error', "There was an error in adding user. Pleae try again")
             return redirect(url_for('register'))
     return render_template("register.html", form=form)
 
@@ -137,18 +138,19 @@ def addhabit():
                 form.name.data)
             profanity_check_reason = profanity.contains_profanity(
                 form.reason.data)
-            profanitY_check_habit_censor= profanity.censor(form.name.data)
+            profanitY_check_habit_censor = profanity.censor(form.name.data)
             profanity_check_reason_censor = profanity.censor(form.reason.data)
-            for test_charatcer in profanity_check_reason_censor: 
-                if test_charatcer=='*':
-                    flash('error', 'This has profanity. That or you have entered an asteriks. Either is not allowed')
+            for test_charatcer in profanity_check_reason_censor:
+                if test_charatcer == '*':
+                    flash(
+                        'error', 'This has profanity. That or you have entered an asteriks. Either is not allowed')
                     return redirect(url_for('addhabit'))
             for test_reason in profanitY_check_habit_censor:
                 if test_reason == '*':
                     flash('error', 'This contains an asteriks. Either this was censored by the filter or you have entered an astericks. Either way please remove this')
                     return redirect(url_for('addhabit'))
             if profanity_check_habit or profanity_check_reason:
-                flash('error','This contains profanity please remove this.')
+                flash('error', 'This contains profanity please remove this.')
                 return redirect(url_for('addhabit'))
             else:
                 NewHabit = habits(
@@ -159,21 +161,31 @@ def addhabit():
                 db.session.add(NewHabit)
                 db.session.commit()
                 flash("success", "Habit added successfully!")
-                return redirect(url_for("dashboard"))
+                return redirect(url_for("dashboard", id=1))
     return render_template("addHabit.html", form=form)
 
 
-@app.route("/dashboard", methods=['GET', 'POST'])
+@app.route("/dashboard/<int:id>", methods=['GET', 'POST'])
 @login_required
-def dashboard():
+def dashboard(id):
     Habits = habits.query.filter_by(user_id=current_user.id)
     Streaks = streak.query.filter_by(user_id=current_user.id)
-    user_streaks={}
+    user_streaks = {}
+    total_habits = Habits.count()
+    habits_first_page = 3
+    habits_pages = 5
+    total_pages = ceil(((total_habits-habits_first_page)/habits_pages)+1)
+    if id == 0:
+        return redirect(url_for('dashboard', id=1))
+    if id > total_pages:
+        return redirect(url_for('dashboard', id=total_pages))
     for Habit in Habits:
-        add_user_streak=streak.query.filter_by(user_id=current_user.id, habit_id=Habit.id).order_by(streak.date.desc()).first()
-        recent_date=add_user_streak.date
-        recent_streak=add_user_streak.is_consecutive
-        user_streaks[recent_date]=recent_streak
+        add_user_streak = streak.query.filter_by(
+            user_id=current_user.id, habit_id=Habit.id).order_by(streak.date.desc()).first()
+        if add_user_streak:
+            recent_date = add_user_streak.date
+            recent_streak = add_user_streak.is_consecutive
+            user_streaks[recent_date] = recent_streak
     form = forms.StreakForm()
     if form.validate_on_submit():
         habit_id = form.hidden_id.data
@@ -202,7 +214,7 @@ def dashboard():
         db.session.commit()
         # Call the method to check consecutive streaks
         flash('success', 'Streak successfully recorded')
-    return render_template("dashboard.html", Habits=Habits, Streaks=Streaks, form=form, user_streaks=user_streaks)
+    return render_template("dashboard.html", Habits=Habits, Streaks=Streaks, form=form, user_streaks=user_streaks, id=id, habits_first_page=habits_first_page, habits_per_page=habits_pages, total_pages=total_pages)
 
 
 @app.route("/delete/<int:id>")
@@ -211,46 +223,46 @@ def delete(id):
     habit_to_delete = habits.query.filter_by(
         id=id).first()
     if habit_to_delete.user_id != current_user.id:
-        flash('error',"You don't own this habit. You can't delete it")
-        return redirect(url_for('dashboard'))
-    streaks_to_delete = streak.query.filter_by(habit_id=id)
-    for streak_to_delete in streaks_to_delete:
-        db.session.delete(streak_to_delete)
-
+        flash('error', "You don't own this habit. You can't delete it")
+        return redirect(url_for('dashboard', id=1))
     try:
+        streak_records = streak.query.filter_by(habit_id=id).all()
+        for record in streak_records:
+            db.session.delete(record)
         db.session.delete(habit_to_delete)
         db.session.commit()
         flash('success', 'Habit successfully deleted.')
-    
+
     except:
         db.session.rollback()
-        flash('error', 'An error occurred while deleting the habit.') 
+        flash('error', 'An error occurred while deleting the habit.')
 
-    return redirect(url_for('dashboard'))
+    return redirect(url_for('dashboard', id=1))
 
 
 @app.route("/update/<int:id>", methods=['GET', 'POST'])
 @login_required
 def update(id):
-    current_habit=habits.query.filter_by(id=id).first()
+    current_habit = habits.query.filter_by(id=id).first()
     if current_habit is None:
-        flash("error","This habit doesn't exist you can't delete this")
-        return redirect(url_for('dashboard'))
+        flash("error", "This habit doesn't exist you can't delete this")
+        return redirect(url_for('dashboard', id=1))
     if current_habit.user_id != current_user.id:
         flash('error', "You don't own this habit you can't update it.")
-        return redirect(url_for('dashboard'))
-    form = forms.UpdateForm() 
+        return redirect(url_for('dashboard', id=1))
+    form = forms.UpdateForm()
     if form.validate_on_submit():
         habit = habits.query.filter_by(id=id).first()
         updated_reason = form.reason.data
-        check_profanity_reason=profanity.contains_profanity(updated_reason)
+        check_profanity_reason = profanity.contains_profanity(updated_reason)
         if check_profanity_reason:
-            flash('error','This updated reason contains profanity please remove it if you wish to update it.')
-            return redirect(url_for('dashboard')) 
+            flash(
+                'error', 'This updated reason contains profanity please remove it if you wish to update it.')
+            return redirect(url_for('dashboard', id=1))
         habit.reason = updated_reason
         db.session.commit()
         flash('success', 'Reason succesfully updated')
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('dashboard', id=1))
     return render_template('Update.html', form=form, current_habit=current_habit)
 
 
@@ -289,18 +301,19 @@ def faq():
     faqs = {
         "What is this app about?": "Hadit is a habit tracker meant to help neurodivergent people as well as thoose with psychological conditions. By offering a customizable and more engaging way for people to achieve there habits",
         "How do I create an account?": "Go onto signup page. Enter your email, username, password. And then do recaptcha to make sure your not a robot. Afterwards if all your details are valid you should be logged in.",
-        "How do I add a new habit?": "First sign into your account or create a new account <a href="+ url_for('register')+ ">signup page</a> Afterwards navigate to add habit route and enter the details or your habit and optionally enter the reason you want to do your habit.",
+        "How do I add a new habit?": "First sign into your account or create a new account <a href=" + url_for('register') + ">signup page</a> Afterwards navigate to add habit route and enter the details or your habit and optionally enter the reason you want to do your habit.",
         "How do I check off a completed habit?": "Make sure you are signed into your account. Navigate to dashboard and then select the checkbox if you have done your habit.",
         "Can I use this app on multiple devices?": "Yes, Hadit is a website created using Flask, HTML, CSS, and Javascript. And is capable of running on any modern webbrowser without any need for any special configuration. Just sign into your account and your informaton should sync from you account seamlessly. ",
-        "Is my personal information secure on this app?": "Yes. Hadit hashes all the passwords from users as well as encrypting any text entered for the reason user input for habits. To try to ensure users privacy. for more information go to <a href="+ url_for('privacy')+"> privacy page </a> for more information",
+        "Is my personal information secure on this app?": "Yes. Hadit hashes all the passwords from users as well as encrypting any text entered for the reason user input for habits. To try to ensure users privacy. for more information go to <a href=" + url_for('privacy')+"> privacy page </a> for more information",
         "What happens if I encounter an error or bug?": "If a red message occurs this may be a sign that you might need to check your input to see if there are any errors. This could be from entering a duplicate habit, the incorrect password, or a username that doesn't exist. Else users would be redirected to a error page where you can be taken back to the website afterwards. ",
         "What types of customisability do you current offer": "Currently Hadit offers the ability to change from Light to Dark mode in the user info page. As well there is a page for cats in case you want to look at some adorable cutie pies. ",
-        "Do I need to do neurodivergent or have a psychological condition to use this app":"No, of course not. Hadit is primaryily devolped for this audience but in doing so it also tries to make itself more accessible to everyone.",
-        "What are some words censored in the profanity filter":" Due to using an external api I can't control what words are censored. This is not to supress peoples expression but as a precaution to stop offensive statements."
+        "Do I need to do neurodivergent or have a psychological condition to use this app": "No, of course not. Hadit is primaryily devolped for this audience but in doing so it also tries to make itself more accessible to everyone.",
+        "What are some words censored in the profanity filter": " Due to using an external api I can't control what words are censored. This is not to supress peoples expression but as a precaution to stop offensive statements."
     }
     return render_template("faq.html", faqs=faqs)
 
-@app.route("/privacy", methods=["get","post"])
+
+@app.route("/privacy", methods=["get", "post"])
 def privacy():
     privacy_policy = {
         'Collection of Personal Data': 'Hadit does not collect any personal data from our users. We believe in respecting your privacy and ensuring that your information remains confidential.',
@@ -314,6 +327,7 @@ def privacy():
     }
 
     return render_template('pp.html', privacy_policy=privacy_policy)
+
 
 """
 def bad_request(error):
