@@ -201,6 +201,11 @@ def dashboard(id):
             recent_streak = add_user_streak.is_consecutive
             user_streaks[recent_date] = recent_streak
     form = forms.StreakForm()
+    preprocess_data=heatmap_data(streak.query.filter_by(user_id=current_user.id))
+    print(preprocess_data)
+    check_days=heatmap_date_checker(preprocess_data)
+    print(check_days)
+    frontend_heatmap_data=check_days
     if form.validate_on_submit():
         habit_id = form.hidden_id.data
         current_date = get_local_date()
@@ -243,7 +248,8 @@ def dashboard(id):
         flash('success', 'Streak successfully recorded you earn {} points'.format(
             add_points))
         print(habit_points(2,"good"))
-    return render_template("dashboard.html", Habits=Habits, Streaks=Streaks, form=form, user_streaks=user_streaks, id=id, habits_first_page=habits_first_page, habits_per_page=habits_pages, total_pages=total_pages)
+    return render_template("dashboard.html", Habits=Habits, Streaks=Streaks, form=form, user_streaks=user_streaks, id=id, habits_first_page=habits_first_page, habits_per_page=habits_pages, total_pages=total_pages
+                           , frontend_heatmap_data=frontend_heatmap_data)
 
 
 @app.route("/delete/<int:id>")
@@ -367,7 +373,7 @@ def privacy():
 @app.route("/resources", methods=["get"])
 def resources():
     return render_template('resources.html')
-
+"""
 # Custom error handler for app
 def bad_request(error):
     return (
@@ -470,3 +476,4 @@ def handle_all_other_errors(error):
 @app.route('/cat')
 def catpage():
     return render_template('cats.html')
+"""

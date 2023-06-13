@@ -40,8 +40,8 @@ If there are then add 1 to total number of habits done
 def heatmap_date_checker(data):
     days_done = {}
     for x in data:
-        date_str = x.date.strftime('%Y-%m-%d')
-        if x.date in days_done:
+        date_str = x['date'].strftime('%Y-%m-%d')
+        if date_str in days_done:
             days_done[date_str] += 1
         else:
             days_done[date_str] = 1

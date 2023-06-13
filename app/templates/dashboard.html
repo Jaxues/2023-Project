@@ -4,6 +4,7 @@
 {% if Habits%}
 <!-- If it's first page then only have 3 habits displaying-->
 {% if id==1%}
+<div id="heatmap-data" style="display: none;">{{frontend_heatmap_data}}</div>
 {% for Habit in Habits.limit(habits_first_page) %}
 <div class="Habit">
     <h1>{{ Habit.name }}</h1>
@@ -91,4 +92,5 @@
 {% else %}
 <p> No habits currently added to do so go to <a href="{{url_for('adhabit')}}"> add habit page</a> to do so</p>
 {% endif%}
+<script src="{{url_for('static',filename='js/heatmap.js')}}"></script>
 {% endblock%}
