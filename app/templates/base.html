@@ -1,4 +1,5 @@
 <link href="{{ url_for('static',filename='css/style.css')}}" rel="stylesheet">
+<!-- Code for creating navbar-->
 <nav class="hero">
   <ul></ul>
   <h1 class="logo"> <a href="{{url_for('index')}}">Hadit</a></h1>
@@ -30,9 +31,11 @@
   {% endif%}
   <ul></ul>
 </nav>
+<!-- Define handler for flashed messages-->
 {% with messages = get_flashed_messages(with_categories=True) %}
 {% for message, css_class in messages%}
 <div class="{{ css_class }}">
+  <!-- Use different styling for types of messages-->
   {{message}}
 </div>
 {% endfor %}
@@ -49,4 +52,5 @@
   <br>
   <p><a href="{{url_for('faq')}}"> FAQ</a></p>
 </footer>
+<!-- Get Javascript defualt theme for user-->
 <script src="{{url_for('static', filename='js/themedefaut.js')}}"></script>

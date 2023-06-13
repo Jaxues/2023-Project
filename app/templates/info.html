@@ -1,13 +1,20 @@
 {% extends 'base.html'%}
 {% block content%}
+<title> Info</title>
 <div class="userinfo">
+    <!-- 
+        General information about the users account
+
+    -->
     <h1> Welcome {{current_user.username}}</h1>
     <p> Email:{{current_user.email}}</p>
     <p> Date Joined:{{current_user.date_joined}}</p>
     <p> Point total: {{current_user.user_points}}</p>
     <br>
 
-
+    <!-- Show all options related to users email perfences. Whether they have them enabled or not. 
+        And have form to change them
+    -->
     <tr>
         {% if current_user.email_notifications %}
         <td>
@@ -30,6 +37,7 @@
 
     </tr>
     <br>
+    <!-- Night theme swithcer linked to javascript-->
     <label> Do you want to change theme?</label><img src="{{url_for('static',filename='images/moon.png')}}" id="icon">
     <button onclick="window.location.href='{{ url_for('logout') }}'" class="submit">Logout</button>
 </div>

@@ -1,4 +1,4 @@
-from app import db  # import database object
+from app import db
 from datetime import datetime, timedelta  # import datetime modules
 from flask_login import UserMixin  # import Usermixin class from flask_login
 # import Check_password_hash and generate_password_hash from werkzeug.security
@@ -17,6 +17,8 @@ class habits(db.Model):  # define 'habits' table
     name = db.Column(EncryptedType(db.String(50), encryption_key))
     # create reason column for table
     reason = db.Column(EncryptedType(db.String(128), encryption_key))
+
+    habit_type= db.Column(db.String(4))
     # create foreign key for user_id in user table
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     # establish one to many relationship with users table

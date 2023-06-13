@@ -1,7 +1,5 @@
 from datetime import datetime
 import pytz
-import schedule
-import time
 # Get local date for location
 
 
@@ -26,7 +24,6 @@ def check_consecutive(steak_paramter):
 
 # Function to convert data to suitable for heatmap in javascript
 
-
 def heatmap_data(data):
     heatmap_dict = []
     for i in data:
@@ -36,7 +33,10 @@ def heatmap_data(data):
         heatmap_dict.append({'date': date, 'streak': streak})
     return heatmap_dict
 
-
+"""
+Check data for multiple entris on same days. 
+If there are then add 1 to total number of habits done
+"""
 def heatmap_date_checker(data):
     days_done = {}
     for x in data:
@@ -47,9 +47,16 @@ def heatmap_date_checker(data):
             days_done[date_str] = 1
     return days_done
 
-
-def habit_points(user_streak):
-    total_points = 100
-    if user_streak:
-        total_points += user_streak*5
+# Define scoring for habits
+def habit_points(user_streak, type_of_habit):
+    total_points=100
+    if type_of_habit=='bad':
+            if user_streak:
+                if user_streak<=14:
+                    total_points += user_streak*20
+                else:
+                    total_points += user_streak*10+140
+    elif type_of_habit=='good':
+        if user_streak:
+            total_points+= user_streak*15
     return total_points

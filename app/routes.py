@@ -1,3 +1,4 @@
+# Import neccesary models to get routes working
 from app import app, forms, db, login_manager
 from flask import render_template, url_for, redirect, flash, jsonify
 from app.models import habits, users, streak
@@ -62,6 +63,8 @@ def register():
     # Set form variable to be equal to RegisterForm class from forms.py
     if form.validate_on_submit():
         # Once user has succesfully submited form
+
+        # Check for any profanity and then stop it
         profanity_username = profanity.contains_profanity(form.username.data)
         profanity_password = profanity.contains_profanity(form.password1.data)
         profanity_email = profanity.contains_profanity(form.email.data)
@@ -107,7 +110,7 @@ Once routed will logout user from session and then return them to index page
 
 """
 
-
+# Log user out of their current session
 @app.route("/logout", methods=["get"])
 @login_required
 def logout():
@@ -125,6 +128,7 @@ def index():
 def addhabit():
     form = forms.HabitForm()
     if form.validate_on_submit():
+        # See if habit exists if it does then flash message to stop duplicates
         checkhabit = habits.query.filter_by(
             user_id=current_user.id, name=form.name.data.title()
         ).first()
@@ -133,6 +137,7 @@ def addhabit():
             flash("error", "You already have this habit")
             return redirect(url_for("addhabit"))
         else:
+            # Check for profanity and stop it
             profanity_check_habit = profanity.contains_profanity(
                 form.name.data)
             profanity_check_reason = profanity.contains_profanity(
@@ -145,6 +150,7 @@ def addhabit():
                         'error', 'This has profanity. That or you have entered an asteriks. Either is not allowed')
                     return redirect(url_for('addhabit'))
             for test_reason in profanitY_check_habit_censor:
+                # Loop to go through all words that users enter even if they space words out will censor it. 
                 if test_reason == '*':
                     flash('error', 'This contains an asteriks. Either this was censored by the filter or you have entered an astericks. Either way please remove this')
                     return redirect(url_for('addhabit'))
@@ -155,14 +161,22 @@ def addhabit():
                 NewHabit = habits(
                     name=form.name.data.title(),
                     reason=form.reason.data.title(),
-                    user_id=current_user.id,
+                    habit_type=form.type_of_habit.data,
+                    user_id=current_user.id
                 )
                 db.session.add(NewHabit)
                 db.session.commit()
                 flash("success", "Habit added successfully!")
+                # Return first page of dashbord page. Dashboard indexed so first page only has 3 habits on it. 
                 return redirect(url_for("dashboard", id=1))
     return render_template("addHabit.html", form=form)
 
+
+"""
+Define a route where users can have multuiple pages of habits.
+The first page will have an id of 1 and will have 3 habits. It will also display a heatmap for all habits from the user. 
+All other pages will have 5 habits per page. 
+"""
 
 @app.route("/dashboard/<int:id>", methods=['GET', 'POST'])
 @login_required
@@ -173,6 +187,7 @@ def dashboard(id):
     total_habits = Habits.count()
     habits_first_page = 3
     habits_pages = 5
+    # See how many pages are needed to display all habits for the user. 
     total_pages = ceil(((total_habits-habits_first_page)/habits_pages)+1)
     if id == 0:
         return redirect(url_for('dashboard', id=1))
@@ -191,6 +206,7 @@ def dashboard(id):
         current_date = get_local_date()
         check_entry = streak.query.filter_by(
             user_id=current_user.id, habit_id=habit_id, date=current_date).first()
+        # Query streak database so can't have multiple of the same entry        
         if check_entry:
             flash("error", "You have already reccorded your habit for today. ")
             return redirect(url_for('dashboard', id=1))
@@ -200,22 +216,25 @@ def dashboard(id):
             streak.habit_id == habit_id,
             streak.date < current_date
         ).order_by(streak.date.desc()).first()
-
+        # See if the previous entry was day before
         if check_date:
             streak_score = check_consecutive(check_date)
             new_entry = streak(user_id=current_user.id,
                                habit_id=habit_id, date=current_date, is_consecutive=streak_score)
-
+        # If dates aren't consecutive assign streak of 1 for first day of recording habit 
         else:
             new_entry = streak(user_id=current_user.id,
                                habit_id=habit_id, date=current_date, is_consecutive=1)
         user_streak = streak.query.filter_by(id=current_user.id, habit_id=habit_id).order_by(
             streak.date.desc()).first()
+        user_habit=habits.query.filter_by(id=habit_id, user_id=current_user.id).first()
         if user_streak:
-            add_points = habit_points(user_streak.is_conescutive)
+            # Give users points based off if they have streak already
+            print(user_habit.habit_type)
+            add_points = habit_points(user_streak.is_consecutive, user_habit.habit_type)
         else:
-            add_points = habit_points(0)
-
+            # Assign points with no streak entries.
+            add_points = habit_points(0, user_habit.habit_type)
         current_user.user_points = current_user.user_points + add_points
         db.session.commit()
         db.session.add(new_entry)
@@ -223,6 +242,7 @@ def dashboard(id):
         # Call the method to check consecutive streaks
         flash('success', 'Streak successfully recorded you earn {} points'.format(
             add_points))
+        print(habit_points(2,"good"))
     return render_template("dashboard.html", Habits=Habits, Streaks=Streaks, form=form, user_streaks=user_streaks, id=id, habits_first_page=habits_first_page, habits_per_page=habits_pages, total_pages=total_pages)
 
 
@@ -231,10 +251,12 @@ def dashboard(id):
 def delete(id):
     habit_to_delete = habits.query.filter_by(
         id=id).first()
+    # Stop unathorised users from deleting habits they don't own
     if habit_to_delete.user_id != current_user.id:
         flash('error', "You don't own this habit. You can't delete it")
         return redirect(url_for('dashboard', id=1))
     try:
+        # Delete all streak entries for the habit
         streak_records = streak.query.filter_by(habit_id=id).all()
         for record in streak_records:
             db.session.delete(record)
@@ -253,9 +275,11 @@ def delete(id):
 @login_required
 def update(id):
     current_habit = habits.query.filter_by(id=id).first()
+    # Check if habit exists
     if current_habit is None:
-        flash("error", "This habit doesn't exist you can't delete this")
+        flash("error", "This habit doesn't exist you can't update it.")
         return redirect(url_for('dashboard', id=1))
+    # See if user owns the habit they want to update
     if current_habit.user_id != current_user.id:
         flash('error', "You don't own this habit you can't update it.")
         return redirect(url_for('dashboard', id=1))
@@ -264,6 +288,7 @@ def update(id):
         habit = habits.query.filter_by(id=id).first()
         updated_reason = form.reason.data
         check_profanity_reason = profanity.contains_profanity(updated_reason)
+        # Check for profanity in user inputted reason
         if check_profanity_reason:
             flash(
                 'error', 'This updated reason contains profanity please remove it if you wish to update it.')
@@ -277,6 +302,7 @@ def update(id):
 
 @app.route("/info")
 def info():
+    # See if user has logged in
     if current_user.is_authenticated:
         form = forms.YesNo()
         if form.validate_on_submit():
@@ -307,6 +333,7 @@ def subscribe():
 
 @app.route("/faq", methods=["get"])
 def faq():
+    # Store FAQ in backend to be dynamically updated and more efficienct
     faqs = {
         "What is this app about?": "Hadit is a habit tracker meant to help neurodivergent people as well as thoose with psychological conditions. By offering a customizable and more engaging way for people to achieve there habits",
         "How do I create an account?": "Go onto signup page. Enter your email, username, password. And then do recaptcha to make sure your not a robot. Afterwards if all your details are valid you should be logged in.",
@@ -337,8 +364,11 @@ def privacy():
 
     return render_template('pp.html', privacy_policy=privacy_policy)
 
+@app.route("/resources", methods=["get"])
+def resources():
+    return render_template('resources.html')
 
-"""
+# Custom error handler for app
 def bad_request(error):
     return (
         render_template(
@@ -436,8 +466,7 @@ def handle_all_other_errors(error):
             500,
             )
 
-
+# Page for pictures of cats
 @app.route('/cat')
 def catpage():
     return render_template('cats.html')
-"""

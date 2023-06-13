@@ -1,6 +1,8 @@
 {% extends 'base.html'%}
+<title> Update </title>
 {% block content%}
 <form method="POST" class="userinfo">
+    <!-- Import wtforms fields-->
     <h1> Reason</h1>
     {{ form.csrf_token()}}
     {{ form.reason(value=current_habit.reason) }}

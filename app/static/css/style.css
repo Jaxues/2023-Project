@@ -218,11 +218,13 @@ p {
 .userinfo {
     background-color: var(--primary_color);
     text-align: center;
-    margin-left: 40%;
-    margin-top: 20vh;
-    position: fixed;
+    margin-top: 10vh;
+    margin-bottom: 10vh;
+    position: relative;
     padding: 50px;
     border-radius: 30px;
+    margin-left: 20%;
+    margin-right: 20%;
 }
 
 .button {

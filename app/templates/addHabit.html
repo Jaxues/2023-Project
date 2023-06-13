@@ -1,12 +1,21 @@
 {% extends 'base.html'%}
 {% block content%}
+<title> Add Habit </title>
 <form method="post" class="userinfo">
-
+<!-- Import Wtforms fields for add habit form-->
   <p> Enter your Habit</p>
   {{form.csrf_token}}
   {{ form.name}}
   <p> What is the reason you want to do this habit?</p>
   {{ form.reason }}
+  <br>
+  <!-- Habit for what options have for type of habits-->
+  {% for subfield in form.type_of_habit%}
+  {{ subfield()}}
+  {{ subfield.label()}}
+  {% endfor%}
+  <!-- Explantion of type of habits-->
+  <p> Need more information about how this work look at <a href="{{url_for('faq')}}">Faq</a> under type of habit section</p>
   <br>
   {{ form.submit(class_='submit')}}
 </form>

@@ -2,6 +2,7 @@
 {% block content%}
 <title> Dashboard </title>
 {% if Habits%}
+<!-- If it's first page then only have 3 habits displaying-->
 {% if id==1%}
 {% for Habit in Habits.limit(habits_first_page) %}
 <div class="Habit">
@@ -24,12 +25,14 @@
     </form>
 </div>
 {% endfor %}
+<!-- Navigate to next page if one page can't display all habits-->        
 {% if total_pages >1%}
 <a href="{{url_for('dashboard', id=2)}}">Next Page →</a>
 {% endif%}
 
-
+<!-- Code for definin last page-->
 {% elif id==total_pages%}
+<!-- Will query habits that are not already displayed-->
 {% for Habit in Habits.offset((id-2)* habits_per_page + habits_first_page).limit(habits_per_page)%}
 <div class="Habit">
     <h1>{{ Habit.name }}</h1>
@@ -52,7 +55,12 @@
 </div>
 {% endfor%}
 <a href="{{url_for('dashboard',id=id-1)}}" class="previous-page"> ← Previous page</a>
+<!-- Go back to prevoius page as on the last page as has to be more than 1 page of habits-->
 {% else %}
+<!-- Form for each habit. 
+    Will have button so can record streaks entries. 
+    Display usrs reasons for habits, name of habits, plus there most recent streak and lasat recorded day for the habit
+-->
 {% for Habit in Habits.offset((id-2)* habits_per_page + habits_first_page).limit(habits_per_page)%}
 <div class="Habit">
     <h1>{{ Habit.name }}</h1>
@@ -74,8 +82,10 @@
     </form>
 </div>
 {% endfor%}
+<!-- Go to page before if more than 2 pages-->
 <a href="{{url_for('dashboard',id=id-1)}}" class="previous-page"> ← Previous page</a>
 <p>{{id}}</p>
+<!-- Shows what page the user is on-->
 <a href="{{url_for('dashboard',id=id+1)}}">Next page →</a>
 {% endif%}
 {% else %}

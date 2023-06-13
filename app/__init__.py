@@ -2,7 +2,6 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from os import environ
 from flask_login import LoginManager
-from flask_migrate import Migrate
 from flask_mail import Mail
 
 app = Flask(__name__)
@@ -19,7 +18,6 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 # Setup flask-mail
 mail = Mail(app)
-migrate = Migrate(app, db)
-app.config['TESTING'] = bool(int(environ.get('testing_status',0)))
-app.config['DEBUG']=app.config['TESTING']
+app.config['TESTING'] = bool(int(environ.get('testing_status', 0)))
+app.config['DEBUG'] = app.config['TESTING']
 from app import forms, models, routes
