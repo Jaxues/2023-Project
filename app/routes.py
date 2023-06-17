@@ -388,14 +388,58 @@ def privacy():
 
     return render_template('pp.html', privacy_policy=privacy_policy)
 
+# Page for pictures of cats
+
+
+@app.route('/cat')
+def catpage():
+    return render_template('cats.html')
+
+
+@app.route('/shop')
+@login_required
+def shop():
+    form = ShopForm()
+    return render_template('shop.html', form=form)
+
+
+@app.route('/achivement')
+@login_required
+def achievements():
+    return render_template('achivements.html')
+
+
+"""
+@app.route('/resources')
+def resources():
+
+    good_habits = [
+        {
+            'name': 'Physical Exercise',
+            'description': 'Engaging in physical activity is beneficial for overall health and fitness. Theese could provide good alternatives to addictive substances, excessie screen time, or getting out to meet people',
+            'replacement': 'Here are some examples of physical exercises:',
+            'resources': ['Go for a walk or run in the park', 'Play a sport (e.g., soccer, basketball)', 'Attend a fitness class or gym session', 'Try yoga or Pilates', 'Go adventure with rock climbing,hiking, kayaking with others', 'Be in nature and take a walk']
+        },
+        {
+            'name': 'Reading',
+            'description': 'Reading helps expand knowledge, enhance creativity, and improve cognitive abilities.',
+            'replacement': 'Here are some reading suggestions:',
+            'resources': ['Read a novel or fiction book', 'Explore non-fiction books on a specific topic of interest', 'Subscribe to a reputable news outlet or magazine', 'Join a book club for discussions', 'Replace watching with reading when you need information']
+        },
+
+    ]
+
 
 @app.route("/resources", methods=["get"])
 def resources():
     return render_template('resources.html')
+#
+"""
+
+
 # Custom error handler for app
 
 
-"""
 def bad_request(error):
     return (
         render_template(
@@ -491,45 +535,3 @@ def handle_all_other_errors(error):
             error_message="Sorry, there was an internal server error.",),
             500,
             )
-
-# Page for pictures of cats
-
-
-@app.route('/cat')
-def catpage():
-    return render_template('cats.html')
-
-
-
-@app.route('/resources')
-def resources():
-
-    good_habits = [
-    {
-        'name': 'Physical Exercise',
-        'description': 'Engaging in physical activity is beneficial for overall health and fitness. Theese could provide good alternatives to addictive substances, excessie screen time, or getting out to meet people',
-        'replacement': 'Here are some examples of physical exercises:',
-        'resources': ['Go for a walk or run in the park', 'Play a sport (e.g., soccer, basketball)', 'Attend a fitness class or gym session', 'Try yoga or Pilates', 'Go adventure with rock climbing,hiking, kayaking with others', 'Be in nature and take a walk']
-    },
-    {
-        'name': 'Reading',
-        'description': 'Reading helps expand knowledge, enhance creativity, and improve cognitive abilities.',
-        'replacement': 'Here are some reading suggestions:',
-        'resources': ['Read a novel or fiction book', 'Explore non-fiction books on a specific topic of interest', 'Subscribe to a reputable news outlet or magazine', 'Join a book club for discussions', 'Replace watching with reading when you need information']
-    },
-    
-]
-"""
-
-
-@app.route('/shop')
-@login_required
-def shop():
-    form = ShopForm()
-    return render_template('shop.html', form=form)
-
-
-@app.route('/achivement')
-@login_required
-def achievements():
-    return render_template('achivements.html')
