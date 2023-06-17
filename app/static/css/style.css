@@ -372,20 +372,11 @@ img.theme-icon {
 }
 
 
-.chartMenu {
-    width: 100vw;
-    height: 40px;
-    background: #1A1A1A;
-}
 
-.chartMenu p {
-    padding: 10px;
-    font-size: 20px;
-}
 
 .chartCard {
     width: 100vw;
-    height: calc(100vh - 40px);
+    height: calc(30vh - 40px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -393,7 +384,7 @@ img.theme-icon {
 
 .chartBox {
     width: 700px;
-    padding: 20px;
+    padding: 10px;
     border-radius: 20px;
     border: solid 3px rgba(54, 162, 235, 1);
     background: white;
