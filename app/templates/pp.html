@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
-<title> Privact Page</title>
 {% block content %}
-    <h1>Privacy Policy</h1>
+<title> Privacy Page</title>
+<h1>Privacy Policy</h1>
 
-    <body>
-        {% for question, answer in privacy_policy.items() %}
-        <details>
-            <summary>{{ question }}</summary>
-            <p>{{ answer | safe }}</p>
-        </details>
-        {% endfor %}
-    </body>
+<body>
+    {% for question, answer in privacy_policy.items() %}
+    <details>
+        <summary>{{ question }}</summary>
+        <p>{{ answer | safe }}</p>
+    </details>
+    {% endfor %}
+</body>
 {% endblock %}
