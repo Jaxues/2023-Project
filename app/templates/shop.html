@@ -1,0 +1,23 @@
+{% extends 'base.html'%}
+{% block content %}
+<title> Shop</title>
+<div class="userinfo">
+    <form>
+        {{form.csrf_token()}}
+        <ul>
+            <li>
+                <div class="svg-container">
+                    <img src="{{url_for('static',filename='images/Custom Theme Icon.svg')}}" class="svg-image">
+                </div>
+                {{form.theme_customization(class_='button')}}
+            </li>
+            <li>
+                <div class="svg-container">
+                    <img src="{{url_for('static',filename='images/Streak Freeze Icon.svg')}}" class="svg-image">
+                </div>
+                {{form.streak_freeze(class_='button')}}
+            </li>
+        </ul>
+    </form>
+</div>
+{% endblock%}

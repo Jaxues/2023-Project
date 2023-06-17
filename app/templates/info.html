@@ -10,6 +10,7 @@
     <p> Email:{{current_user.email}}</p>
     <p> Date Joined:{{current_user.date_joined}}</p>
     <p> Point total: {{current_user.user_points}}</p>
+    <p> <a href="{{url_for('achievements')}}"> Achievements</a></p>
     <br>
 
     <!-- Show all options related to users email perfences. Whether they have them enabled or not. 
@@ -38,7 +39,8 @@
     </tr>
     <br>
     <!-- Night theme swithcer linked to javascript-->
-    <label> Do you want to change theme?</label><img src="{{url_for('static',filename='images/moon.png')}}" id="icon">
+    <label> Do you want to change theme?</label>
+    <img src="/static/images/dark-mode-night-moon-svgrepo-com.svg" id="icon" class="theme-icon">
     <button onclick="window.location.href='{{ url_for('logout') }}'" class="submit">Logout</button>
 </div>
 <script src="{{url_for('static', filename='js/themeswitcher.js')}}"></script>

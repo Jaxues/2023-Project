@@ -45,7 +45,7 @@ class RegisterForm(FlaskForm):
     )
     # Check to make sure there not a robot
     recaptcha = RecaptchaField("Recaptcha", validators=[
-                               Recaptcha(),])
+                               Recaptcha()])
     # Setup of flask-wtforms google recaptcha field
     register = SubmitField("register")
 
@@ -59,6 +59,8 @@ class YesNo(FlaskForm):
 class StreakForm(FlaskForm):
     hidden_id = HiddenField(name='habit_id')
     submit = SubmitField('Done')
+    update =SubmitField('Update')
+    delete= SubmitField('Delete')
 
 # Form for user updating reason for why they do a habit
 
@@ -66,3 +68,7 @@ class UpdateForm(FlaskForm):
     reason = TextAreaField(name='updated_reason', validators=[
                            DataRequired(), Length(8, 64)])
     submit = SubmitField('update')
+
+class ShopForm(FlaskForm):
+    theme_customization= SubmitField('Customize')
+    streak_freeze=SubmitField('Purchase Streak Freeze')

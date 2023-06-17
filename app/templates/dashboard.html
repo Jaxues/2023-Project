@@ -1,96 +1,85 @@
-{% extends 'base.html'%}
-{% block content%}
-<title> Dashboard </title>
-{% if Habits%}
-<!-- If it's first page then only have 3 habits displaying-->
-{% if id==1%}
-<div id="heatmap-data" style="display: none;">{{frontend_heatmap_data}}</div>
-{% for Habit in Habits.limit(habits_first_page) %}
-<div class="Habit">
-    <h1>{{ Habit.name }}</h1>
-    <p> Reason: {{ Habit.reason }}</p>
-    <p> Recent Streak: </p>
-    <p> Last recorded day: </p>
-    <form method="post" onsubmit="document.getElementById('{{ form.submit.id }}').disabled=true;">
-        {{ form.csrf_token}}
-        {{ form.hidden_id(value=Habit.id)}}
-        <ul>
-            <li>{{ form.submit(class_='button', id='submit-btn') }}</li>
-            <li><button class="button"><a href="{{url_for('update', id=Habit.id)}}"> Update</a></button>
-            </li>
-            <li>
-                <button class="button"><a href="{{url_for('delete',id=Habit.id)}}">Delete</a></button>
-            </li>
-
-        </ul>
-    </form>
-</div>
-{% endfor %}
-<!-- Navigate to next page if one page can't display all habits-->        
-{% if total_pages >1%}
-<a href="{{url_for('dashboard', id=2)}}">Next Page →</a>
-{% endif%}
-
-<!-- Code for definin last page-->
-{% elif id==total_pages%}
-<!-- Will query habits that are not already displayed-->
-{% for Habit in Habits.offset((id-2)* habits_per_page + habits_first_page).limit(habits_per_page)%}
-<div class="Habit">
-    <h1>{{ Habit.name }}</h1>
-    <p> Reason: {{ Habit.reason }}</p>
-    <p> Recent Streak: </p>
-    <p> Last recorded day: </p>
-    <form method="post" onsubmit="document.getElementById('{{ form.submit.id }}').disabled=true;">
-        {{ form.csrf_token}}
-        {{ form.hidden_id(value=Habit.id)}}
-        <ul>
-            <li>{{ form.submit(class_='button', id='submit-btn') }}</li>
-            <li><button class="button"><a href="{{url_for('update', id=Habit.id)}}"> Update</a></button>
-            </li>
-            <li>
-                <button class="button"><a href="{{url_for('delete',id=Habit.id)}}">Delete</a></button>
-            </li>
-
-        </ul>
-    </form>
-</div>
-{% endfor%}
-<a href="{{url_for('dashboard',id=id-1)}}" class="previous-page"> ← Previous page</a>
-<!-- Go back to prevoius page as on the last page as has to be more than 1 page of habits-->
-{% else %}
-<!-- Form for each habit. 
-    Will have button so can record streaks entries. 
-    Display usrs reasons for habits, name of habits, plus there most recent streak and lasat recorded day for the habit
--->
-{% for Habit in Habits.offset((id-2)* habits_per_page + habits_first_page).limit(habits_per_page)%}
-<div class="Habit">
-    <h1>{{ Habit.name }}</h1>
-    <p> Reason: {{ Habit.reason }}</p>
-    <p> Recent Streak: </p>
-    <p> Last recorded day: </p>
-    <form method="post" onsubmit="document.getElementById('{{ form.submit.id }}').disabled=true;">
-        {{ form.csrf_token}}
-        {{ form.hidden_id(value=Habit.id)}}
-        <ul>
-            <li>{{ form.submit(class_='button', id='submit-btn') }}</li>
-            <li><button class="button"><a href="{{url_for('update', id=Habit.id)}}"> Update</a></button>
-            </li>
-            <li>
-                <button class="button"><a href="{{url_for('delete',id=Habit.id)}}">Delete</a></button>
-            </li>
-
-        </ul>
-    </form>
-</div>
-{% endfor%}
-<!-- Go to page before if more than 2 pages-->
-<a href="{{url_for('dashboard',id=id-1)}}" class="previous-page"> ← Previous page</a>
-<p>{{id}}</p>
-<!-- Shows what page the user is on-->
-<a href="{{url_for('dashboard',id=id+1)}}">Next page →</a>
-{% endif%}
-{% else %}
-<p> No habits currently added to do so go to <a href="{{url_for('adhabit')}}"> add habit page</a> to do so</p>
-{% endif%}
-<script src="{{url_for('static',filename='js/heatmap.js')}}"></script>
-{% endblock%}
+{% extends 'base.html' %}
+{% block content %}
+    <title>Dashboard</title>
+    {% if Habits %}
+        <!-- If there are habits, display them -->
+        {% if id == 1 %}
+            <!-- If it's the first page, display 3 habits -->
+            <div id="heatmap-data" style="display: none;">{{ frontend_heatmap_data }}</div>
+            <div id="myheatMap"></div>
+            {% for Habit in Habits.limit(habits_first_page) %}
+                <div class="Habit">
+                    <h1>{{ Habit.name }}</h1>
+                    <p>Reason: {{ Habit.reason }}</p>
+                    <p>Recent Streak: {{ user_streak[Habit.id][0] }}</p>
+                    <p>Last recorded day: {{ user_streak[Habit.id][1] }}</p>
+                    <form method="post" onsubmit="document.getElementById('{{ form.submit.id }}').disabled = true;">
+                        {{ form.csrf_token }}
+                        {{ form.hidden_id(value=Habit.id) }}
+                        <ul>
+                            <li>{{ form.submit(class_='button', id='submit-btn') }}</li>
+                            <li>{{ form.update(class_='button') }}</li>
+                            <li>{{ form.delete(class_='button') }}</li>
+                        </ul>
+                    </form>
+                </div>
+            {% endfor %}
+            <!-- Navigate to next page if one page can't display all habits -->
+            {% if total_pages > 1 %}
+                <a href="{{ url_for('dashboard', id=2) }}">Next Page →</a>
+            {% endif %}
+        {% else %}
+            <!-- Code for defining the last page -->
+            {% if id == total_pages %}
+                <!-- Query habits that are not already displayed -->
+                {% for Habit in Habits.offset((id - 2) * habits_per_page + habits_first_page).limit(habits_per_page) %}
+                    <div class="Habit">
+                        <h1>{{ Habit.name }}</h1>
+                        <p>Reason: {{ Habit.reason }}</p>
+                        <p>Recent Streak: {{ user_streak[Habit.id][0] }}</p>
+                        <p>Last recorded day: {{ user_streak[Habit.id][1] }}</p>
+                        <form method="post" onsubmit="document.getElementById('{{ form.submit.id }}').disabled = true;">
+                            {{ form.csrf_token }}
+                            {{ form.hidden_id(value=Habit.id) }}
+                            <ul>
+                                <li>{{ form.submit(class_='button', id='submit-btn') }}</li>
+                                <li>{{ form.update(class_='button') }}</li>
+                                <li>{{ form.delete(class_='button') }}</li>
+                            </ul>
+                        </form>
+                    </div>
+                {% endfor %}
+                <a href="{{ url_for('dashboard', id=id-1) }}" class="previous-page">← Previous page</a>
+            {% else %}
+                <!-- Form for each habit. Display user's reasons for habits, name of habits, plus their most recent streak and last recorded day for the habit -->
+                {% for Habit in Habits.offset((id - 2) * habits_per_page + habits_first_page).limit(habits_per_page) %}
+                    <div class="Habit">
+                        <h1>{{ Habit.name }}</h1>
+                        <p>Reason: {{ Habit.reason }}</p>
+                        <p>Recent Streak: {{ user_streak[Habit.id][0] }}</p>
+                        <p>Last recorded day: {{ user_streak[Habit.id][1] }}</p>
+                        <form method="post" onsubmit="document.getElementById('{{ form.submit.id }}').disabled = true;">
+                            {{ form.csrf_token }}
+                            {{ form.hidden_id(value=Habit.id) }}
+                            <ul>
+                                <li>{{ form.submit(class_='button', id='submit-btn') }}</li>
+                                <li>{{ form.update(class_='button') }}</li>
+                                <li>{{ form.delete(class_='button') }}</li>
+                            </ul>
+                        </form>
+                    </div>
+                {% endfor %}
+                <a href="{{ url_for('dashboard', id=id-1) }}" class="previous-page">← Previous page</a>
+                <p>{{ id }}</p>
+                <!-- Shows what page the user is on -->
+                <a href="{{ url_for('dashboard', id=id+1) }}">Next page →</a>
+            {% endif %}
+        {% endif %}
+    {% else %}
+    <div class="habit">
+         <p style="text-align: center;">No habits currently added. Go to <a href="{{ url_for('addhabit') }}">Add Habit page</a> to add one.</p>
+    </div>
+    {% endif %}
+    <script src="{{ url_for('static', filename='js/heatmap.js') }}"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+{% endblock %}

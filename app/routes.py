@@ -2,6 +2,8 @@
 from app import app, forms, db, login_manager
 from flask import render_template, url_for, redirect, flash, jsonify
 from app.models import habits, users, streak
+from app.forms import (HabitForm, StreakForm, LoginForm,
+                       RegisterForm, UpdateForm, YesNo, ShopForm)
 from flask_login import login_required, current_user, logout_user, login_user
 from werkzeug.security import check_password_hash
 from sqlalchemy.exc import IntegrityError
@@ -22,7 +24,7 @@ def load_user(user_id):
 # define login route
 def login():
     # Create login function
-    form = forms.LoginForm()
+    form = LoginForm()
     # Set form variable to be equal to Loginform class from forms.py
     if current_user.is_authenticated:
         # If current users is already logged in flash message
@@ -54,7 +56,7 @@ def login():
 @app.route("/register", methods=["get", "post"])
 # Define register route
 def register():
-    form = forms.RegisterForm()
+    form = RegisterForm()
     if current_user.is_authenticated:
         # If current users is already logged in flash message
         flash("error", "Your already logged in silly :)")
@@ -111,6 +113,8 @@ Once routed will logout user from session and then return them to index page
 """
 
 # Log user out of their current session
+
+
 @app.route("/logout", methods=["get"])
 @login_required
 def logout():
@@ -126,7 +130,7 @@ def index():
 @app.route("/addhabit", methods=["GET", "POST"])
 @login_required
 def addhabit():
-    form = forms.HabitForm()
+    form = HabitForm()
     if form.validate_on_submit():
         # See if habit exists if it does then flash message to stop duplicates
         checkhabit = habits.query.filter_by(
@@ -150,7 +154,7 @@ def addhabit():
                         'error', 'This has profanity. That or you have entered an asteriks. Either is not allowed')
                     return redirect(url_for('addhabit'))
             for test_reason in profanitY_check_habit_censor:
-                # Loop to go through all words that users enter even if they space words out will censor it. 
+                # Loop to go through all words that users enter even if they space words out will censor it.
                 if test_reason == '*':
                     flash('error', 'This contains an asteriks. Either this was censored by the filter or you have entered an astericks. Either way please remove this')
                     return redirect(url_for('addhabit'))
@@ -167,7 +171,7 @@ def addhabit():
                 db.session.add(NewHabit)
                 db.session.commit()
                 flash("success", "Habit added successfully!")
-                # Return first page of dashbord page. Dashboard indexed so first page only has 3 habits on it. 
+                # Return first page of dashbord page. Dashboard indexed so first page only has 3 habits on it.
                 return redirect(url_for("dashboard", id=1))
     return render_template("addHabit.html", form=form)
 
@@ -178,78 +182,92 @@ The first page will have an id of 1 and will have 3 habits. It will also display
 All other pages will have 5 habits per page. 
 """
 
+
 @app.route("/dashboard/<int:id>", methods=['GET', 'POST'])
 @login_required
 def dashboard(id):
     Habits = habits.query.filter_by(user_id=current_user.id)
-    Streaks = streak.query.filter_by(user_id=current_user.id)
     user_streaks = {}
-    total_habits = Habits.count()
+    total_habits = Habits.count() if Habits else 0
     habits_first_page = 3
     habits_pages = 5
-    # See how many pages are needed to display all habits for the user. 
+    # See how many pages are needed to display all habits for the user.
+    total_pages = ceil(((total_habits-habits_first_page)/habits_pages)+1)
+
+    # See how many pages are needed to display all habits for the user.
     total_pages = ceil(((total_habits-habits_first_page)/habits_pages)+1)
     if id == 0:
         return redirect(url_for('dashboard', id=1))
     if id > total_pages:
         return redirect(url_for('dashboard', id=total_pages))
     for Habit in Habits:
-        add_user_streak = streak.query.filter_by(
-            user_id=current_user.id, habit_id=Habit.id).order_by(streak.date.desc()).first()
-        if add_user_streak:
-            recent_date = add_user_streak.date
-            recent_streak = add_user_streak.is_consecutive
-            user_streaks[recent_date] = recent_streak
-    form = forms.StreakForm()
-    preprocess_data=heatmap_data(streak.query.filter_by(user_id=current_user.id))
+        Habit_streak = streak.query.filter_by(
+            habit_id=Habit.id).order_by(streak.date.desc())
+        if Habit_streak.first():
+            user_streaks[Habit.id] = [
+                Habit_streak.first().is_consecutive, Habit_streak.first().date]
+        else:
+            user_streaks[Habit.id] = [0, 'No date recorded']
+    form = StreakForm()
+    preprocess_data = heatmap_data(
+        streak.query.filter_by(user_id=current_user.id))
     print(preprocess_data)
-    check_days=heatmap_date_checker(preprocess_data)
+    check_days = heatmap_date_checker(preprocess_data)
     print(check_days)
-    frontend_heatmap_data=check_days
+    frontend_heatmap_data = check_days
     if form.validate_on_submit():
         habit_id = form.hidden_id.data
-        current_date = get_local_date()
-        check_entry = streak.query.filter_by(
-            user_id=current_user.id, habit_id=habit_id, date=current_date).first()
-        # Query streak database so can't have multiple of the same entry        
-        if check_entry:
-            flash("error", "You have already reccorded your habit for today. ")
-            return redirect(url_for('dashboard', id=1))
+        if form.update.data:
+            return redirect(url_for('update', id=habit_id))
+        elif form.delete.data:
+            return redirect(url_for('delete', id=habit_id))
+        else:
+            current_date = get_local_date()
+            check_entry = streak.query.filter_by(
+                user_id=current_user.id, habit_id=habit_id, date=current_date).first()
+            # Query streak database so can't have multiple of the same entry
+            if check_entry:
+                flash("error", "You have already reccorded your habit for today. ")
+                return redirect(url_for('dashboard', id=1))
 
-        check_date = streak.query.filter(
-            streak.user_id == current_user.id,
-            streak.habit_id == habit_id,
-            streak.date < current_date
-        ).order_by(streak.date.desc()).first()
-        # See if the previous entry was day before
-        if check_date:
-            streak_score = check_consecutive(check_date)
-            new_entry = streak(user_id=current_user.id,
-                               habit_id=habit_id, date=current_date, is_consecutive=streak_score)
-        # If dates aren't consecutive assign streak of 1 for first day of recording habit 
-        else:
-            new_entry = streak(user_id=current_user.id,
-                               habit_id=habit_id, date=current_date, is_consecutive=1)
-        user_streak = streak.query.filter_by(id=current_user.id, habit_id=habit_id).order_by(
-            streak.date.desc()).first()
-        user_habit=habits.query.filter_by(id=habit_id, user_id=current_user.id).first()
-        if user_streak:
-            # Give users points based off if they have streak already
-            print(user_habit.habit_type)
-            add_points = habit_points(user_streak.is_consecutive, user_habit.habit_type)
-        else:
-            # Assign points with no streak entries.
-            add_points = habit_points(0, user_habit.habit_type)
-        current_user.user_points = current_user.user_points + add_points
-        db.session.commit()
-        db.session.add(new_entry)
-        db.session.commit()
-        # Call the method to check consecutive streaks
-        flash('success', 'Streak successfully recorded you earn {} points'.format(
-            add_points))
-        print(habit_points(2,"good"))
-    return render_template("dashboard.html", Habits=Habits, Streaks=Streaks, form=form, user_streaks=user_streaks, id=id, habits_first_page=habits_first_page, habits_per_page=habits_pages, total_pages=total_pages
-                           , frontend_heatmap_data=frontend_heatmap_data)
+            check_date = streak.query.filter(
+                streak.user_id == current_user.id,
+                streak.habit_id == habit_id,
+                streak.date < current_date
+            ).order_by(streak.date.desc()).first()
+            # See if the previous entry was day before
+            if check_date:
+                streak_score = check_consecutive(check_date)
+                new_entry = streak(user_id=current_user.id,
+                                   habit_id=habit_id, date=current_date, is_consecutive=streak_score)
+            # If dates aren't consecutive assign streak of 1 for first day of recording habit
+            else:
+                new_entry = streak(user_id=current_user.id,
+                                   habit_id=habit_id, date=current_date, is_consecutive=1)
+            user_streak = streak.query.filter_by(id=current_user.id, habit_id=habit_id).order_by(
+                streak.date.desc()).first()
+            user_habit = habits.query.filter_by(
+                id=habit_id, user_id=current_user.id).first()
+            if user_streak:
+                # Give users points based off if they have streak already
+                print(user_habit.habit_type)
+                add_points = habit_points(
+                    user_streak.is_consecutive, user_habit.habit_type)
+            else:
+                # Assign points with no streak entries.
+                add_points = habit_points(0, user_habit.habit_type)
+            current_user.user_points = current_user.user_points + add_points
+            db.session.commit()
+            db.session.add(new_entry)
+            db.session.commit()
+            # Call the method to check consecutive streaks
+            flash('success', 'Streak successfully recorded you earn {} points'.format(
+                add_points))
+            print(habit_points(2, "good"))
+    if total_habits > 0:
+        return render_template("dashboard.html", Habits=Habits,  user_streak=user_streaks, form=form, id=id, habits_first_page=habits_first_page, habits_per_page=habits_pages, total_pages=total_pages, frontend_heatmap_data=frontend_heatmap_data)
+    else:
+        return render_template("dashboard.html", Habits=None,  user_streak=None, form=form, id=id, habits_first_page=habits_first_page, habits_per_page=habits_pages, total_pages=total_pages, frontend_heatmap_data=frontend_heatmap_data)
 
 
 @app.route("/delete/<int:id>")
@@ -289,7 +307,7 @@ def update(id):
     if current_habit.user_id != current_user.id:
         flash('error', "You don't own this habit you can't update it.")
         return redirect(url_for('dashboard', id=1))
-    form = forms.UpdateForm()
+    form = UpdateForm()
     if form.validate_on_submit():
         habit = habits.query.filter_by(id=id).first()
         updated_reason = form.reason.data
@@ -310,7 +328,7 @@ def update(id):
 def info():
     # See if user has logged in
     if current_user.is_authenticated:
-        form = forms.YesNo()
+        form = YesNo()
         if form.validate_on_submit():
             email_perference = form.options.data
             print(email_perference)
@@ -370,11 +388,14 @@ def privacy():
 
     return render_template('pp.html', privacy_policy=privacy_policy)
 
+
 @app.route("/resources", methods=["get"])
 def resources():
     return render_template('resources.html')
-"""
 # Custom error handler for app
+
+
+"""
 def bad_request(error):
     return (
         render_template(
@@ -431,7 +452,6 @@ def method_not_allowed(error):
     return (
         render_template(
             "error.html",
-            error_code=406,
             error_description="Method Not Allowed",
             error_message="Sorry, the method you used to access this page is not allowed.",
         ),
@@ -473,7 +493,43 @@ def handle_all_other_errors(error):
             )
 
 # Page for pictures of cats
+
+
 @app.route('/cat')
 def catpage():
     return render_template('cats.html')
+
+
+
+@app.route('/resources')
+def resources():
+
+    good_habits = [
+    {
+        'name': 'Physical Exercise',
+        'description': 'Engaging in physical activity is beneficial for overall health and fitness. Theese could provide good alternatives to addictive substances, excessie screen time, or getting out to meet people',
+        'replacement': 'Here are some examples of physical exercises:',
+        'resources': ['Go for a walk or run in the park', 'Play a sport (e.g., soccer, basketball)', 'Attend a fitness class or gym session', 'Try yoga or Pilates', 'Go adventure with rock climbing,hiking, kayaking with others', 'Be in nature and take a walk']
+    },
+    {
+        'name': 'Reading',
+        'description': 'Reading helps expand knowledge, enhance creativity, and improve cognitive abilities.',
+        'replacement': 'Here are some reading suggestions:',
+        'resources': ['Read a novel or fiction book', 'Explore non-fiction books on a specific topic of interest', 'Subscribe to a reputable news outlet or magazine', 'Join a book club for discussions', 'Replace watching with reading when you need information']
+    },
+    
+]
 """
+
+
+@app.route('/shop')
+@login_required
+def shop():
+    form = ShopForm()
+    return render_template('shop.html', form=form)
+
+
+@app.route('/achivement')
+@login_required
+def achievements():
+    return render_template('achivements.html')
