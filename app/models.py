@@ -18,7 +18,7 @@ class habits(db.Model):  # define 'habits' table
     # create reason column for table
     reason = db.Column(EncryptedType(db.String(128), encryption_key))
 
-    habit_type= db.Column(db.String(4))
+    habit_type = db.Column(db.String(4))
     # create foreign key for user_id in user table
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     # establish one to many relationship with users table
@@ -43,7 +43,9 @@ class users(db.Model, UserMixin):  # define 'users' table and include UserMixin 
     # column for recording when user joined. Stored as datetime object. Defualt to current date.
     date_joined = db.Column(db.DateTime, default=datetime.utcnow)
     email_notifactions = db.Column(
-        db.Boolean, default=False, name='email_notifactions')
+        db.Boolean, default=False)
+    email_authentication = db.Column(
+        db.Boolean, default=False)
     user_points = db.Column(db.Integer, default=0)
 
     def get_id(self):  # function that returns own id

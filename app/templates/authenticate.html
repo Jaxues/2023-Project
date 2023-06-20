@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content%}
+<p> Please enter all your detials. </p>
+<form method="post">
+{{ form.csrf_token()}}
+{{form.username}}
+
+{{form.password}}
+
+{{form.submit}}
+</form>
+{% endblock%}

@@ -17,7 +17,14 @@ app.config['RECAPTCHA_PRIVATE_KEY'] = environ['recap_priv']
 login_manager = LoginManager()
 login_manager.init_app(app)
 # Setup flask-mail
+# Configure your Flask application
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_USERNAME'] = environ['MAIL_USERNAME']
+app.config['MAIL_PASSWORD'] = environ['MAIL_PASSWORD']
+app.config['MAIL_DEFAULT_SENDER'] = environ['MAIL_USERNAME']
+
 mail = Mail(app)
-app.config['TESTING'] = bool(int(environ.get('testing_status', 0)))
-app.config['DEBUG'] = app.config['TESTING']
 from app import forms, models, routes

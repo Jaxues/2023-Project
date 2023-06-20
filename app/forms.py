@@ -18,7 +18,7 @@ Reason is text area field for why users wants to do habit
 """
 
 class HabitForm(FlaskForm):
-    name = StringField("name", validators=[DataRequired()])
+    name = StringField("name", validators=[DataRequired(), Length(5,50)])
     type_of_habit = RadioField(choices=(['bad', 'Habit to Break'], [
                                'good', 'Habit to build']), validators=[DataRequired()])
     reason = TextAreaField("reason", validators=[
@@ -70,5 +70,5 @@ class UpdateForm(FlaskForm):
     submit = SubmitField('update')
 
 class ShopForm(FlaskForm):
-    theme_customization= SubmitField('Customize')
+    theme_customization= SubmitField('Purchase Custom Theme')
     streak_freeze=SubmitField('Purchase Streak Freeze')

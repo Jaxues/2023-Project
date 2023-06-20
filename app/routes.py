@@ -7,9 +7,10 @@ from app.forms import (HabitForm, StreakForm, LoginForm,
 from flask_login import login_required, current_user, logout_user, login_user
 from werkzeug.security import check_password_hash
 from sqlalchemy.exc import IntegrityError
-from app.function import get_local_date, check_consecutive, heatmap_data, heatmap_date_checker, habit_points
+from app.function import get_local_date, check_consecutive, heatmap_data, heatmap_date_checker, habit_points, email_verification
 from better_profanity import profanity
 from math import ceil
+from itsdangerous import URLSafeSerializer
 
 
 @login_manager.user_loader
@@ -19,37 +20,29 @@ def load_user(user_id):
     # Returns current users_id from 'users' table
     return users.query.get(user_id)
 
-
-@app.route("/login", methods=["get", "post"])
-# define login route
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    # Create login function
     form = LoginForm()
-    # Set form variable to be equal to Loginform class from forms.py
     if current_user.is_authenticated:
-        # If current users is already logged in flash message
-        flash("error", "Your already logged in silly :)")
+        flash("error", "You are already logged in.")
         return redirect(url_for("info"))
+
     if form.validate_on_submit():
-        # Once user has submited form check with logic
         user = users.query.filter_by(username=form.username.data).first()
-        # See if user exists
         if user:
-            # If user exists continue
             if check_password_hash(user.password_hash, form.password.data):
-                # See if entered password from user is same as stored hashed password
-                login_user(user)
-                # If successful log in user
-                flash("success", "Login Succeesful")
-                # Alert user that proccess was succesful
-                return redirect(url_for("dashboard", id=1))
-            # Return to page where user can see most recent habits
+                if user.email_authentication:
+                    login_user(user)
+                    flash("success", "Login successful!")
+                    return redirect(url_for("dashboard", id=1))
+                else:
+                    flash("error", "Please verify your email before logging in.")
+                    return redirect(url_for("login"))
             else:
-                flash("error", "Wrong password")
-                # If user entered password is incorrect. Won't log in user
+                flash("error", "Invalid username or password.")
         else:
-            flash("error", "User doesn't exist")
-            # If user isn't created alert user
+            flash("error", "User does not exist.")
+
     return render_template("login.html", form=form)
 
 
@@ -80,7 +73,7 @@ def register():
         # Set password hash for new user
             if form.password1.data != form.password2.data:
                 flash('error', "Password's don't match check them again.")
-                return redirect(url_for('regiter'))
+                return redirect(url_for('register'))
             db.session.add(newuser)
 
         """
@@ -92,17 +85,49 @@ def register():
         """
 
         try:
+            db.session.add(newuser)
             db.session.commit()
+            email_verification(form.email.data)
+            flash('success','Email needs to be authenticated email was sent to {}'.format(form.email.data))
             return redirect(url_for("login"))
+        
         except IntegrityError:
             db.session.rollback()
             flash("error", "User already exists")
+            email_verification(form.email.data)
             return redirect(url_for('register'))
+        """
         except:
             flash('error', "There was an error in adding user. Pleae try again")
             return redirect(url_for('register'))
+        """
     return render_template("register.html", form=form)
 
+@app.route('/authenticate/<token>', methods=['get','post'])
+def authentication(token):
+    form=LoginForm()
+    if current_user.is_authenticated:
+        flash('error','You are already logged in.')
+        return redirect(url_for('dsashboard',id=1))
+    if form.validate_on_submit():
+        authenticate_user=users.query.filter_by(username=form.username.data).first()
+        if authenticate_user:
+            if authenticate_user.email_authentication:
+                flash('error','This user is already verified')
+                return redirect(url_for('login'))
+            if check_password_hash(authenticate_user.password_hash,form.password.data):
+                authenticate_user.email_authentication=True
+                db.session.commit()
+                login_user(authenticate_user)
+                flash('success','Email Verified')
+                return redirect(url_for('dashboard',id=1))
+            else:
+                flash('error', "Password doesn't match please try again")
+                return redirect(url_for('authentication',token=token))
+        else:
+                flash('error', "user doesn't exist please register first")
+                return redirect(url_for('register'))
+    return render_template('authenticate.html',form=form, token=token)
 
 """
 
@@ -409,8 +434,7 @@ def achievements():
     return render_template('achivements.html')
 
 # Custom error handler for app
-
-
+"""
 def bad_request(error):
     return (
         render_template(
@@ -506,3 +530,4 @@ def handle_all_other_errors(error):
             error_message="Sorry, there was an internal server error.",),
             500,
             )
+"""
