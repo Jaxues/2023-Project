@@ -2,16 +2,18 @@
 {% block content %}
 <title> Shop</title>
 <div class="userinfo">
-    <form>
+    <form method="post">
         {{form.csrf_token()}}
         <ul>
             <li>
+                <p> Cost 4000 points </p>
                 <div class="svg-container">
                     <img src="{{url_for('static',filename='images/Custom Theme Icon.svg')}}" class="svg-image">
                 </div>
                 {{form.theme_customization(class_='button')}}
             </li>
             <li>
+                <p> Cost 500 points</p>
                 <div class="svg-container">
                     <img src="{{url_for('static',filename='images/Streak Freeze Icon.svg')}}" class="svg-image">
                 </div>

@@ -47,7 +47,8 @@ class users(db.Model, UserMixin):  # define 'users' table and include UserMixin 
     email_authentication = db.Column(
         db.Boolean, default=False)
     user_points = db.Column(db.Integer, default=0)
-
+    streak_freeze= db.Column(db.Boolean, default=False)
+    custom_theme=db.Column(db.Boolean, default=False)
     def get_id(self):  # function that returns own id
         return self.id
 
@@ -83,3 +84,11 @@ class streak(db.Model):  # define 'streak' table
                             overlaps="habits,user_streak,users")
     __table_args__ = (db.UniqueConstraint(
         'user_id', 'habit_id', 'date', name='_user_habit_date_uc'),)
+
+class user_theme(db.Model):
+    id=db.Column(db.Integer, primary_key=True)
+    user_id=db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    primary=db.Column(db.String, nullable=False)
+    secondary=db.Column(db.String, nullable=False)
+    accent=db.Column(db.String, nullable=False)
+    background=db.Column(db.String, nullable=False)

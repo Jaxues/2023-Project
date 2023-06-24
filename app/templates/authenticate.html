@@ -1,12 +1,17 @@
 {% extends 'base.html' %}
 {% block content%}
-<p> Please enter all your detials. </p>
-<form method="post">
-{{ form.csrf_token()}}
-{{form.username}}
-
-{{form.password}}
-
-{{form.submit}}
-</form>
+<div class="body">
+    <form method="post">
+        {{ form.csrf_token}}
+        <p> Please enter all your details</p>
+        <br>
+        <p> Username</p>
+        {{ form.username(class_='logininput')}}
+        <br>
+        <p> Password</p>
+        {{ form.password(class_='logininput')}}
+        <br>
+        {{ form.submit(class_='submit')}}
+    </form>
+</div>
 {% endblock%}

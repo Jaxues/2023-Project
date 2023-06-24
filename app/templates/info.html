@@ -17,17 +17,18 @@
         And have form to change them
     -->
     <tr>
-        {% if current_user.email_notifications %}
+    {% if current_user.email_notifactions %}
         <td>
-            <p>You currently have email notifcations enabled</p>
+            <p>You currently have email notifications enabled</p>
         </td>
-        {% else %}
+    {% else %}
         <td>
-            <p> You don't have email notifications enabled</p>
+            <p>You don't have email notifications enabled</p>
         </td>
-        {%endif %}
+    {% endif %}
+
         <p>Do you want email reminders?</p>
-        <form method="post" action="{{url_for('subscribe')}}">
+        <form method="post">
             {{ form.csrf_token}}
             {% for option in form.options %}
             <td>{{ option }}</td>

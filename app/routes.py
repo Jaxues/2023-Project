@@ -3,14 +3,14 @@ from app import app, forms, db, login_manager
 from flask import render_template, url_for, redirect, flash, jsonify
 from app.models import habits, users, streak
 from app.forms import (HabitForm, StreakForm, LoginForm,
-                       RegisterForm, UpdateForm, YesNo, ShopForm)
+                       RegisterForm, UpdateForm, YesNo, ShopForm,
+                       ThemeForm)
 from flask_login import login_required, current_user, logout_user, login_user
 from werkzeug.security import check_password_hash
 from sqlalchemy.exc import IntegrityError
 from app.function import get_local_date, check_consecutive, heatmap_data, heatmap_date_checker, habit_points, email_verification
 from better_profanity import profanity
 from math import ceil
-from itsdangerous import URLSafeSerializer
 
 
 @login_manager.user_loader
@@ -288,7 +288,7 @@ def dashboard(id):
             # Call the method to check consecutive streaks
             flash('success', 'Streak successfully recorded you earn {} points'.format(
                 add_points))
-            print(habit_points(2, "good"))
+            return redirect(url_for('dashboard',id=1))
     if total_habits > 0:
         return render_template("dashboard.html", Habits=Habits,  user_streak=user_streaks, form=form, id=id, habits_first_page=habits_first_page, habits_per_page=habits_pages, total_pages=total_pages, frontend_heatmap_data=frontend_heatmap_data)
     else:
@@ -348,8 +348,7 @@ def update(id):
         return redirect(url_for('dashboard', id=1))
     return render_template('Update.html', form=form, current_habit=current_habit)
 
-
-@app.route("/info")
+@app.route("/info", methods=['get','post'])
 def info():
     # See if user has logged in
     if current_user.is_authenticated:
@@ -357,27 +356,20 @@ def info():
         if form.validate_on_submit():
             email_perference = form.options.data
             print(email_perference)
-            return (redirect('subscribe'))
+            if email_perference == 'y':
+                current_user.email_notifactions = True
+                db.session.commit()
+            elif email_perference == 'n':
+                current_user.email_notifactions = False 
+                db.session.commit()
+            flash('success','Email perferences successfully updated')
+            return redirect(url_for('info'))
         return render_template("info.html", form=form)
     else:
         flash("You haven't logged on you can't access this page")
         return redirect(url_for("login"))
 
 # Email perferences to subscribe user to email
-
-
-@app.route("/subscribe", methods=['GET', 'POST'])
-@login_required
-def subscribe():
-    email_user = users.query.filter_by(id=current_user.id).first()
-    if email_user.email_notifactions == True:
-        email_user.email_notifcations = False
-    elif email_user.email_notifactions == False:
-        email_user.email_notifactions = True
-    db.session.add(email_user)
-    db.session.commit()
-    flash('success', 'Email perferences updated')
-    return redirect(url_for('info'))
 
 
 @app.route("/faq", methods=["get"])
@@ -392,7 +384,7 @@ def faq():
         "Is my personal information secure on this app?": "Yes. Hadit hashes all the passwords from users as well as encrypting any text entered for the reason user input for habits. To try to ensure users privacy. for more information go to <a href=" + url_for('privacy')+"> privacy page </a> for more information",
         "What happens if I encounter an error or bug?": "If a red message occurs this may be a sign that you might need to check your input to see if there are any errors. This could be from entering a duplicate habit, the incorrect password, or a username that doesn't exist. Else users would be redirected to a error page where you can be taken back to the website afterwards. ",
         "What types of customisability do you current offer": "Currently Hadit offers the ability to change from Light to Dark mode in the user info page. As well there is a page for cats. ",
-        "Do I need to do neurodivergent or have a psychological condition to use this app": "No, of course not. Hadit is primaryily devolped for this audience but in doing so it also tries to make itself more accessible to everyone.",
+        "Do I need to be neurodivergent or have a psychological condition to use this app": "No, of course not. Hadit is primaryily devolped for this audience but in doing so it also tries to make itself more accessible to everyone.",
         "What are some words censored in the profanity filter": " Due to using an external api I can't control what words are censored. This is not to supress peoples expression but as a precaution to stop offensive statements."
     }
     return render_template("faq.html", faqs=faqs)
@@ -421,10 +413,38 @@ def catpage():
     return render_template('cats.html')
 
 
-@app.route('/shop')
+@app.route('/shop', methods=['get','post'])
 @login_required
 def shop():
     form = ShopForm()
+    if form.validate_on_submit():
+        if form.streak_freeze.data:
+            streak_freeze_user= users.query.filter_by(id=current_user.id).first()
+            if streak_freeze_user.user_points >= 500:
+                if streak_freeze_user.streak_freeze:
+                    flash('error','Streak freeze already purchased')
+                    return redirect(url_for('shop'))
+                streak_freeze_user.user_points = current_user.user_points - 500
+                streak_freeze_user.streak_freeze= True
+                db.session.commit()
+                flash('success','Streak freeze purchased')
+                return redirect(url_for('shop'))
+            elif streak_freeze_user.streak_freeze:
+                flash('error','Streak freeze already purchased') 
+                return redirect(url_for('shop'))
+            else:
+                flash('error','Not enough points to purchase streak freeze only have {}'.format(streak_freeze_user.user_points))
+                return redirect(url_for('shop'))
+        elif form.theme_customization.data:
+            theme_customization_user=users.query.filter_by(id=current_user.id).first()
+
+            if theme_customization_user.user_points >= 4000:
+                flash('success','Enough points to purchase custom theme')
+                return redirect(url_for('customize'))
+            else:
+                flash('error','Not enough points to purchase theme customixation need 4000 only have {}'.format(theme_customization_user.user_points)) 
+                return redirect(url_for('shop'))
+
     return render_template('shop.html', form=form)
 
 
@@ -433,8 +453,22 @@ def shop():
 def achievements():
     return render_template('achivements.html')
 
-# Custom error handler for app
+@app.route('/theme', methods=['get','post'])
+@login_required
+def customize():
+    if current_user.user_points < 4000:
+        flash('error','You need 4000 points to purchase theme customization you only have {} points'.format(current_user.user_points))
+        return redirect(url_for('shop'))
+    else:
+        form=ThemeForm()
+        if form.validate_on_submit():
+            user_custom_theme=users.query.filter_by(id=current_user.id).first()
+            user_custom_theme.user_points= user_custom_theme.user_points - 4000
+            print(form.primary_color.data, form.secondary_color.data, form.accent_color.data,form.background_color.data)
+    return render_template('customtheme.html',form=form)
+
 """
+# Custom error handler for app
 def bad_request(error):
     return (
         render_template(
@@ -530,4 +564,4 @@ def handle_all_other_errors(error):
             error_message="Sorry, there was an internal server error.",),
             500,
             )
-"""
+            """

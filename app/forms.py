@@ -1,15 +1,16 @@
 # neccesary imports for forms classes and dunctions
 from flask_wtf import FlaskForm, Recaptcha, RecaptchaField
-from wtforms.validators import DataRequired, Email, EqualTo, Length
+from wtforms.validators import DataRequired, Email, EqualTo, Length 
 from wtforms import (
     StringField,
     SubmitField,
     PasswordField,
     TextAreaField,
     RadioField,
-    HiddenField
+    HiddenField,
 )
-
+from wtforms.widgets import ColorInput
+from wtforms import ValidationError
 """
 Form for creating habits
 Takes paramters of name which is the anme of the habit
@@ -51,7 +52,7 @@ class RegisterForm(FlaskForm):
 
 
 class YesNo(FlaskForm):
-    options = RadioField(choices=(["y", "Yes"], ["n", "No"]))
+    options = RadioField(choices=[('y','Yes'), ('n','No')])
     submit = SubmitField("Submit")
 
 # Used on dashboard page when determine that habit to update in streak table
@@ -72,3 +73,26 @@ class UpdateForm(FlaskForm):
 class ShopForm(FlaskForm):
     theme_customization= SubmitField('Purchase Custom Theme')
     streak_freeze=SubmitField('Purchase Streak Freeze')
+
+class ThemeForm(FlaskForm):
+    primary_color = StringField('Primary Color', widget=ColorInput(), validators=[DataRequired()])
+    secondary_color = StringField('Secondary Color', widget=ColorInput(), validators=[DataRequired()])
+    accent_color = StringField('Accent Color', widget=ColorInput(), validators=[DataRequired()])
+    background_color = StringField('Background Color', widget=ColorInput(), validators=[DataRequired()])
+    submit = SubmitField('Submit')
+
+    def validate(self):
+        if not super().validate():
+            return False
+
+        color_fields = [
+            self.primary_color.data.lower(),
+            self.secondary_color.data.lower(),
+            self.accent_color.data.lower(),
+            self.background_color.data.lower()
+        ]
+        if len(color_fields) != len(set(color_fields)):
+            self.primary_color.errors.append('Colors must be unique.')
+            return False
+
+        return True

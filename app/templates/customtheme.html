@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content%}
+<div class="userinfo"> 
+<form method="post">
+    {{ form.csrf_token()}}
+    <p> Choose your primary Color</p>
+    {{ form.primary_color()}}
+    <p> Choose your secondary Color</p>
+    {{ form.secondary_color()}}
+    <p> Choose your accent Color</p>
+    {{ form.accent_color()}}
+    <p> Choose you background color</p>
+    {{ form.background_color()}}
+    <br>
+    {{form.submit()}}
+</form>
+</div>
+{% endblock%}
