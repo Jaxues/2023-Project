@@ -68,6 +68,7 @@ class StreakForm(FlaskForm):
 class UpdateForm(FlaskForm):
     reason = TextAreaField(name='updated_reason', validators=[
                            DataRequired(), Length(8, 64)])
+    name= StringField(name='update name', validators=[DataRequired(), Length(8,64)])
     submit = SubmitField('update')
 
 class ShopForm(FlaskForm):

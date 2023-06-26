@@ -11,7 +11,7 @@ from sqlalchemy.exc import IntegrityError
 from app.function import get_local_date, check_consecutive, heatmap_data, heatmap_date_checker, habit_points, email_verification
 from better_profanity import profanity
 from math import ceil
-
+from itsdangerous import URLSafeSerializer
 
 @login_manager.user_loader
 # Define userloader to Users ID
@@ -87,6 +87,7 @@ def register():
         try:
             db.session.add(newuser)
             db.session.commit()
+             
             email_verification(form.email.data)
             flash('success','Email needs to be authenticated email was sent to {}'.format(form.email.data))
             return redirect(url_for("login"))
@@ -94,7 +95,8 @@ def register():
         except IntegrityError:
             db.session.rollback()
             flash("error", "User already exists")
-            email_verification(form.email.data)
+            token=URLSafeSerializer(form.email.data)
+            email_verification(form.email.data, token)
             return redirect(url_for('register'))
         """
         except:
@@ -335,6 +337,7 @@ def update(id):
     form = UpdateForm()
     if form.validate_on_submit():
         habit = habits.query.filter_by(id=id).first()
+        name=form.name.data
         updated_reason = form.reason.data
         check_profanity_reason = profanity.contains_profanity(updated_reason)
         # Check for profanity in user inputted reason
@@ -343,6 +346,7 @@ def update(id):
                 'error', 'This updated reason contains profanity please remove it if you wish to update it.')
             return redirect(url_for('dashboard', id=1))
         habit.reason = updated_reason
+        habit.name=name
         db.session.commit()
         flash('success', 'Reason succesfully updated')
         return redirect(url_for('dashboard', id=1))
@@ -420,18 +424,16 @@ def shop():
     if form.validate_on_submit():
         if form.streak_freeze.data:
             streak_freeze_user= users.query.filter_by(id=current_user.id).first()
-            if streak_freeze_user.user_points >= 500:
-                if streak_freeze_user.streak_freeze:
-                    flash('error','Streak freeze already purchased')
-                    return redirect(url_for('shop'))
+            if streak_freeze_user.streak_freeze:
+                flash('error','Streak freeze already purchased') 
+                return redirect(url_for('shop'))
+            elif streak_freeze_user.user_points >= 500:
                 streak_freeze_user.user_points = current_user.user_points - 500
                 streak_freeze_user.streak_freeze= True
                 db.session.commit()
                 flash('success','Streak freeze purchased')
                 return redirect(url_for('shop'))
-            elif streak_freeze_user.streak_freeze:
-                flash('error','Streak freeze already purchased') 
-                return redirect(url_for('shop'))
+
             else:
                 flash('error','Not enough points to purchase streak freeze only have {}'.format(streak_freeze_user.user_points))
                 return redirect(url_for('shop'))

@@ -71,8 +71,7 @@ def habit_points(user_streak, type_of_habit):
             total_points += user_streak*15
     return total_points
 
-def email_verification(user_email):
-    token=URLSafeSerializer(user_email)
+def email_verification(user_email, token):
     msg= Message("Authentication link", recipients=[user_email])
     msg.body=("This is your authentication link {}".format(url_for('authentication', token=token, _external=True)))
     return mail.send(msg)

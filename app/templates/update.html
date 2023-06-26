@@ -1,10 +1,15 @@
 {% extends 'base.html'%}
 <title> Update </title>
 {% block content%}
+<div class="body"> 
+<a href="{{url_for('dashboard',id=1)}}"> Go back</a>
+
+</div>
 <form method="POST" class="userinfo">
     <!-- Import wtforms fields-->
     <h1> Reason</h1>
     {{ form.csrf_token()}}
+    {{ form.name(value=current_habit.name)}}
     {{ form.reason(value=current_habit.reason) }}
     {{ form.submit(class_='submit')}}
 </form>
