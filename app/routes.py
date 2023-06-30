@@ -1,7 +1,7 @@
 # Import neccesary models to get routes working
 from app import app, forms, db, login_manager, serializer
 from flask import render_template, url_for, redirect, flash, jsonify
-from app.models import habits, users, streak
+from app.models import habits, users, streak, users_theme
 from app.forms import (HabitForm, StreakForm, LoginForm,
                        RegisterForm, UpdateForm, YesNo, ShopForm,
                        ThemeForm)
@@ -18,8 +18,7 @@ from datetime import datetime, timedelta
 def load_user(user_id):
     # Create function
     # Returns current users_id from 'users' table
-    return users.query.get(user_id)
-
+    return users.query.filter_by(id=user_id) 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
@@ -481,10 +480,34 @@ def customize():
         form=ThemeForm()
         if form.validate_on_submit():
             user_custom_theme=users.query.filter_by(id=current_user.id).first()
-            user_custom_theme.user_points= user_custom_theme.user_points - 4000
-            print(form.primary_color.data, form.secondary_color.data, form.accent_color.data,form.background_color.data)
-    return render_template('customtheme.html',form=form)
+            primary_color=form.primary_color.data
+            secondary_color=form.secondary_color.data
+            accent_color=form.accent_color.data
+            background_color=form.background_color.data
+            color_fields = [primary_color.lower(), secondary_color.lower(), accent_color.lower(), background_color.lower()]
+            if len(color_fields) != len(set(color_fields)):
+                flash('error', 'Colors must be unique.')
+                return redirect(url_for('customize'))
 
+            # Process the submitted colors as needed
+            user_custom_theme.user_points -= 4000
+            print(primary_color, secondary_color, accent_color, background_color)
+            theme_status=user_custom_theme.custom_theme
+            if theme_status:
+                theme_to_delete=users_theme.query.filter_by(id=current_user.id).first()
+                db.session.delete(theme_to_delete)
+                db.session.commit()
+            new_custom_theme=users_theme(user_id=current_user.id,primary=primary_color, secondary=secondary_color, accent=accent_color,background=background_color)
+            db.session.add(new_custom_theme)
+            user_custom_theme.custom_theme=True
+            db.session.commit()
+            # Redirect or render a success message
+            flash('success', 'Theme customization successful!')
+            return redirect(url_for('dashboard',id=1))
+
+
+        return render_template('customtheme.html',form=form)
+"""
 # Custom error handler for app
 def bad_request(error):
     return (
@@ -581,3 +604,4 @@ def handle_all_other_errors(error):
             error_message="Sorry, there was an internal server error.",),
             500,
             )
+            """

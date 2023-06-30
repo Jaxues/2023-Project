@@ -80,19 +80,3 @@ class ThemeForm(FlaskForm):
     accent_color = StringField('Accent Color', widget=ColorInput(), validators=[DataRequired()])
     background_color = StringField('Background Color', widget=ColorInput(), validators=[DataRequired()])
     submit = SubmitField('Submit')
-
-    def validate(self):
-        if not super().validate():
-            return False
-
-        color_fields = [
-            self.primary_color.data.lower(),
-            self.secondary_color.data.lower(),
-            self.accent_color.data.lower(),
-            self.background_color.data.lower()
-        ]
-        if len(color_fields) != len(set(color_fields)):
-            self.primary_color.errors.append('Colors must be unique.')
-            return False
-
-        return True

@@ -58,7 +58,8 @@ class users(db.Model, UserMixin):  # define 'users' table and include UserMixin 
     # function that generates password hash when called
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
-
+    
+    theme = db.relationship('users_theme', backref='user', uselist=False)
     # establish many to many relationship with 'streak' table
     streak = db.relationship(
         "habits", secondary="streak", backref="user_streak", overlaps="habits,streak,user,user_streak", cascade="delete,all")
@@ -85,7 +86,7 @@ class streak(db.Model):  # define 'streak' table
     __table_args__ = (db.UniqueConstraint(
         'user_id', 'habit_id', 'date', name='_user_habit_date_uc'),)
 
-class user_theme(db.Model):
+class users_theme(db.Model):
     id=db.Column(db.Integer, primary_key=True)
     user_id=db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     primary=db.Column(db.String, nullable=False)

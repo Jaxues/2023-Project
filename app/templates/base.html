@@ -8,6 +8,20 @@
 </html>
 
 <link href="{{ url_for('static',filename='css/style.css')}}" rel="stylesheet">
+
+<!-- If user has cusotm theme set the color variables as thoose in table-->
+
+{{ if current_user.custom_theme }}
+<style>
+  :root{
+  --primary_color:{{current_user.theme.primary}};
+  --secondary_color:{{current_user.theme.secondary}};
+  --accent_color:{{current_user.theme.accent}};
+  --background_color:{{current_user.theme.background}};
+  }
+</style>
+{{ endif}}
+
 <!-- Code for creating navbar-->
 <nav class="hero">
   <ul></ul>
