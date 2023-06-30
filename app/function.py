@@ -3,9 +3,8 @@ from app import mail
 import pytz
 from flask_mail import Message
 from flask import url_for
-from itsdangerous import URLSafeSerializer
+from itsdangerous import URLSafeTimedSerializer
 # Get local date for location
-
 
 def get_local_date():
     # replace with your local timezone

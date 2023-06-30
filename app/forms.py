@@ -10,7 +10,6 @@ from wtforms import (
     HiddenField,
 )
 from wtforms.widgets import ColorInput
-from wtforms import ValidationError
 """
 Form for creating habits
 Takes paramters of name which is the anme of the habit
@@ -28,8 +27,8 @@ class HabitForm(FlaskForm):
 
 
 class LoginForm(FlaskForm):
-    username = StringField("username", validators=[DataRequired()])
-    password = PasswordField("password", validators=[DataRequired()])
+    username = StringField("username", validators=[DataRequired(), Length(6,24)])
+    password = PasswordField("password", validators=[DataRequired(), Length(12,64)])
     submit = SubmitField("submit")
 
 # Form for registering users

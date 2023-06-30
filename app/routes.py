@@ -1,5 +1,5 @@
 # Import neccesary models to get routes working
-from app import app, forms, db, login_manager
+from app import app, forms, db, login_manager, serializer
 from flask import render_template, url_for, redirect, flash, jsonify
 from app.models import habits, users, streak
 from app.forms import (HabitForm, StreakForm, LoginForm,
@@ -11,8 +11,8 @@ from sqlalchemy.exc import IntegrityError
 from app.function import get_local_date, check_consecutive, heatmap_data, heatmap_date_checker, habit_points, email_verification
 from better_profanity import profanity
 from math import ceil
-from itsdangerous import URLSafeSerializer
-
+from itsdangerous import SignatureExpired, BadSignature
+from datetime import datetime, timedelta
 @login_manager.user_loader
 # Define userloader to Users ID
 def load_user(user_id):
@@ -36,6 +36,13 @@ def login():
                     flash("success", "Login successful!")
                     return redirect(url_for("dashboard", id=1))
                 else:
+                    token_date=user.date_joined
+                    ellapsed_time=datetime.now()-token_date
+                    if ellapsed_time > timedelta(1):
+                        email_token=serializer.dumps(user.email)
+                        email_verification(user.email, email_token)
+                        flash('error','Email not verified. Another token was sent to email address')
+                        return redirect(url_for('register'))
                     flash("error", "Please verify your email before logging in.")
                     return redirect(url_for("login"))
             else:
@@ -87,16 +94,15 @@ def register():
         try:
             db.session.add(newuser)
             db.session.commit()
-             
-            email_verification(form.email.data)
-            flash('success','Email needs to be authenticated email was sent to {}'.format(form.email.data))
+            email=form.email.data
+            token=serializer.dumps(email)
+            email_verification(email,token)
+            flash('success','Email needs to be authenticated email was sent to {}'.format(email))
             return redirect(url_for("login"))
         
         except IntegrityError:
             db.session.rollback()
             flash("error", "User already exists")
-            token=URLSafeSerializer(form.email.data)
-            email_verification(form.email.data, token)
             return redirect(url_for('register'))
         """
         except:
@@ -114,18 +120,27 @@ def authentication(token):
     if form.validate_on_submit():
         authenticate_user=users.query.filter_by(username=form.username.data).first()
         if authenticate_user:
-            if authenticate_user.email_authentication:
-                flash('error','This user is already verified')
-                return redirect(url_for('login'))
-            if check_password_hash(authenticate_user.password_hash,form.password.data):
-                authenticate_user.email_authentication=True
-                db.session.commit()
-                login_user(authenticate_user)
-                flash('success','Email Verified')
-                return redirect(url_for('dashboard',id=1))
-            else:
-                flash('error', "Password doesn't match please try again")
-                return redirect(url_for('authentication',token=token))
+            try:
+                email_token=serializer.loads(token, max_age=3600)
+                if authenticate_user.email_authentication:
+                    flash('error','This user is already verified')
+                    return redirect(url_for('login'))
+                if check_password_hash(authenticate_user.password_hash,form.password.data):
+                    authenticate_user.email_authentication=True
+
+                    db.session.commit()
+                    login_user(authenticate_user)
+                    flash('success','Email Verified')
+                    return redirect(url_for('dashboard',id=1))
+                else:
+                    flash('error', "Password doesn't match please try again")
+                    return redirect(url_for('authentication',token=token))
+            except SignatureExpired:
+                flash('error','Token has expired')
+                return redirect(url_for('register'))
+            except BadSignature:
+                flash('error','Invalid email token.')
+                return redirect(url_for('register'))
         else:
                 flash('error', "user doesn't exist please register first")
                 return redirect(url_for('register'))
@@ -389,7 +404,8 @@ def faq():
         "What happens if I encounter an error or bug?": "If a red message occurs this may be a sign that you might need to check your input to see if there are any errors. This could be from entering a duplicate habit, the incorrect password, or a username that doesn't exist. Else users would be redirected to a error page where you can be taken back to the website afterwards. ",
         "What types of customisability do you current offer": "Currently Hadit offers the ability to change from Light to Dark mode in the user info page. As well there is a page for cats. ",
         "Do I need to be neurodivergent or have a psychological condition to use this app": "No, of course not. Hadit is primaryily devolped for this audience but in doing so it also tries to make itself more accessible to everyone.",
-        "What are some words censored in the profanity filter": " Due to using an external api I can't control what words are censored. This is not to supress peoples expression but as a precaution to stop offensive statements."
+        "What are some words censored in the profanity filter": " Due to using an external api I can't control what words are censored. This is not to supress peoples expression but as a precaution to stop offensive statements.",
+        "Why are there 'good' and 'bad habits' ?":"The reason for this distinction is between habit that we would like to build or try to do more of good habits. As well as bad behavior users wish to stop doing which are bad habits."
     }
     return render_template("faq.html", faqs=faqs)
 
@@ -469,7 +485,6 @@ def customize():
             print(form.primary_color.data, form.secondary_color.data, form.accent_color.data,form.background_color.data)
     return render_template('customtheme.html',form=form)
 
-"""
 # Custom error handler for app
 def bad_request(error):
     return (
@@ -566,4 +581,3 @@ def handle_all_other_errors(error):
             error_message="Sorry, there was an internal server error.",),
             500,
             )
-            """

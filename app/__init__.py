@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from os import environ
 from flask_login import LoginManager
 from flask_mail import Mail
-
+from itsdangerous import URLSafeTimedSerializer
 app = Flask(__name__)
 # Set up Database.
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///Hadit.db'
@@ -27,4 +27,7 @@ app.config['MAIL_PASSWORD'] = environ['MAIL_PASSWORD']
 app.config['MAIL_DEFAULT_SENDER'] = environ['MAIL_USERNAME']
 
 mail = Mail(app)
+serializer_key=environ['serializer_key']
+serializer=URLSafeTimedSerializer(serializer_key)
+
 from app import forms, models, routes
