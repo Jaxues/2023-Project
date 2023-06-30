@@ -1,7 +1,7 @@
 # Import neccesary models to get routes working
 from app import app, forms, db, login_manager, serializer
 from flask import render_template, url_for, redirect, flash, jsonify
-from app.models import habits, users, streak, users_theme
+from app.models import habits, users, streak, user_theme
 from app.forms import (HabitForm, StreakForm, LoginForm,
                        RegisterForm, UpdateForm, YesNo, ShopForm,
                        ThemeForm)
@@ -18,7 +18,8 @@ from datetime import datetime, timedelta
 def load_user(user_id):
     # Create function
     # Returns current users_id from 'users' table
-    return users.query.filter_by(id=user_id) 
+    return users.query.get(user_id)
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
@@ -494,10 +495,10 @@ def customize():
             print(primary_color, secondary_color, accent_color, background_color)
             theme_status=user_custom_theme.custom_theme
             if theme_status:
-                theme_to_delete=users_theme.query.filter_by(id=current_user.id).first()
+                theme_to_delete=user_theme.query.filter_by(id=current_user.id).first()
                 db.session.delete(theme_to_delete)
                 db.session.commit()
-            new_custom_theme=users_theme(user_id=current_user.id,primary=primary_color, secondary=secondary_color, accent=accent_color,background=background_color)
+            new_custom_theme=user_theme(user_id=current_user.id,primary=primary_color, secondary=secondary_color, accent=accent_color,background=background_color)
             db.session.add(new_custom_theme)
             user_custom_theme.custom_theme=True
             db.session.commit()

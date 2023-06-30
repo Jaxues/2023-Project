@@ -11,7 +11,7 @@
 
 <!-- If user has cusotm theme set the color variables as thoose in table-->
 
-{{ if current_user.custom_theme }}
+{% if current_user.custom_theme %}
 <style>
   :root{
   --primary_color:{{current_user.theme.primary}};
@@ -19,8 +19,9 @@
   --accent_color:{{current_user.theme.accent}};
   --background_color:{{current_user.theme.background}};
   }
+
 </style>
-{{ endif}}
+{% endif%}
 
 <!-- Code for creating navbar-->
 <nav class="hero">
