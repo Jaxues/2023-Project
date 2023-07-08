@@ -1,13 +1,14 @@
 from app import db
-from datetime import datetime, timedelta  # import datetime modules
+from datetime import datetime  # import datetime modules
 from flask_login import UserMixin  # import Usermixin class from flask_login
 # import Check_password_hash and generate_password_hash from werkzeug.security
 from werkzeug.security import check_password_hash, generate_password_hash
 from sqlalchemy_utils import EncryptedType
 from os import environ
+from sqlalchemy import event
+from app.function import add_achievements
 
 encryption_key = environ.get('encryption_key')
-
 
 class habits(db.Model):  # define 'habits' table
     __tablename__ = "habits"  # add 'habits' tablename
@@ -17,7 +18,6 @@ class habits(db.Model):  # define 'habits' table
     name = db.Column(EncryptedType(db.String(50), encryption_key))
     # create reason column for table
     reason = db.Column(EncryptedType(db.String(128), encryption_key))
-
     habit_type = db.Column(db.String(4))
     # create foreign key for user_id in user table
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
@@ -63,6 +63,7 @@ class users(db.Model, UserMixin):  # define 'users' table and include UserMixin 
     # establish many to many relationship with 'streak' table
     streak = db.relationship(
         "habits", secondary="streak", backref="user_streak", overlaps="habits,streak,user,user_streak", cascade="delete,all")
+    user_achievements_rel = db.relationship('user_achievements', backref='user')
 
 
 class streak(db.Model):  # define 'streak' table
@@ -93,3 +94,25 @@ class user_theme(db.Model):
     secondary=db.Column(db.String, nullable=False)
     accent=db.Column(db.String, nullable=False)
     background=db.Column(db.String, nullable=False)
+
+class achievements(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    rarity = db.Column(db.Integer)
+    category = db.Column(db.String)
+    description=db.Column(db.String)
+    requirements=db.Column(db.Integer)
+    achievements_rel = db.relationship('user_achievements', backref='achievements')
+
+class user_achievements(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    achievement_id = db.Column(db.Integer, db.ForeignKey('achievements.id'), nullable=False)
+    achievement = db.relationship('achievements', backref="user_achievements")
+
+# Define a function to add achievements after the database is created
+def add_achievements_after_create(target, connection, **kwargs):
+    add_achievements()
+
+# Listen for the 'after_create' event on the database
+event.listen(db, 'after_create', add_achievements_after_create)

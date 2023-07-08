@@ -36,10 +36,9 @@
             {% endfor %}
             {{form.submit(class_='submit')}}
         </form>
-
     </tr>
     <br>
-    <!-- Night theme swithcer linked to javascript-->
+        <!-- Night theme swithcer linked to javascript-->
     <label> Do you want to change theme?</label>
     <img src="/static/images/dark-mode-night-moon-svgrepo-com.svg" id="icon" class="theme-icon">
     <button onclick="window.location.href='{{ url_for('logout') }}'" class="submit">Logout</button>
