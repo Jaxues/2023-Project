@@ -1,7 +1,7 @@
 # Import neccesary models to get routes working
 from app import app, forms, db, login_manager, serializer
 from flask import render_template, url_for, redirect, flash, jsonify
-from app.models import habits, users, streak, user_theme
+from app.models import habits, users, streak, user_theme, achievements
 from app.forms import (HabitForm, StreakForm, LoginForm,
                        RegisterForm, UpdateForm, YesNo, ShopForm,
                        ThemeForm)

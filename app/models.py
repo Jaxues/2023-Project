@@ -5,9 +5,6 @@ from flask_login import UserMixin  # import Usermixin class from flask_login
 from werkzeug.security import check_password_hash, generate_password_hash
 from sqlalchemy_utils import EncryptedType
 from os import environ
-from sqlalchemy import event
-from app.function import add_achievements
-
 encryption_key = environ.get('encryption_key')
 
 class habits(db.Model):  # define 'habits' table
@@ -110,9 +107,3 @@ class user_achievements(db.Model):
     achievement_id = db.Column(db.Integer, db.ForeignKey('achievements.id'), nullable=False)
     achievement = db.relationship('achievements', backref="user_achievements")
 
-# Define a function to add achievements after the database is created
-def add_achievements_after_create(target, connection, **kwargs):
-    add_achievements()
-
-# Listen for the 'after_create' event on the database
-event.listen(db, 'after_create', add_achievements_after_create)
