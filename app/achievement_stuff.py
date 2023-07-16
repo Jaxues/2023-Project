@@ -42,10 +42,10 @@ def add_achievements():
         {'name': 'Gold Habits', 'rarity': 3, 'category': 'Total Habits Completed',
         'description': 'Track 50 entries of habits',
         'requirements': 50},
-        {'name': 'Customize Theme', 'rarity': 1, 'category': 'Custom Theme',
+        {'name': 'Customize Theme', 'rarity': 4, 'category': 'Custom Theme',
         'description': 'Customize the theme',
         'requirements': 1},
-        {'name': 'Streak Freeze', 'rarity': 1, 'category': 'Streak Freeze',
+        {'name': 'Streak Freeze', 'rarity': 4, 'category': 'Streak Freeze',
         'description': 'Purchase a streak freeze item',
         'requirements': 1},
         {'name': 'Bronze Milestone', 'rarity': 1, 'category': 'Progression Milestones',
@@ -62,8 +62,8 @@ def add_achievements():
         'requirements': 1},
         {'name': 'Diamond Points', 'rarity': 4, 'category': 'Total Points Earned',
         'description': 'Accumulate a total of 10,000 points',
-        'requirements': 1*10^4},
-        {'name': 'Account Creation', 'rarity': 1, 'category': 'Account',
+        'requirements': 1e4},
+        {'name': 'Account Creation', 'rarity': 4, 'category': 'Account',
          'description': 'Create an account',
          'requirements': 1}
 

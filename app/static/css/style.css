@@ -391,3 +391,34 @@ img.theme-icon {
     border: solid 3px rgba(54, 162, 235, 1);
     background: var(--primary_color);
 }
+.achievement-class {
+    background-color: var(--primary_color);
+    color: var(--secondary_color);
+    padding: 20px;
+    margin: 10px;
+    border-radius: 10px;
+    width: calc(33.33% - 20px); /* Adjust the width based on the number of achievements per row */
+    box-sizing: border-box;
+    float: left;
+    clear: both;
+}
+
+.last-two {
+    background-color: var(--primary_color);
+    color: var(--secondary_color);
+    padding: 20px;
+    margin: 10px;
+    border-radius: 10px;
+    box-sizing: border-box;
+    float: left;
+    clear: both;
+    width: calc(50% - 20px); /* Adjust the width for the last two elements */
+}
+
+.achievement-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 0 20px; /* Add padding on the sides */
+}
+

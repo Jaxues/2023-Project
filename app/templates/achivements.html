@@ -1,7 +1,55 @@
 {% extends 'base.html' %}
-<title> Achievements</title>
-{% block content%}
-<div class="achievment">
-    <svg src="{{url_for('static', filename='images/award-svgrepo-com.svg')}}"></svg>
+<title>Achievements</title> 
+{% block content %}
+<style>
+    .common-color {
+        color: var(--common_color);
+    }
+    .uncommon-color {
+        color: var(--uncomon_color);
+    }
+    .rare-color {
+        color: var(--rare_color);
+    }
+    .rainbow-gradient {
+        color: var(--rainbow-gradient);
+    }
+</style>
+
+<div class="achievement-row">
+    {% for achievement in achievements %}
+    <div class="achievement-class">
+        {% if achievement.category == 'Streak Award' %}
+        <p class="rarity {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}">Streak</p>
+
+        {% elif achievement.category == 'Establish Good Habit' %}
+        <p class="rarity {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}">Type: Good Habit</p>
+
+        {% elif achievement.category == 'Break Bad Habit' %}
+        <p class="rarity {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}">Type: Bad Habit</p>
+
+        {% elif achievement.category == 'Total Habits Completed' %}
+        <p class="rarity {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}">Type: Total Habits</p>
+
+        {% elif achievement.category == 'Custom Theme' %}
+        <p class="rarity {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}">Type: Custom Theme</p>
+
+        {% elif achievement.category == 'Streak Freeze' %}
+        <p class="rarity {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}">Type: Streak freeze</p>
+
+        {% elif achievement.category == 'Progression Milestones' %}
+        <p class="rarity {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}">Type: Progression</p>
+
+        {% elif achievement.category == 'Total Points Earned' %}
+        <p class="rarity {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}">Type: Total Points</p>
+
+        {% else %}
+        <p class="rarity">Type: Account</p>
+
+        {% endif %}
+        <p>Description: {{ achievement.description }}</p>
+        <p>Requirements: {{ achievement.requirements }}</p>
+    </div>
+    {% endfor %}
 </div>
-{% endblock%}
+{% endblock %}

@@ -1,6 +1,6 @@
 # Import neccesary models to get routes working
 from app import app, forms, db, login_manager, serializer
-from flask import render_template, url_for, redirect, flash, jsonify
+from flask import render_template, url_for, redirect, flash
 from app.models import habits, users, streak, user_theme, achievements
 from app.forms import (HabitForm, StreakForm, LoginForm,
                        RegisterForm, UpdateForm, YesNo, ShopForm,
@@ -402,7 +402,7 @@ def faq():
         "Can I use this app on multiple devices?": "Yes, Hadit is a website created using Flask, HTML, CSS, and Javascript. And is capable of running on any modern webbrowser without any need for any special configuration. Just sign into your account and your informaton should sync from you account seamlessly. ",
         "Is my personal information secure on this app?": "Yes. Hadit hashes all the passwords from users as well as encrypting any text entered for the reason user input for habits. To try to ensure users privacy. for more information go to <a href=" + url_for('privacy')+"> privacy page </a> for more information",
         "What happens if I encounter an error or bug?": "If a red message occurs this may be a sign that you might need to check your input to see if there are any errors. This could be from entering a duplicate habit, the incorrect password, or a username that doesn't exist. Else users would be redirected to a error page where you can be taken back to the website afterwards. ",
-        "What types of customisability do you current offer": "Currently Hadit offers the ability to change from Light to Dark mode in the user info page. As well there is a page for cats. ",
+        "What types of customisability do you current offer": "Currently Hadit offers the ability to change from Light to Dark mode in the user info page. ",
         "Do I need to be neurodivergent or have a psychological condition to use this app": "No, of course not. Hadit is primaryily devolped for this audience but in doing so it also tries to make itself more accessible to everyone.",
         "What are some words censored in the profanity filter": " Due to using an external api I can't control what words are censored. This is not to supress peoples expression but as a precaution to stop offensive statements.",
         "Why are there 'good' and 'bad habits' ?":"The reason for this distinction is between habit that we would like to build or try to do more of good habits. As well as bad behavior users wish to stop doing which are bad habits."
@@ -424,14 +424,6 @@ def privacy():
     }
 
     return render_template('pp.html', privacy_policy=privacy_policy)
-
-# Page for pictures of cats
-
-
-@app.route('/cat')
-def catpage():
-    return render_template('cats.html')
-
 
 @app.route('/shop', methods=['get','post'])
 @login_required
@@ -466,11 +458,13 @@ def shop():
     return render_template('shop.html', form=form)
 
 
-@app.route('/achivement')
+@app.route('/achivements')
 @login_required
-def achievements():
-    return render_template('achivements.html')
-
+def user_achievement():
+    current_achievements=achievements.query.all()
+    print(current_achievements)
+    return render_template('achivements.html', achievements=current_achievements)
+# This is a comment
 @app.route('/theme', methods=['get','post'])
 @login_required
 def customize():
@@ -605,4 +599,4 @@ def handle_all_other_errors(error):
             error_message="Sorry, there was an internal server error.",),
             500,
             )
-            """
+"""
