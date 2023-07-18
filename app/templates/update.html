@@ -9,7 +9,9 @@
     <!-- Import wtforms fields-->
     <h1> Reason</h1>
     {{ form.csrf_token()}}
+    <!-- Store previous value of name in field-->
     {{ form.name(value=current_habit.name)}}
+    <!-- Store previous value for reason fie;d-->
     {{ form.reason(value=current_habit.reason) }}
     {{ form.submit(class_='submit')}}
 </form>

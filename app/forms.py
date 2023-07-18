@@ -74,6 +74,7 @@ class ShopForm(FlaskForm):
     theme_customization= SubmitField('Purchase Custom Theme')
     streak_freeze=SubmitField('Purchase Streak Freeze')
 
+# define form for user customization. widget allows user to interact by selecting color. 
 class ThemeForm(FlaskForm):
     primary_color = StringField('Primary Color', widget=ColorInput(), validators=[DataRequired()])
     secondary_color = StringField('Secondary Color', widget=ColorInput(), validators=[DataRequired()])

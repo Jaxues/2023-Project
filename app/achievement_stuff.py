@@ -1,10 +1,27 @@
 from app import db
 from app.models import achievements
+# Manual call function when creating database
 def add_achievements():
     # Check if achievements already exist in the database
     existing_achievements = achievements.query.all()
     if not existing_achievements:
         # Create and add achievements to the database
+
+        """
+        Rarity of 1 is common, 2 is uncommon, 3 is rare, and 4 is miscenalous
+        Requirements are numerical terms. 
+        For Purchase streak freeze, theme customization and account creation. True is stored as one. 
+        So checking this value works for reequirements
+
+        Progression is measured in percentage of achievements completed. 
+        0.25 is 25%, 0.75 is 75%, etc. 
+
+        All other values for requirements are the number of occurences needed. 
+        For streak, break bad habit, and maintain good habit theese are the number of days.. 
+
+        For habit completion this is the total occurence of all entries in the streaks table 
+        """
+
         achievement_data = [
         {'name': 'Bronze Streak', 'rarity': 1, 'category': 'Streak Award',
         'description': 'Maintain a streak of 7 consecutive days',
@@ -70,7 +87,7 @@ def add_achievements():
     ]
 
  
-
+        # If table is emtpy prepopulate with achievements.
         for data in achievement_data:
             achievement = achievements(**data)
             db.session.add(achievement)

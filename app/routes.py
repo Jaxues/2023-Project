@@ -255,6 +255,7 @@ def dashboard(id):
         streak.query.filter_by(user_id=current_user.id))
     print(preprocess_data)
     check_days = heatmap_date_checker(preprocess_data)
+    # convert data from database to suitable format for json
     print(check_days)
     frontend_heatmap_data = check_days
     if form.validate_on_submit():
@@ -464,10 +465,11 @@ def user_achievement():
     current_achievements=achievements.query.all()
     print(current_achievements)
     return render_template('achivements.html', achievements=current_achievements)
-# This is a comment
+
 @app.route('/theme', methods=['get','post'])
 @login_required
 def customize():
+    # Check user has required amount of points
     if current_user.user_points < 4000:
         flash('error','You need 4000 points to purchase theme customization you only have {} points'.format(current_user.user_points))
         return redirect(url_for('shop'))
@@ -489,9 +491,11 @@ def customize():
             print(primary_color, secondary_color, accent_color, background_color)
             theme_status=user_custom_theme.custom_theme
             if theme_status:
+                # If user already has purchase a custom theme. Delete old entry. So it can be replaced.
                 theme_to_delete=user_theme.query.filter_by(id=current_user.id).first()
                 db.session.delete(theme_to_delete)
                 db.session.commit()
+            # Pass user input values to theme to store user perfered choices
             new_custom_theme=user_theme(user_id=current_user.id,primary=primary_color, secondary=secondary_color, accent=accent_color,background=background_color)
             db.session.add(new_custom_theme)
             user_custom_theme.custom_theme=True

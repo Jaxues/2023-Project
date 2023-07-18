@@ -12,6 +12,7 @@
         <canvas id="myChart"></canvas>
     </div>
 </div>
+<!-- Code for setting up heatmap -->
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
 <script
     src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
@@ -202,8 +203,13 @@
 <div class="Habit">
     <h1>{{ Habit.name }}</h1>
     <p>Reason: {{ Habit.reason }}</p>
+
+    <!-- Show users most recent streak score-->
     <p>Recent Streak: {{ user_streak[Habit.id][0] }}</p>
+
+    <!-- Show users last day that they recorded there habit on--> 
     <p>Last recorded day: {{ user_streak[Habit.id][1] }}</p>
+   
     <form method="post" onsubmit="document.getElementById('{{ form.submit.id }}').disabled = true;">
         {{ form.csrf_token }}
         {{ form.hidden_id(value=Habit.id) }}
@@ -215,13 +221,19 @@
     </form>
 </div>
 {% endfor %}
+
+<!-- Allow user to go back one page-->
 <a href="{{ url_for('dashboard', id=id-1) }}" class="previous-page">← Previous page</a>
-<p>{{ id }}</p>
+
 <!-- Shows what page the user is on -->
+<p>{{ id }}</p>
+
+<!-- Allow user to go forward one page-->
 <a href="{{ url_for('dashboard', id=id+1) }}">Next page →</a>
 {% endif %}
 {% endif %}
 {% else %}
+<!-- If user doesn't have any habits displays message to tell them to add some-->
 <div class="habit">
     <p style="text-align: center;">No habits currently added. Go to <a href="{{ url_for('addhabit') }}">Add Habit
             page</a> to add one.</p>

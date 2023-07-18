@@ -1,6 +1,5 @@
 /* CSS Color Palette*/
 :root {
-
     --background_color: #ffff;
     --primary_color: #f5f5f5;
     --secondary_color: #1D1F1F;
@@ -11,7 +10,7 @@
     --common_color: #cd7f32;
     --uncomon_color: #c0c0c0;
     --rare_color: #ffd700;
-    --rainbow-gradient: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
+    --misc_color: #800080; 
 }
 
 [data-theme='dark'] {
@@ -25,8 +24,10 @@
     --common_color: #cd7f32;
     --uncomon_color: #c0c0c0;
     --rare_color: #ffd700;
-    --rainbow-gradient: linear-gradient(to right, #ff6666, #ff9933, #ffff66, #66ff66, #66ccff, #cc66ff, #ff66cc);
+    --misc_color: #008080; 
 }
+
+
 
 
 /* Styling for Habit Dashbaord*/

@@ -9,7 +9,6 @@ console.log('heatmapData:', heatmapData); // Log the value of heatmapData to the
 // Parse the JSON data as a JavaScript object
 var parsedData = JSON.parse(heatmapData);
 
-console.log('pasedData',parsedData)
 // Get Success Color for Heatmap
 var successColor = getComputedStyle(document.documentElement).getPropertyValue('--success-color');
 console.log('successColor',successColor)
@@ -64,3 +63,4 @@ canvas.addEventListener('mousemove', function (event) {
 canvas.addEventListener('mouseout', function () {
   canvas.title = '';
 });
+console.log('pasedData',parsedData)

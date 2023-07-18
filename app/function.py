@@ -3,7 +3,6 @@ from app import mail, db
 import pytz
 from flask_mail import Message
 from flask import url_for
-from app.models import achievements
 
  # Get local date for location
 
@@ -56,10 +55,9 @@ def heatmap_date_checker(data):
     return days_done
 
 # Define scoring for habits
-
-
 def habit_points(user_streak, type_of_habit):
     total_points = 100
+    # Award different points for breaking bad habit. To encourage with incentives certain behaviour
     if type_of_habit == 'bad':
         if user_streak:
             if user_streak <= 14:
@@ -71,8 +69,11 @@ def habit_points(user_streak, type_of_habit):
             total_points += user_streak*15
     return total_points
 
+# function sends user a verification email
 def email_verification(user_email, token):
     msg= Message("Authentication link", recipients=[user_email])
-    msg.body=("This is your authentication link {}".format(url_for('authentication', token=token, _external=True)))
+    # send an email with the subject Authentication Link. Recipetient will be what user enters in email field
+    msg.body=("This is your authentication link {}. \n Remember to login in with your defined username and password from registration.".format(url_for('authentication', token=token, _external=True)))
+    # Includes link to verify account for user
     return mail.send(msg)
 

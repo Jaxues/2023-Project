@@ -10,7 +10,7 @@
 <link href="{{ url_for('static',filename='css/style.css')}}" rel="stylesheet">
 
 <!-- If user has cusotm theme set the color variables as thoose in table-->
-
+<!-- Sets color for theme from user perferences -->
 {% if current_user.custom_theme %}
 <style>
   :root{

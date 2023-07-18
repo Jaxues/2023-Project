@@ -84,6 +84,7 @@ class streak(db.Model):  # define 'streak' table
     __table_args__ = (db.UniqueConstraint(
         'user_id', 'habit_id', 'date', name='_user_habit_date_uc'),)
 
+# One to One relationship between users and user_theme. Allows user to change color to accodmate for customiziation with styling. 
 class user_theme(db.Model):
     id=db.Column(db.Integer, primary_key=True)
     user_id=db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
@@ -101,6 +102,7 @@ class achievements(db.Model):
     requirements=db.Column(db.Integer)
     achievements_rel = db.relationship('user_achievements', backref='achievements')
 
+# Define joining table between achievements and user table. Shows the number of achievements a user has completed
 class user_achievements(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)

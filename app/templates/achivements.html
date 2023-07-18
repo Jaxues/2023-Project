@@ -1,18 +1,25 @@
 {% extends 'base.html' %}
-<title>Achievements</title> 
+<title>Achievements</title>
 {% block content %}
 <style>
     .common-color {
-        color: var(--common_color);
+        --icon-fill-color: var(--common_color);
     }
     .uncommon-color {
-        color: var(--uncomon_color);
+        --icon-fill-color: var(--uncommon_color);
     }
     .rare-color {
-        color: var(--rare_color);
+        --icon-fill-color: var(--rare_color);
     }
     .rainbow-gradient {
-        color: var(--rainbow-gradient);
+        --icon-fill-color: var(--misc_color);
+    }
+    .achievement-icon {
+        width: 24px; /* Adjust the width as needed */
+        height: 24px; /* Adjust the height as needed */
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: 5px; /* Adjust the margin as needed */
     }
 </style>
 
@@ -20,35 +27,56 @@
     {% for achievement in achievements %}
     <div class="achievement-class">
         {% if achievement.category == 'Streak Award' %}
-        <p class="rarity {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}">Streak</p>
-
+        <svg class="achievement-icon {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}" viewBox="0 0 24 24">
+            <use xlink:href="{{ url_for('static', filename='images/Streak Award.svg') }}"></use>
+        </svg>
+        <p class="rarity">Streak</p>
         {% elif achievement.category == 'Establish Good Habit' %}
-        <p class="rarity {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}">Type: Good Habit</p>
+        <svg class="achievement-icon {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}" viewBox="0 0 24 24">
+            <use xlink:href="{{ url_for('static', filename='images/Good Habit Achievement.svg') }}"></use>
+        </svg>
+        <p class="rarity">Type: Good Habit</p>
 
         {% elif achievement.category == 'Break Bad Habit' %}
-        <p class="rarity {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}">Type: Bad Habit</p>
+        <svg class="achievement-icon {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}" viewBox="0 0 24 24">
+            <use xlink:href="{{ url_for('static', filename='images/Break Bad Habit Achievement.svg') }}"></use>
+        </svg>
+        <p class="rarity">Type: Bad Habit</p>
 
         {% elif achievement.category == 'Total Habits Completed' %}
-        <p class="rarity {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}">Type: Total Habits</p>
+        <svg class="achievement-icon {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}" viewBox="0 0 24 24">
+            <use xlink:href="{{ url_for('static', filename='images/Consistenacy Award.svg') }}"></use>
+        </svg>
+        <p class="rarity">Type: Total Habits</p>
 
         {% elif achievement.category == 'Custom Theme' %}
-        <p class="rarity {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}">Type: Custom Theme</p>
+        <svg class="achievement-icon {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}" viewBox="0 0 24 24">
+            <use xlink:href="{{ url_for('static', filename='images/Custom Theme Achievement.svg') }}"></use>
+        </svg>
+        <p class="rarity">Type: Custom Theme</p>
 
         {% elif achievement.category == 'Streak Freeze' %}
-        <p class="rarity {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}">Type: Streak freeze</p>
+        <svg class="achievement-icon {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}" viewBox="0 0 24 24">
+            <use xlink:href="{{ url_for('static', filename='images/Streak-Freeze-Icon.svg') }}"></use>
+        </svg>
+        <p class="rarity">Type: Streak freeze</p>
 
         {% elif achievement.category == 'Progression Milestones' %}
-        <p class="rarity {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}">Type: Progression</p>
+        <svg class="achievement-icon {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% endif %}">
+            <use xlink:href="{{ url_for('static', filename='images/award-svgrepo-com.svg') }}"></use>
+        </svg>
+        <p class="rarity">Type: Progression</p>
 
         {% elif achievement.category == 'Total Points Earned' %}
-        <p class="rarity {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}">Type: Total Points</p>
+        <svg class="achievement-icon">
+            <!-- Add the SVG code for Total Points Earned icon here -->
+        </svg>
+        <p class="rarity">Type: Total Points</p>
 
         {% else %}
         <p class="rarity">Type: Account</p>
-
         {% endif %}
         <p>Description: {{ achievement.description }}</p>
-        <p>Requirements: {{ achievement.requirements }}</p>
     </div>
     {% endfor %}
 </div>
