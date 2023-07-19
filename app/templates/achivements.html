@@ -1,78 +1,32 @@
 {% extends 'base.html' %}
 <title>Achievements</title>
 {% block content %}
-<style>
-    .common-color {
-        --icon-fill-color: var(--common_color);
-    }
-    .uncommon-color {
-        --icon-fill-color: var(--uncommon_color);
-    }
-    .rare-color {
-        --icon-fill-color: var(--rare_color);
-    }
-    .rainbow-gradient {
-        --icon-fill-color: var(--misc_color);
-    }
-    .achievement-icon {
-        width: 24px; /* Adjust the width as needed */
-        height: 24px; /* Adjust the height as needed */
-        display: inline-block;
-        vertical-align: middle;
-        margin-right: 5px; /* Adjust the margin as needed */
-    }
-</style>
-
 <div class="achievement-row">
     {% for achievement in achievements %}
     <div class="achievement-class">
         {% if achievement.category == 'Streak Award' %}
-        <svg class="achievement-icon {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}" viewBox="0 0 24 24">
-            <use xlink:href="{{ url_for('static', filename='images/Streak Award.svg') }}"></use>
-        </svg>
         <p class="rarity">Streak</p>
+        <img src="{{url_for('static',filename='images/Streak award.svg')}}" class="achievement-icon">
         {% elif achievement.category == 'Establish Good Habit' %}
-        <svg class="achievement-icon {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}" viewBox="0 0 24 24">
-            <use xlink:href="{{ url_for('static', filename='images/Good Habit Achievement.svg') }}"></use>
-        </svg>
+        <img src="{{url_for('static',filename='images/Good Habit Achievement.svg')}}" class="achievement-icon">    
         <p class="rarity">Type: Good Habit</p>
-
         {% elif achievement.category == 'Break Bad Habit' %}
-        <svg class="achievement-icon {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}" viewBox="0 0 24 24">
-            <use xlink:href="{{ url_for('static', filename='images/Break Bad Habit Achievement.svg') }}"></use>
-        </svg>
-        <p class="rarity">Type: Bad Habit</p>
-
+                <p class="rarity">Type: Bad Habit</p>
+                <img src="{{url_for('static',filename='images/Break Bad Habit Achievement.svg')}}" class="achievement-icon">    
         {% elif achievement.category == 'Total Habits Completed' %}
-        <svg class="achievement-icon {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}" viewBox="0 0 24 24">
-            <use xlink:href="{{ url_for('static', filename='images/Consistenacy Award.svg') }}"></use>
-        </svg>
-        <p class="rarity">Type: Total Habits</p>
-
+                <p class="rarity">Type: Total Habits</p>
+                <img src="{{url_for('static',filename='images/Consistenacy Award.svg')}}" class="achievement-icon">    
         {% elif achievement.category == 'Custom Theme' %}
-        <svg class="achievement-icon {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}" viewBox="0 0 24 24">
-            <use xlink:href="{{ url_for('static', filename='images/Custom Theme Achievement.svg') }}"></use>
-        </svg>
-        <p class="rarity">Type: Custom Theme</p>
-
+            <p class="rarity">Type: Custom Theme</p>
+            <img src="{{url_for('static',filename='images/Custom Theme Achievement.svg')}}" class="achievement-icon">    
         {% elif achievement.category == 'Streak Freeze' %}
-        <svg class="achievement-icon {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}" viewBox="0 0 24 24">
-            <use xlink:href="{{ url_for('static', filename='images/Streak-Freeze-Icon.svg') }}"></use>
-        </svg>
-        <p class="rarity">Type: Streak freeze</p>
-
+            <p class="rarity">Type: Streak freeze</p>
+            <img src="{{url_for('static',filename='images/Streak-Freeze-Icon.svg')}}" class="achievement-icon">    
         {% elif achievement.category == 'Progression Milestones' %}
-        <svg class="achievement-icon {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% endif %}">
-            <use xlink:href="{{ url_for('static', filename='images/award-svgrepo-com.svg') }}"></use>
-        </svg>
-        <p class="rarity">Type: Progression</p>
-
+            <p class="rarity">Type: Progression</p>
+            <img src="{{url_for('static',filename='images/award-svgrepo-com.svg')}}" class="achievement-icon">    
         {% elif achievement.category == 'Total Points Earned' %}
-        <svg class="achievement-icon">
-            <!-- Add the SVG code for Total Points Earned icon here -->
-        </svg>
-        <p class="rarity">Type: Total Points</p>
-
+            <p class="rarity">Type: Total Points</p>
         {% else %}
         <p class="rarity">Type: Account</p>
         {% endif %}

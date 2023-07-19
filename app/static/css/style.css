@@ -423,3 +423,22 @@ img.theme-icon {
     padding: 0 20px; /* Add padding on the sides */
 }
 
+.common-color {
+        --icon-fill-color: var(--common_color);
+    }
+.uncommon-color {
+        --icon-fill-color: var(--uncommon_color);
+    }
+.rare-color {
+        --icon-fill-color: var(--rare_color);
+    }
+.rainbow-gradient {
+        --icon-fill-color: var(--misc_color);
+    }
+.achievement-icon {
+        width: 250px; /* Adjust the width as needed */
+        height: 250px; /* Adjust the height as needed */
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: 5px; /* Adjust the margin as needed */
+    }

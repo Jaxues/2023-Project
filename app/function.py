@@ -3,9 +3,10 @@ from app import mail, db
 import pytz
 from flask_mail import Message
 from flask import url_for
+from flask import flash
+from app.models import user_achievements, achievements
 
  # Get local date for location
-
 def get_local_date():
     # replace with your local timezone
     local_tz = pytz.timezone('Pacific/Auckland')
@@ -77,3 +78,70 @@ def email_verification(user_email, token):
     # Includes link to verify account for user
     return mail.send(msg)
 
+def award_achievement(user_check):
+    achievement_list = []
+    achievements_total=achievements.query.all()
+    for achievement in achievements_total:
+        achievement_list.append({'id': achievement.id, 'requirements': achievement.requirements})
+    
+    for achievement in achievement_list:
+        # Code for checking achievements for streaks
+        if achievement['id'] < 4:
+            if achievement['requirements'] == user_check.longest_streak:
+                flash('success', 'You earned {} achievement for {}'.format(achievement['name'], achievement['description']))
+                if user_achievements.query.filter_by(id=achievement['id']).first():
+                    pass
+                else:
+                    new_user_achievement = user_achievements(achievement_id=achievement['id'], user_id=user_check.id)
+                    db.session.add(new_user_achievement)
+                    db.session.commit()
+        # Code for checking achievements for Good Habits
+        elif 3 < achievement['id'] < 7:
+           if achievement['requirements'] == user_check.good_habits_tracked:
+                flash('success', 'You earned {} achievement for {}'.format(achievement['name'], achievement['description']))
+                if user_achievements.query.filter_by(id=achievement['id']).first():
+                    pass
+                else:
+                    new_user_achievement = user_achievements(achievement_id=achievement['id'], user_id=user_check.id)
+                    db.session.add(new_user_achievement)
+                    db.session.commit()
+    # Code for checking achievements for Breaking Bad Habits
+        elif 6 < achievement['id'] < 10:
+            if achievement['requirements'] == user_check.bad_habits_tracked:
+                    flash('success', 'You earned {} achievement for {}'.format(achievement['name'], achievement['description']))
+                    if user_achievements.query.filter_by(id=achievement['id']).first():
+                        pass
+                    else:
+                        new_user_achievement = user_achievements(achievement_id=achievement['id'], user_id=user_check.id)
+                        db.session.add(new_user_achievement)
+                        db.session.commit()
+        # Code for checking achievements for Total Habits Completed 
+        elif 10 < achievement['id'] < 13: 
+            if achievement['requirements'] == user_check.total_habits_complete:
+                            flash('success', 'You earned {} achievement for {}'.format(achievement['name'], achievement['description']))
+                            if user_achievements.query.filter_by(id=achievement['id']).first():
+                                pass
+                            else:
+                                new_user_achievement = user_achievements(achievement_id=achievement['id'], user_id=user_check.id)
+                                db.session.add(new_user_achievement)
+                                db.session.commit()
+        # Code for checking achievements for Completion habits 
+        elif 14 < achievement['id'] < 19:
+            if achievement['requirements'] == user_check.total_achievements:
+                flash('success', 'You earned {} achievement for {}'.format(achievement['name'], achievement['description']))
+                if user_achievements.query.filter_by(id=achievement['id']).first():
+                    pass
+                else:
+                    new_user_achievement = user_achievements(achievement_id=achievement['id'], user_id=user_check.id)
+                    db.session.add(new_user_achievement)
+                    db.session.commit()
+        # Code for checking achievements for getting point total 
+        elif achievement['id']==19:
+            if achievement['requirements'] == user_check.total_points:
+                flash('success', 'You earned {} achievement for {}'.format(achievement['name'], achievement['description']))
+                if user_achievements.query.filter_by(id=achievement['id']).first():
+                    pass
+                else:
+                    new_user_achievement = user_achievements(achievement_id=achievement['id'], user_id=user_check.id)
+                    db.session.add(new_user_achievement)
+                    db.session.commit()

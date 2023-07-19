@@ -61,7 +61,14 @@ class users(db.Model, UserMixin):  # define 'users' table and include UserMixin 
     streak = db.relationship(
         "habits", secondary="streak", backref="user_streak", overlaps="habits,streak,user,user_streak", cascade="delete,all")
     user_achievements_rel = db.relationship('user_achievements', backref='user')
-
+    # Columns for achievements
+    longest_streak=db.Column(db.Integer, default=0)
+    bad_habits_tracked=db.Column(db.Integer, default=0)
+    good_habits_tracked=db.Column(db.Integer, default=0)
+    total_habits_tracked=db.Column(db.Integer, default=0)
+    total_achievements=db.Column(db.Integer, default=0)
+    total_points=db.Column(db.Integer, default=0)
+    
 
 class streak(db.Model):  # define 'streak' table
     __tablename__ = "streak"  # add 'streak' as tablename
