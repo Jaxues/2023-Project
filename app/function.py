@@ -88,7 +88,7 @@ def award_achievement(user_check):
         # Code for checking achievements for streaks
         if achievement['id'] < 4:
             if achievement['requirements'] == user_check.longest_streak:
-                flash('success', 'You earned {} achievement for {}'.format(achievement['name'], achievement['description']))
+                flash('success', 'You earned {} achievement for {}'.format(achievement.name, achievement.description))
                 if user_achievements.query.filter_by(id=achievement['id']).first():
                     pass
                 else:
@@ -98,7 +98,7 @@ def award_achievement(user_check):
         # Code for checking achievements for Good Habits
         elif 3 < achievement['id'] < 7:
            if achievement['requirements'] == user_check.good_habits_tracked:
-                flash('success', 'You earned {} achievement for {}'.format(achievement['name'], achievement['description']))
+                flash('success', 'You earned {} achievement for {}'.format(achievement.name, achievement.description))
                 if user_achievements.query.filter_by(id=achievement['id']).first():
                     pass
                 else:
@@ -108,7 +108,7 @@ def award_achievement(user_check):
     # Code for checking achievements for Breaking Bad Habits
         elif 6 < achievement['id'] < 10:
             if achievement['requirements'] == user_check.bad_habits_tracked:
-                    flash('success', 'You earned {} achievement for {}'.format(achievement['name'], achievement['description']))
+                    flash('success', 'You earned {} achievement for {}'.format(achievement.name, achievement.description))
                     if user_achievements.query.filter_by(id=achievement['id']).first():
                         pass
                     else:
@@ -118,7 +118,7 @@ def award_achievement(user_check):
         # Code for checking achievements for Total Habits Completed 
         elif 10 < achievement['id'] < 13: 
             if achievement['requirements'] == user_check.total_habits_complete:
-                            flash('success', 'You earned {} achievement for {}'.format(achievement['name'], achievement['description']))
+                            flash('success', 'You earned {} achievement for {}'.format(achievement.name, achievement.description))
                             if user_achievements.query.filter_by(id=achievement['id']).first():
                                 pass
                             else:
@@ -128,7 +128,7 @@ def award_achievement(user_check):
         # Code for checking achievements for Completion habits 
         elif 14 < achievement['id'] < 19:
             if achievement['requirements'] == user_check.total_achievements:
-                flash('success', 'You earned {} achievement for {}'.format(achievement['name'], achievement['description']))
+                flash('success', 'You earned {} achievement for {}'.format(achievement.name, achievement.description))
                 if user_achievements.query.filter_by(id=achievement['id']).first():
                     pass
                 else:
@@ -138,10 +138,13 @@ def award_achievement(user_check):
         # Code for checking achievements for getting point total 
         elif achievement['id']==19:
             if achievement['requirements'] == user_check.total_points:
-                flash('success', 'You earned {} achievement for {}'.format(achievement['name'], achievement['description']))
+                flash('success', 'You earned {} achievement for {}'.format(achievement.name, achievement.description))
                 if user_achievements.query.filter_by(id=achievement['id']).first():
                     pass
                 else:
-                    new_user_achievement = user_achievements(achievement_id=achievement['id'], user_id=user_check.id)
-                    db.session.add(new_user_achievement)
-                    db.session.commit()
+                    print('Achievement not award this way.') 
+
+def email_reminders(user_email):
+    msg= Message('Habit Reminder',recipients={user_email})
+    msg.body=("Reminder to make sure to log on to hadit and track your habits today")
+    return mail.send(msg)
