@@ -1,7 +1,7 @@
 # Import neccesary models to get routes working
 from app import app, forms, db, login_manager, serializer
 from flask import render_template, url_for, redirect, flash
-from app.models import habits, users, streak, user_theme, achievements
+from app.models import habits, users, streak, user_theme, achievements, user_achievements
 from app.forms import (HabitForm, StreakForm, LoginForm,
                        RegisterForm, UpdateForm, YesNo, ShopForm,
                        ThemeForm)
@@ -127,10 +127,11 @@ def authentication(token):
                     return redirect(url_for('login'))
                 if check_password_hash(authenticate_user.password_hash,form.password.data):
                     authenticate_user.email_authentication=True
-
+                    user_authenticated_achievement=user_achievement(achievement_id=20, user_id=current_user.id)
+                    db.session.add(user_authenticated_achievement)
                     db.session.commit()
                     login_user(authenticate_user)
-                    flash('success','Email Verified')
+                    flash('success','Email Verified.')
                     return redirect(url_for('dashboard',id=1))
                 else:
                     flash('error', "Password doesn't match please try again")
@@ -280,7 +281,7 @@ def dashboard(id):
             ).order_by(streak.date.desc()).first()
             # See if the previous entry was day before
             if check_date:
-                streak_score = check_consecutive(check_date)
+                streak_score = check_consecutive(check_date=check_date,user=current_user)
                 new_entry = streak(user_id=current_user.id,
                                    habit_id=habit_id, date=current_date, is_consecutive=streak_score)
             # If dates aren't consecutive assign streak of 1 for first day of recording habit
@@ -295,10 +296,10 @@ def dashboard(id):
                 # Give users points based off if they have streak already
                 print(user_habit.habit_type)
                 add_points = habit_points(
-                    user_streak.is_consecutive, user_habit.habit_type)
+                    user_streak.is_consecutive, user_habit.habit_type,user=current_user)
             else:
                 # Assign points with no streak entries.
-                add_points = habit_points(0, user_habit.habit_type)
+                add_points = habit_points(0, user_habit.habit_type, user=current_user)
             current_user.user_points = current_user.user_points + add_points
             db.session.commit()
             db.session.add(new_entry)
@@ -373,6 +374,8 @@ def info():
     # See if user has logged in
     if current_user.is_authenticated:
         form = YesNo()
+        total_user_achievements=user_achievements.query.all()
+        achievement_percentage=int(len(total_user_achievements))/20*100
         if form.validate_on_submit():
             email_perference = form.options.data
             print(email_perference)
@@ -384,7 +387,7 @@ def info():
                 db.session.commit()
             flash('success','Email perferences successfully updated')
             return redirect(url_for('info'))
-        return render_template("info.html", form=form)
+        return render_template("info.html", form=form, achievement_percentage=achievement_percentage)
     else:
         flash("You haven't logged on you can't access this page")
         return redirect(url_for("login"))
@@ -462,9 +465,16 @@ def shop():
 @app.route('/achivements')
 @login_required
 def user_achievement():
-    current_achievements=achievements.query.all()
-    print(current_achievements)
-    return render_template('achivements.html', achievements=current_achievements)
+    total_achievements=[]
+    current_achievements=user_achievements.query.all()
+    if current_achievements:
+        for user_completed in current_achievements:
+            achievement=achievements.query.filter_by(id=user_completed.achievement_id).first()
+            total_achievements.append(achievement)
+    else:
+        flash("error","no achievements created")
+
+    return render_template('achivements.html', achievements=total_achievements)
 
 @app.route('/theme', methods=['get','post'])
 @login_required

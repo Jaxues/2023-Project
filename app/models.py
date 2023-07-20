@@ -48,7 +48,6 @@ class users(db.Model, UserMixin):  # define 'users' table and include UserMixin 
     custom_theme=db.Column(db.Boolean, default=False)
     def get_id(self):  # function that returns own id
         return self.id
-
     def set_password(self, password):  # function that generates password hash when called
         self.password_hash = generate_password_hash(password)
 

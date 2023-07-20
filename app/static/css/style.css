@@ -234,6 +234,12 @@ p {
     border-radius: 30px;
     margin-left: 20%;
     margin-right: 20%;
+
+    /* New styles */
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center horizontally */
 }
 
 .button {
@@ -442,3 +448,29 @@ img.theme-icon {
         vertical-align: middle;
         margin-right: 5px; /* Adjust the margin as needed */
     }
+
+.progress-bar-container {
+    width: 300px;
+    height: 20px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+
+    /* Center horizontally inside the .userinfo div */
+    align-self: center;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: var(--success_color);
+    background-image: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.2) 25%,
+        transparent 25%,
+        transparent 50%,
+        var(--success_color) 50%,
+        var(--success_color) 75%,
+        transparent 75%,
+        transparent
+    );
+    background-size: 20px 20px;
+}

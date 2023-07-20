@@ -4,7 +4,7 @@ import pytz
 from flask_mail import Message
 from flask import url_for
 from flask import flash
-from app.models import user_achievements, achievements
+from app.models import user_achievements, achievements, users
 
  # Get local date for location
 def get_local_date():
@@ -15,14 +15,21 @@ def get_local_date():
 # Streak to see if two habits are consecutive in days
 
 
-def check_consecutive(steak_paramter):
+def check_consecutive(steak_paramter,user):
     previous_date = steak_paramter.date
     date = get_local_date()
     streak_total = steak_paramter.is_consecutive
     # Gets the total score which is the number of uninterupted days of doing a day consecutive
     delta = date - previous_date
     if delta.days == 1:
-        return streak_total+1
+        streak_total=streak_total+1
+        if streak_total > user.longest_streak: 
+            user.longest_streak=streak_total
+            db.session.add()
+            db.session.commit()
+            return streak_total
+        else: 
+            return streak_total
     else:
         return 1
 
@@ -56,16 +63,20 @@ def heatmap_date_checker(data):
     return days_done
 
 # Define scoring for habits
-def habit_points(user_streak, type_of_habit):
+def habit_points(user_streak, type_of_habit,user):
     total_points = 100
+    user.total_habits_tracked= user.total_habits_tracked +1 
+    db.session.commit()
     # Award different points for breaking bad habit. To encourage with incentives certain behaviour
     if type_of_habit == 'bad':
+        user.bad_habits_tracked= user.bad_habits_tracked + 1 
         if user_streak:
             if user_streak <= 14:
                 total_points += user_streak*20
             else:
-                total_points += user_streak*10+140
+                total_points += user_streak*10+14*20
     elif type_of_habit == 'good':
+        user.good_habits_tracked = user.good_habits_tracked + 1 
         if user_streak:
             total_points += user_streak*15
     return total_points
@@ -117,7 +128,7 @@ def award_achievement(user_check):
                         db.session.commit()
         # Code for checking achievements for Total Habits Completed 
         elif 10 < achievement['id'] < 13: 
-            if achievement['requirements'] == user_check.total_habits_complete:
+            if achievement['requirements'] == user_check.total_habits_tracked:
                             flash('success', 'You earned {} achievement for {}'.format(achievement.name, achievement.description))
                             if user_achievements.query.filter_by(id=achievement['id']).first():
                                 pass
@@ -148,3 +159,6 @@ def email_reminders(user_email):
     msg= Message('Habit Reminder',recipients={user_email})
     msg.body=("Reminder to make sure to log on to hadit and track your habits today")
     return mail.send(msg)
+
+def streak_freezer(user_info):
+    pass
