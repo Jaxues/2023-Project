@@ -5,14 +5,14 @@
     {% for achievement in achievements %}
     <div class="achievement-class">
         {% if achievement.category == 'Streak Award' %}
-        <p class="rarity">Streak</p>
+        <p class="rarity {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}">Streak</p> 
         <img src="{{url_for('static',filename='images/Streak award.svg')}}" class="achievement-icon">
         {% elif achievement.category == 'Establish Good Habit' %}
+        <p class="rarity {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}">Type: Good Habit</p> 
         <img src="{{url_for('static',filename='images/Good Habit Achievement.svg')}}" class="achievement-icon">    
-        <p class="rarity">Type: Good Habit</p>
         {% elif achievement.category == 'Break Bad Habit' %}
-                <p class="rarity">Type: Bad Habit</p>
-                <img src="{{url_for('static',filename='images/Break Bad Habit Achievement.svg')}}" class="achievement-icon">    
+               <p class="rarity {% if achievement.rarity == 1 %}common-color{% elif achievement.rarity == 2 %}uncommon-color{% elif achievement.rarity == 3 %}rare-color{% else %}rainbow-gradient{% endif %}">Type: Bad Habit</p> 
+        <img src="{{url_for('static',filename='images/Break Bad Habit Achievement.svg')}}" class="achievement-icon">    
         {% elif achievement.category == 'Total Habits Completed' %}
                 <p class="rarity">Type: Total Habits</p>
                 <img src="{{url_for('static',filename='images/Consistenacy Award.svg')}}" class="achievement-icon">    

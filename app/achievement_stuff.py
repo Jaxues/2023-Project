@@ -1,9 +1,9 @@
 from app import db
-from app.models import achievements
+from app.models import Achievements
 # Manual call function when creating database
 def add_achievements():
     # Check if achievements already exist in the database
-    existing_achievements = achievements.query.all()
+    existing_achievements = Achievements.query.all()
     if not existing_achievements:
         # Create and add achievements to the database
 

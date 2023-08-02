@@ -12,7 +12,7 @@
         <canvas id="myChart"></canvas>
     </div>
 </div>
-<!-- Code for setting up heatmap -->
+<div id="heatmap-data" style="display: none;">{{ frontend_heatmap_data }}</div>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
 <script
     src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
@@ -153,7 +153,149 @@
     const chartVersion = document.getElementById('chartVersion');
     chartVersion.innerText = Chart.version;
 </script>
+<!-- Code for setting up heatmap -->
+<!--
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.1/dist/chartjs-chart-matrix.min.js"></script>
+<script>
+// Store the parsedData as a global variable
+var parsedData = JSON.parse(document.getElementById('heatmap-data').textContent);
 
+// date settings
+function isoDayOfWeek(dt) {
+    let wd = dt.getDay(); // Get days of the week starting from Sunday to Friday
+    wd = (wd + 6) % 7 + 1; // Start the week on Monday and end on Sunday
+    return '' + wd; // String of weekdays to be parsed
+}
+
+// setup calendar for 365 squares for days and include user data for habit entries
+function generateData(heatmapData) {
+    const d = new Date();
+    const today = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+    const data2 = [];
+    const end = today;
+    let dt = new Date(new Date().setDate(end.getDate() - 365));
+    while (dt <= end) {
+        const iso = dt.toISOString().substring(0, 10);
+        const userDataEntry = heatmapData.find((entry) => entry.date === iso);
+        const v = userDataEntry ? userDataEntry.value : 0; // Use user data if available, otherwise set value to 0
+        data2.push({
+            x: iso,
+            y: isoDayOfWeek(dt),
+            d: iso,
+            v: v,
+        });
+        dt = new Date(dt.setDate(dt.getDate() + 1));
+    }
+    console.log(data2);
+    return data2;
+}
+
+// setup block
+const data = {
+    datasets: [
+        {
+            label: 'Heat Map',
+            data: generateData(parsedData), // Use the global parsedData as user data
+            backgroundColor(c) {
+                const value = c.dataset.data[c.dataIndex].v;
+                const alpha = (10 + value) / 60;
+                return `rgba(0, 200, 0, ${alpha})`;
+            },
+            borderColor: 'green',
+            borderRadius: 1,
+            borderWidth: 1,
+            hoverBackgroundColor: 'rgba(255, 26, 104, 0.2)',
+            hoverBorderColor: 'rgba(255, 26, 104, 1)',
+            width(c) {
+                const a = c.chart.chartArea || {};
+                return (a.right - a.left) / 53 - 1;
+            },
+            height(c) {
+                const a = c.chart.chartArea || {};
+                return (a.bottom - a.top) / 7 - 1;
+            },
+        },
+    ],
+};
+
+// scales block
+const scales = {
+    y: {
+        type: 'time',
+        offset: true,
+        time: {
+            unit: 'day',
+            round: 'day',
+            isoWeek: 1,
+            parser: 'i',
+            displayFormats: {
+                day: 'iiiiii',
+            },
+        },
+        reverse: true,
+        position: 'right',
+        ticks: {
+            maxRotation: 0,
+            autoSkip: true,
+            padding: 1,
+            font: {
+                size: 9,
+            },
+            grid: {
+                display: false,
+            },
+        },
+    },
+    x: {
+        type: 'time',
+        position: 'bottom',
+        offset: true,
+        time: {
+            unit: 'week',
+            round: 'week',
+            isoWeekday: 1,
+            displayFormats: {
+                week: 'MMM dd',
+            },
+        },
+        ticks: {
+            maxRotation: 0,
+            autoSkip: true,
+            font: {
+                size: 9,
+            },
+        },
+        grid: {
+            display: false,
+            drawBorder: false,
+            tickLength: 0,
+        },
+    },
+};
+
+// config
+const config = {
+    type: 'matrix',
+    data,
+    options: {
+        maintainAspectRatio: false,
+        scales,
+        plugins: {
+            legend: {
+                display: false,
+                drawBorder: false,
+                tickLength: 0,
+            },
+        },
+    },
+};
+
+// render init block
+const myChart = new Chart(document.getElementById('myChart'), config);
+</script>
+--->
 {% for Habit in Habits.limit(habits_first_page) %}
 <div class="Habit">
     <h1>{{ Habit.name }}</h1>
@@ -207,7 +349,7 @@
     <!-- Show users most recent streak score-->
     <p>Recent Streak: {{ user_streak[Habit.id][0] }}</p>
 
-    <!-- Show users last day that they recorded there habit on--> 
+    <!-- Show users last day that they recorded their habit on--> 
     <p>Last recorded day: {{ user_streak[Habit.id][1] }}</p>
    
     <form method="post" onsubmit="document.getElementById('{{ form.submit.id }}').disabled = true;">
@@ -233,12 +375,10 @@
 {% endif %}
 {% endif %}
 {% else %}
-<!-- If user doesn't have any habits displays message to tell them to add some-->
+<!-- If user doesn't have any habits, display a message to tell them to add some-->
 <div class="habit">
     <p style="text-align: center;">No habits currently added. Go to <a href="{{ url_for('addhabit') }}">Add Habit
             page</a> to add one.</p>
 </div>
 {% endif %}
-<script src="{{ url_for('static', filename='js/heatmap.js') }}"></script>
-<script src="https://d3js.org/d3.v7.min.js"></script>
 {% endblock %}
