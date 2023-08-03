@@ -20,7 +20,7 @@ from werkzeug.security import check_password_hash
 from sqlalchemy.exc import IntegrityError
 from app.function import (
     get_local_date, check_consecutive, heatmap_data,
-    heatmap_date_checker, habit_points, email_verification
+    heatmap_date_checker, habit_points, email_verification,
 )
 from better_profanity import profanity
 from math import ceil
@@ -108,43 +108,43 @@ def register():
     
     return render_template("register.html", form=form)
 
-
-@app.route('/authenticate/<token>', methods=['GET', 'POST'])
+@app.route('/authenticate/<token>', methods=['get','post'])
 def authentication(token):
-    form = LoginForm()
+    form=LoginForm()
     if current_user.is_authenticated:
-        flash('error', 'You are already logged in.')
-        return redirect(url_for('dashboard', id=1))    
+        flash('error','You are already logged in.')
+        return redirect(url_for('dashboard',id=1))
     if form.validate_on_submit():
-        authenticate_user = Users.query.filter_by(username=form.username.data).first()
+        authenticate_user=Users.query.filter_by(username=form.username.data).first()
         if authenticate_user:
             try:
-                email_token = serializer.loads(token, max_age=3600)
+                email_token=serializer.loads(token, max_age=3600)
                 if authenticate_user.email_authentication:
-                    flash('error', 'This user is already verified')
+                    flash('error','This user is already verified')
                     return redirect(url_for('login'))
-                if check_password_hash(authenticate_user.password_hash, form.password.data):
-                    authenticate_user.email_authentication = True
-                    user_authenticated_achievement = user_achievement(achievement_id=20, user_id=current_user.id)
-                    db.session.add(user_authenticated_achievement)
+                if check_password_hash(authenticate_user.password_hash,form.password.data):
+                    authenticate_user.email_authentication=True
+                    db.session.commit()
+                    authenticated_achievement=UserAchievements(user_id=authenticate_user.id, achievement_id=20)
+                    db.session.add(authenticated_achievement)
                     db.session.commit()
                     login_user(authenticate_user)
-                    flash('success', 'Email Verified.')
-                    return redirect(url_for('dashboard', id=1))
+                    flash('success','Email Verified.')
+                    return redirect(url_for('dashboard',id=1))
                 else:
-                    flash("error", "Password doesn't match, please try again")
-                    return redirect(url_for('authentication', token=token))
+                    flash('error', "Password doesn't match please try again")
+                    return redirect(url_for('authentication',token=token))
             except SignatureExpired:
-                flash('error', 'Token has expired')
+                flash('error','Token has expired')
                 return redirect(url_for('register'))
             except BadSignature:
-                flash('error', 'Invalid email token.')
+                flash('error','Invalid email token.')
                 return redirect(url_for('register'))
         else:
-            flash("error", "User doesn't exist, please register first")
-            return redirect(url_for('register'))
+                flash('error', "user doesn't exist please register first")
+                return redirect(url_for('register'))
+    return render_template('authenticate.html',form=form, token=token)
 
-    return render_template('authenticate.html', form=form, token=token)
 
 @app.route("/")
 def index():
@@ -163,30 +163,26 @@ def addhabit():
     form = HabitForm()
     if form.validate_on_submit():
         # See if habit exists if it does then flash message to stop duplicates
-        checkhabit = Habits.query.filter_by(
-            user_id=current_user.id, name=form.name.data.title()
-        ).first()
+        checkhabit = Habits.query.filter_by(user_id=current_user.id, name=form.name.data.title()).first()
         print('Habit Added')
         if checkhabit:
             flash("error", "You already have this habit")
             return redirect(url_for("addhabit"))
         else:
             # Check for profanity and stop it
-            profanity_check_habit = profanity.contains_profanity(
-                form.name.data)
-            profanity_check_reason = profanity.contains_profanity(
-                form.reason.data)
+            profanity_check_habit = profanity.contains_profanity(form.name.data)
+            profanity_check_reason = profanity.contains_profanity(form.reason.data)
             profanitY_check_habit_censor = profanity.censor(form.name.data)
             profanity_check_reason_censor = profanity.censor(form.reason.data)
-            for test_charatcer in profanity_check_reason_censor:
-                if test_charatcer == '*':
+            for test_character in profanity_check_reason_censor:
+                if test_character == '*':
                     flash(
-                        'error', 'This has profanity. That or you have entered an asteriks. Either is not allowed')
+                        'error', 'This has profanity. That or you have entered an asterisk. Either is not allowed')
                     return redirect(url_for('addhabit'))
             for test_reason in profanitY_check_habit_censor:
                 # Loop to go through all words that users enter even if they space words out will censor it.
                 if test_reason == '*':
-                    flash('error', 'This contains an asteriks. Either this was censored by the filter or you have entered an astericks. Either way please remove this')
+                    flash('error', 'This contains an asterisk. Either this was censored by the filter or you have entered an asterisk. Either way please remove this')
                     return redirect(url_for('addhabit'))
             if profanity_check_habit or profanity_check_reason:
                 flash('error', 'This contains profanity please remove this.')
@@ -201,16 +197,10 @@ def addhabit():
                 db.session.add(NewHabit)
                 db.session.commit()
                 flash("success", "Habit added successfully!")
-                # Return first page of dashbord page. Dashboard indexed so first page only has 3 habits on it.
+                # Return first page of dashboard page. Dashboard indexed so the first page only has 3 habits on it.
                 return redirect(url_for("dashboard", id=1))
     return render_template("addHabit.html", form=form)
 
-
-"""
-Define a route where users can have multuiple pages of habits.
-The first page will have an id of 1 and will have 3 habits. It will also display a heatmap for all habits from the user. 
-All other pages will have 5 habits per page. 
-"""
 
 @app.route("/dashboard/<int:id>", methods=['GET', 'POST'])
 @login_required
@@ -229,17 +219,14 @@ def dashboard(id):
         return redirect(url_for('dashboard', id=total_pages))
 
     for Habit in habits:
-        Habit_streak = Streak.query.filter_by(
-            habit_id=Habit.id).order_by(Streak.date.desc())
+        Habit_streak = Streak.query.filter_by(habit_id=Habit.id).order_by(Streak.date.desc())
         if Habit_streak.first():
-            user_streaks[Habit.id] = [
-                Habit_streak.first().is_consecutive, Habit_streak.first().date]
+            user_streaks[Habit.id] = [Habit_streak.first().is_consecutive, Habit_streak.first().date]
         else:
             user_streaks[Habit.id] = [0, 'No date recorded']
 
     form = StreakForm()
-    preprocess_data = heatmap_data(
-        Streak.query.filter_by(user_id=current_user.id))
+    preprocess_data = heatmap_data(Streak.query.filter_by(user_id=current_user.id))
     check_days = heatmap_date_checker(preprocess_data)
     # convert data from the database to a suitable format for JSON
     print(check_days)
@@ -253,9 +240,8 @@ def dashboard(id):
             return redirect(url_for('delete', id=habit_id))
         else:
             current_date = get_local_date()
-            check_entry = Streak.query.filter_by(
-                user_id=current_user.id, habit_id=habit_id, date=current_date).first()
-            # Query streak database, so can't have multiple of the same entry
+            check_entry = Streak.query.filter_by(user_id=current_user.id, habit_id=habit_id, date=current_date).first()
+            # Query the streak database, so can't have multiple of the same entry
             if check_entry:
                 flash("error", "You have already recorded your habit for today.")
                 return redirect(url_for('dashboard', id=1))
@@ -268,7 +254,7 @@ def dashboard(id):
             # See if the previous entry was the day before
             if check_date:
                 filtered_type_of_habit = Habits.query.filter_by(id=form.hidden_id.data).first()
-                streak_score = check_consecutive(steak_paramter=check_date, user=current_user)
+                streak_score = check_consecutive(streak_parameter=check_date, user=current_user)
                 new_entry = Streak(user_id=current_user.id,
                                    habit_id=habit_id, date=current_date, is_consecutive=streak_score)
             # If dates aren't consecutive, assign a streak of 1 for the first day of recording the habit
@@ -278,14 +264,12 @@ def dashboard(id):
 
             user_streak = Streak.query.filter_by(id=current_user.id, habit_id=habit_id).order_by(
                 Streak.date.desc()).first()
-            user_habit = Habits.query.filter_by(
-                id=habit_id, user_id=current_user.id).first()
+            user_habit = Habits.query.filter_by(id=habit_id, user_id=current_user.id).first()
 
             if user_streak:
                 # Give users points based on whether they have a streak already
                 print(user_habit.habit_type)
-                add_points = habit_points(
-                    user_streak.is_consecutive, user_habit.habit_type, user=current_user)
+                add_points = habit_points(user_streak.is_consecutive, user_habit.habit_type, user=current_user)
             else:
                 # Assign points with no streak entries
                 add_points = habit_points(0, user_habit.habit_type, user=current_user)
@@ -359,6 +343,7 @@ def update(id):
         return redirect(url_for('dashboard', id=1))
     return render_template('Update.html', form=form, current_habit=current_habit)
 
+
 @app.route("/info", methods=['get','post'])
 def info():
     # See if user has logged in
@@ -382,8 +367,6 @@ def info():
         flash("error","You haven't logged on you can't access this page")
         return redirect(url_for("login"))
 
-# Email perferences to subscribe user to email
-
 
 @app.route("/faq", methods=["GET"])
 def faq():
@@ -403,6 +386,7 @@ def faq():
     }
     return render_template("faq.html", faqs=faqs)
 
+
 @app.route("/privacy", methods=["GET", "POST"])
 def privacy():
     privacy_policy = {
@@ -417,6 +401,7 @@ def privacy():
     }
 
     return render_template('pp.html', privacy_policy=privacy_policy)
+
 
 @app.route('/shop', methods=['get','post'])
 @login_required
@@ -468,49 +453,58 @@ def user_achievement():
 
     return render_template('achivements.html', achievements=total_achievements)
 
-@app.route('/theme', methods=['get','post'])
+@app.route('/theme', methods=['GET', 'POST'])
 @login_required
 def customize():
-    # Check user has required amount of points
+    """
+    Customizes the theme for the user.
+
+    Returns:
+        If successful, redirects to the dashboard page.
+        If there are errors, renders the customtheme.html template with the form.
+    """
+    # Check if the user has the required amount of points
     if current_user.user_points < 4000:
-        flash('error','You need 4000 points to purchase theme customization you only have {} points'.format(current_user.user_points))
+        flash('error', 'You need 4000 points to purchase theme customization. You only have {} points'.format(current_user.user_points))
         return redirect(url_for('shop'))
-    else:
-        form=ThemeForm()
-        if form.validate_on_submit():
-            user_custom_theme=Users.query.filter_by(id=current_user.id).first()
-            primary_color=form.primary_color.data
-            secondary_color=form.secondary_color.data
-            accent_color=form.accent_color.data
-            background_color=form.background_color.data
-            color_fields = [primary_color.lower(), secondary_color.lower(), accent_color.lower(), background_color.lower()]
-            if len(color_fields) != len(set(color_fields)):
-                flash('error', 'Colors must be unique.')
-                return redirect(url_for('customize'))
+    
+    form = ThemeForm()
+    if form.validate_on_submit():
+        user_custom_theme = Users.query.filter_by(id=current_user.id).first()
+        primary_color = form.primary_color.data
+        secondary_color = form.secondary_color.data
+        accent_color = form.accent_color.data
+        background_color = form.background_color.data
+        color_fields = [primary_color.lower(), secondary_color.lower(), accent_color.lower(), background_color.lower()]
+        if len(color_fields) != len(set(color_fields)):
+            flash('error', 'Colors must be unique.')
+            return redirect(url_for('customize'))
 
-            # Process the submitted colors as needed
-            user_custom_theme.user_points -= 4000
-            print(primary_color, secondary_color, accent_color, background_color)
-            theme_status=user_custom_theme.custom_theme
-            if theme_status:
-                # If user already has purchase a custom theme. Delete old entry. So it can be replaced.
-                theme_to_delete=UserTheme.query.filter_by(id=current_user.id).first()
-                db.session.delete(theme_to_delete)
-                db.session.commit()
-            # Pass user input values to theme to store user perfered choices
-            new_custom_theme=UserTheme(user_id=current_user.id,primary=primary_color, secondary=secondary_color, accent=accent_color,background=background_color)
-            db.session.add(new_custom_theme)
-            user_custom_theme.custom_theme=True
+        # Process the submitted colors as needed
+        user_custom_theme.user_points -= 4000
+        print(primary_color, secondary_color, accent_color, background_color)
+        theme_status = user_custom_theme.custom_theme
+        if theme_status:
+            # If the user already purchased a custom theme, delete the old entry to replace it.
+            theme_to_delete = UserTheme.query.filter_by(id=current_user.id).first()
+            db.session.delete(theme_to_delete)
             db.session.commit()
-            # Redirect or render a success message
-            flash('success', 'Theme customization successful!')
-            return redirect(url_for('dashboard',id=1))
+
+        # Pass user input values to store user's preferred choices in the theme
+        new_custom_theme = UserTheme(user_id=current_user.id, primary=primary_color, secondary=secondary_color, accent=accent_color, background=background_color)
+        db.session.add(new_custom_theme)
+        user_custom_theme.custom_theme = True
+        db.session.commit()
+
+        # Redirect or render a success message
+        flash('success', 'Theme customization successful!')
+        return redirect(url_for('dashboard', id=1))
+
+    return render_template('customtheme.html', form=form)
 
 
-        return render_template('customtheme.html',form=form)
-"""
 # Custom error handler for app
-def bad_request(error):
+def handle_bad_request(error):
     return (
         render_template(
             "error.html",
@@ -523,7 +517,7 @@ def bad_request(error):
 
 
 @app.errorhandler(401)
-def unauthorized(error):
+def handle_unauthorized(error):
     return (
         render_template(
             "error.html",
@@ -536,7 +530,7 @@ def unauthorized(error):
 
 
 @app.errorhandler(403)
-def forbidden(error):
+def handle_forbidden(error):
     return (
         render_template(
             "error.html",
@@ -549,7 +543,7 @@ def forbidden(error):
 
 
 @app.errorhandler(404)
-def page_not_found(error):
+def handle_page_not_found(error):
     return (
         render_template(
             "error.html",
@@ -562,7 +556,7 @@ def page_not_found(error):
 
 
 @app.errorhandler(405)
-def method_not_allowed(error):
+def handle_method_not_allowed(error):
     return (
         render_template(
             "error.html",
@@ -574,7 +568,7 @@ def method_not_allowed(error):
 
 
 @app.errorhandler(500)
-def internal_server_error(error):
+def handle_internal_server_error(error):
     db.session.rollback()
     return (
         render_template(
@@ -598,11 +592,12 @@ def handle_integrity_error(error):
 def handle_all_other_errors(error):
     db.session.rollback()
     flash("An error occurred")
-    return (render_template(
+    return (
+        render_template(
             "error.html",
             error_code=500,
             error_description="Internal Server Error",
-            error_message="Sorry, there was an internal server error.",),
-            500,
-            )
-"""
+            error_message="Sorry, there was an internal server error.",
+        ),
+        500,
+    )

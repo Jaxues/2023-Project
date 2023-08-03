@@ -89,7 +89,6 @@ def add_achievements():
  
         # If table is emtpy prepopulate with achievements.
         for data in achievement_data:
-            achievement = achievements(**data)
             db.session.add(achievement)
         
         db.session.commit()
