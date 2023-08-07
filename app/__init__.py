@@ -35,5 +35,5 @@ mail = Mail(app)
 serializer_key = environ['serializer_key']
 serializer = URLSafeTimedSerializer(serializer_key)
 
-# Import forms, models, and routes
+# Import all app modules for app creation
 from app import forms, models, routes, achievement_stuff

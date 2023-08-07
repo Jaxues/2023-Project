@@ -3,7 +3,7 @@ from app import (
     app, db, login_manager, serializer
 )
 from flask import (
-    render_template, url_for, redirect, flash
+    render_template, url_for, redirect, flash, jsonify
 )
 from app.models import (
     Habits, Users, Streak, UserTheme, Achievements, UserAchievements
@@ -218,18 +218,17 @@ def dashboard(id):
     if id > total_pages:
         return redirect(url_for('dashboard', id=total_pages))
 
-    for Habit in habits:
-        Habit_streak = Streak.query.filter_by(habit_id=Habit.id).order_by(Streak.date.desc())
+    for habit in habits:
+        Habit_streak = Streak.query.filter_by(habit_id=habit.id).order_by(Streak.date.desc())
         if Habit_streak.first():
-            user_streaks[Habit.id] = [Habit_streak.first().is_consecutive, Habit_streak.first().date]
+            user_streaks[habit.id] = [Habit_streak.first().is_consecutive, Habit_streak.first().date]
         else:
-            user_streaks[Habit.id] = [0, 'No date recorded']
+            user_streaks[habit.id] = [0, 'No date recorded']
 
     form = StreakForm()
     preprocess_data = heatmap_data(Streak.query.filter_by(user_id=current_user.id))
     check_days = heatmap_date_checker(preprocess_data)
     # convert data from the database to a suitable format for JSON
-    print(check_days)
     frontend_heatmap_data = check_days
 
     if form.validate_on_submit():
@@ -257,6 +256,21 @@ def dashboard(id):
                 streak_score = check_consecutive(streak_parameter=check_date, user=current_user)
                 new_entry = Streak(user_id=current_user.id,
                                    habit_id=habit_id, date=current_date, is_consecutive=streak_score)
+                if streak_score == 7 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=1).first() is None:
+                    bronzestreakachievement=UserAchievements(user_id=current_user.id, achievement_id=1)
+                    db.session.add(bronzestreakachievement)
+                    db.session.commit()
+                if streak_score == 14 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=1).first() is None:
+                    bronzestreakachievement=UserAchievements(user_id=current_user.id, achievement_id=1)
+                    db.session.add(bronzestreakachievement)
+                    db.session.commit()
+                if streak_score == 30 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=1).first() is None:
+                    bronzestreakachievement=UserAchievements(user_id=current_user.id, achievement_id=1)
+                    db.session.add(bronzestreakachievement)
+                    db.session.commit()
+
+
+
             # If dates aren't consecutive, assign a streak of 1 for the first day of recording the habit
             else:
                 new_entry = Streak(user_id=current_user.id,
@@ -275,6 +289,52 @@ def dashboard(id):
                 add_points = habit_points(0, user_habit.habit_type, user=current_user)
 
             current_user.user_points = current_user.user_points + add_points
+            if current_user.user_points== 10000 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=19).first() is None:
+                diamond_points=UserAchievements(user_id=current_user.id, achievement_id=19)
+                db.session.add(diamond_points)
+                db.session.commit()
+            type_habit=Habits.query.filter_by(id=form.hidden_id.data).first()
+            if type_habit.habit_type == 1:
+                current_user.good_habits_tracked += 1
+                if current_user.good_habits_tracked == 7 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=4).first() is None:
+                    bronzegoodhabit=UserAchievements(user_id=current_user.id, achievement_id=4)
+                    db.session.add(bronzegoodhabit)
+                    db.session.commit()
+                    achievement_info=Achievements.query.get(id=4)
+                    flash("achievement","You earned the {} achievement for {}".format(str(achievement_info.name).lower(), str(achievement_info.description).lower()))
+                if current_user.good_habits_tracked == 14 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=5).first() is None:
+                    silvergoodhabit=UserAchievements(user_id=current_user.id, achievement_id=5)
+                    db.session.add(silvergoodhabit)
+                    db.session.commit()
+                    achievement_info=Achievements.query.get(id=5)
+                    flash("achievement","You earned the {} achievement for {}".format(str(achievement_info.name).lower(), str(achievement_info.description).lower()))
+                if current_user.good_habits_tracked ==30 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=6).first() is None:
+                    goldgoodhabit=UserAchievements(user_id=current_user.id, achievement_id=6)
+                    db.session.add(goldgoodhabit)
+                    db.session.commit()
+                    achievement_info=Achievements.query.get(id=6)
+                    flash("achievement","You earned the {} achievement for {}".format(str(achievement_info.name).lower(), str(achievement_info.description).lower()))
+
+            else:
+                current_user.bad_habits_tracked +=1
+                if current_user.bad_habits_tracked == 7 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=7).first() is None:
+                    bronzebadhabit=UserAchievements(user_id=current_user.id, achievement_id=7)
+                    db.session.add(bronzebadhabit)
+                    db.session.commit()
+                    achievement_info=Achievements.query.get(id=7)
+                    flash("achievement","You earned the {} achievement for {}".format(str(achievement_info.name).lower(), str(achievement_info.description).lower()))
+                if current_user.bad_habits_tracked == 14 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=8).firt() is None:
+                    silverbadhabit=UserAchievements(user_id=current_user.id, achievement_id=8)
+                    db.session.add(silverbadhabit)
+                    db.session.commit()
+                    achievement_info=Achievements.query.get(id=8)
+                    flash("achievement","You earned the {} achievement for {}".format(str(achievement_info.name).lower(), str(achievement_info.description).lower()))
+                if current_user.bad_habits_tracked ==30 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=9).first() is None:
+                    goldbadhabit=UserAchievements(user_id=current_user.id, achievement_id=9)
+                    db.session.add(goldbadhabit)
+                    db.session.commit()
+                    achievement_info=Achievements.query.get(id=9)
+                    flash("achievement","You earned the {} achievement for {}".format(str(achievement_info.name).lower(), str(achievement_info.description).lower()))
             db.session.commit()
             db.session.add(new_entry)
             db.session.commit()
@@ -351,6 +411,22 @@ def info():
         form = YesNo()
         total_user_achievements=UserAchievements.query.all()
         achievement_percentage=int(len(total_user_achievements))/20*100
+        if achievement_percentage==0.25 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=15).first() is None:
+            bronze_progression=UserAchievements(user_id=current_user.id, achievement_id=15) 
+            db.session.add(bronze_progression)
+            db.session.commit()
+        if achievement_percentage==0.5 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=15).first() is None:
+            silver_progression=UserAchievements(user_id=current_user.id, achievement_id=16) 
+            db.session.add(silver_progression)
+            db.session.commit()
+        if achievement_percentage==0.75 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=15).first() is None:
+            gold_progression=UserAchievements(user_id=current_user.id, achievement_id=17) 
+            db.session.add(gold_progression)
+            db.session.commit()
+        if achievement_percentage==0.95 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=15).first() is None:
+            complete_progression=UserAchievements(user_id=current_user.id, achievement_id=18) 
+            db.session.add(complete_progression)
+            db.session.commit()
         if form.validate_on_submit():
             email_perference = form.options.data
             print(email_perference)
@@ -379,7 +455,7 @@ def faq():
         "Can I use this app on multiple devices?": "Yes, Hadit is a website created using Flask, HTML, CSS, and Javascript. And is capable of running on any modern web browser without any need for any special configuration. Just sign into your account, and your information should sync from your account seamlessly.",
         "Is my personal information secure on this app?": "Yes. Hadit hashes all the passwords from users as well as encrypting any text entered for the reason user input for habits. To try to ensure users' privacy. For more information, go to <a href=" + url_for('privacy')+"> privacy page </a> for more information.",
         "What happens if I encounter an error or bug?": "If a red message occurs, this may be a sign that you might need to check your input to see if there are any errors. This could be from entering a duplicate habit, the incorrect password, or a username that doesn't exist. Else users would be redirected to an error page where you can be taken back to the website afterwards.",
-        "What types of customizability do you currently offer": "Currently, Hadit offers the ability to change from Light to Dark mode on the user info page.",
+        "What types of customizability do you currently offer": "Currently, Hadit offers the ability to change from Light to Dark mode on the user info page. As well Hadit offer the ability to user to change to a custom theme by spending 4000 points on the <a href=" + url_for('shop')+"> shop page </a>. Note users need an account first",
         "Do I need to be neurodivergent or have a psychological condition to use this app": "No, of course not. Hadit is primarily developed for this audience but in doing so, it also tries to make itself more accessible to everyone.",
         "What are some words censored in the profanity filter": "Due to using an external API, I can't control what words are censored. This is not to suppress people's expression but as a precaution to stop offensive statements.",
         "Why are there 'good' and 'bad habits' ?": "The reason for this distinction is between habits that we would like to build or try to do more of (good habits) as well as bad behavior users wish to stop doing (bad habits)."
@@ -414,10 +490,15 @@ def shop():
                 flash('error','Streak freeze already purchased') 
                 return redirect(url_for('shop'))
             elif streak_freeze_user.user_points >= 500:
+                if streak_freeze_user.streak_freeze:
+                    flash("error","Streak freeze already active")
+                    return redirect(url_for('shop'))
                 streak_freeze_user.user_points = current_user.user_points - 500
                 streak_freeze_user.streak_freeze= True
-                user_check=Users.query.filter_by(id=current_user.id).first()
-                streak_freeze_achievement=user_achievement(id=current_user.id,)
+                if UserAchievements.query.filter_by(id=current_user.id, achievement_id=14).first() is None:
+                    streak_freeze_achievement=UserAchievements(user_id=current_user.id,achievement_id=14)
+                    db.session.add(streak_freeze_achievement)
+                    db.session.commit()
                 flash('success','Streak freeze purchased')
                 db.session.commit()
                 return redirect(url_for('shop'))
@@ -436,7 +517,6 @@ def shop():
                 return redirect(url_for('shop'))
 
     return render_template('shop.html', form=form)
-
 
 @app.route('/achivements')
 @login_required
@@ -489,6 +569,12 @@ def customize():
             theme_to_delete = UserTheme.query.filter_by(id=current_user.id).first()
             db.session.delete(theme_to_delete)
             db.session.commit()
+        
+        check_theme_achievement=UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=13).first()
+        if check_theme_achievement is None:
+            award_theme_achievement=UserAchievements(user_id=current_user.id, achievement_id=13)
+            db.session.add(award_theme_achievement)
+            flash('achievement','You earned the custom theme achievement')
 
         # Pass user input values to store user's preferred choices in the theme
         new_custom_theme = UserTheme(user_id=current_user.id, primary=primary_color, secondary=secondary_color, accent=accent_color, background=background_color)
@@ -501,7 +587,6 @@ def customize():
         return redirect(url_for('dashboard', id=1))
 
     return render_template('customtheme.html', form=form)
-
 
 # Custom error handler for app
 def handle_bad_request(error):

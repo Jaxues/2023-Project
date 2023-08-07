@@ -9,6 +9,9 @@ encryption_key = environ.get('encryption_key')
 
 
 class Habits(db.Model):
+    """
+    
+    """
     __tablename__ = "habits"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(EncryptedType(db.String(50), encryption_key))
@@ -22,6 +25,19 @@ class Habits(db.Model):
 
 
 class Users(db.Model, UserMixin):
+    """
+    Table for storing all information for users
+    Columns
+    id: Unique identifer for which user is which. Unique and is used as a foriegn key in other 
+    username: What the user logins in with. 
+    password_hash: hashed verion of what the users password
+    email: Where all notifactions as well as links will be sent to. 
+    email_notifactions: Whether or not a user wants notifactions
+    email_authenticated: Neccesary to protect users account so that no one can use anothers email
+    streak_freeze: Whether or not a user has a streak freeze powerup active. 
+    custom_theme: Whether or not a user has custom theme enabled within the website. 
+    """
+
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(EncryptedType(
@@ -49,7 +65,8 @@ class Users(db.Model, UserMixin):
     streak = db.relationship(
         "Habits", secondary="streak", backref="user_streak", overlaps="habits,streak,user,user_streak", cascade="delete,all")
     user_achievements_rel = db.relationship('UserAchievements', backref='user')
-
+    
+    #Code realting to tracker user progress towards achievements over time
     longest_streak = db.Column(db.Integer, default=0)
     bad_habits_tracked = db.Column(db.Integer, default=0)
     good_habits_tracked = db.Column(db.Integer, default=0)
@@ -59,6 +76,15 @@ class Users(db.Model, UserMixin):
 
 
 class Streak(db.Model):
+    """
+    Table for storing all data related to tracking the habits users have done on certain days
+    Columns
+    id
+    user_id
+    habit_id
+    date
+    is_consecutive
+    """
     __tablename__ = "streak"
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey(
@@ -75,6 +101,16 @@ class Streak(db.Model):
 
 
 class UserTheme(db.Model):
+    """
+    Table
+    Column
+    id
+    user_id
+    primary
+    secondary
+    accent
+    background
+    """
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     primary = db.Column(db.String, nullable=False)
@@ -84,6 +120,11 @@ class UserTheme(db.Model):
 
 
 class Achievements(db.Model):
+    """
+    Storing all information relating to achievements. 
+    Including the name description, rarity and category as well as requirements. 
+
+    """
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     rarity = db.Column(db.Integer)
@@ -94,6 +135,13 @@ class Achievements(db.Model):
 
 
 class UserAchievements(db.Model):
+    """
+    Table for storing data relating to achievments users have completed
+    Columns:
+    id: Unique identifier for the table. Need to order table. Primary Key
+    user_id: Identifier of which user has achieved something. To be specific how has accomplished a certain achievement
+    achievement_id: Which Achievement the user has accomplished. Theese are from the achievements table. 
+    """
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     achievement_id = db.Column(db.Integer, db.ForeignKey('achievements.id'), nullable=False)

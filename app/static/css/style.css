@@ -490,17 +490,17 @@ img.theme-icon {
 }
 
 .comon_color{
-    color:var(--common_color)
+    fill:var(--common_color)
 }
 
 .uncomon_color{
-    color:var(--uncommon_color)
+    fill:var(--uncommon_color)
 }
 
 .rare_color{
-    color:var(--rare_color)
+    fill:var(--rare_color)
 }
 
 .misc_color{
-    color:var(--misc_color)
+    fill:var(--misc_color)
 }
