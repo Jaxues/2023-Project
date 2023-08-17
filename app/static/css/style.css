@@ -172,6 +172,7 @@ textarea {
     color: var(--button_color);
     border-radius: 30px;
     text-align: center;
+    padding: 12px 30px;
 }
 
 /**/
@@ -503,4 +504,8 @@ img.theme-icon {
 
 .misc_color{
     fill:var(--misc_color)
+}
+
+.dash_links{
+    align-items: center;
 }

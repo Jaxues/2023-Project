@@ -61,6 +61,7 @@ class YesNo(FlaskForm):
     """
     options = RadioField(choices=[("y", "Yes"), ("n", "No")])
     submit = SubmitField("Submit")
+    theme_toggle= SubmitField("ThemeToggle")
 
 
 class StreakForm(FlaskForm):

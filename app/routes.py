@@ -411,33 +411,48 @@ def info():
         form = YesNo()
         total_user_achievements=UserAchievements.query.all()
         achievement_percentage=int(len(total_user_achievements))/20*100
-        if achievement_percentage==0.25 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=15).first() is None:
+        print(achievement_percentage)
+        if achievement_percentage >= 25.0 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=15).first() is None:
             bronze_progression=UserAchievements(user_id=current_user.id, achievement_id=15) 
             db.session.add(bronze_progression)
             db.session.commit()
-        if achievement_percentage==0.5 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=15).first() is None:
+        if achievement_percentage >=50.0 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=15).first() is None:
             silver_progression=UserAchievements(user_id=current_user.id, achievement_id=16) 
             db.session.add(silver_progression)
             db.session.commit()
-        if achievement_percentage==0.75 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=15).first() is None:
+        if achievement_percentage >=75.0 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=15).first() is None:
             gold_progression=UserAchievements(user_id=current_user.id, achievement_id=17) 
             db.session.add(gold_progression)
             db.session.commit()
-        if achievement_percentage==0.95 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=15).first() is None:
+        if achievement_percentage ==95.0 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=15).first() is None:
             complete_progression=UserAchievements(user_id=current_user.id, achievement_id=18) 
             db.session.add(complete_progression)
             db.session.commit()
         if form.validate_on_submit():
-            email_perference = form.options.data
-            print(email_perference)
-            if email_perference == 'y':
-                current_user.email_notifactions = True
-                db.session.commit()
-            elif email_perference == 'n':
-                current_user.email_notifactions = False 
-                db.session.commit()
-            flash('success','Email perferences successfully updated')
-            return redirect(url_for('info'))
+            if form.submit.data:
+                email_perference = form.options.data
+                print(email_perference)
+                if email_perference == 'y':
+                    current_user.email_notifactions = True
+                    db.session.commit()
+                elif email_perference == 'n':
+                    current_user.email_notifactions = False 
+                    db.session.commit()
+                flash('success','Email perferences successfully updated')
+                return redirect(url_for('info'))
+            elif form.theme_toggle.data:
+                theme_toggle_select=form.options.data
+                if theme_toggle_select == 'y':
+                    current_user.custom_theme= True
+                    db.session.commit()
+                    flash("success","Theme successfully enabled")
+                    return redirect(url_for('info'))
+                elif theme_toggle_select == 'n':
+                    current_user.custom_theme= False
+                    db.session.commit()
+                    flash("success"," Theme successfully disabled")
+                    return redirect(url_for('info'))
+                
         return render_template("info.html", form=form, achievement_percentage=achievement_percentage)
     else:
         flash("error","You haven't logged on you can't access this page")
@@ -587,7 +602,7 @@ def customize():
         return redirect(url_for('dashboard', id=1))
 
     return render_template('customtheme.html', form=form)
-
+"""
 # Custom error handler for app
 def handle_bad_request(error):
     return (
@@ -599,7 +614,7 @@ def handle_bad_request(error):
         ),
         400,
     )
-
+        
 
 @app.errorhandler(401)
 def handle_unauthorized(error):
@@ -686,3 +701,4 @@ def handle_all_other_errors(error):
         ),
         500,
     )
+"""

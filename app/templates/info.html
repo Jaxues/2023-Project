@@ -38,14 +38,24 @@
             <td>{{ option.label }}</td>
             {% endfor %}
             {{ form.submit(class_='submit') }}
+            {% if current_user.custom_theme %}
+            <label> Disable Custom theme?</label>
+            {% for option in form.options %}
+                <td>{{ option }}</td>
+                <td>{{ option.label }}</td>
+            {% endfor %}
+            {{ form.theme_toggle(class_='submit')}}
         </form>
     </tr>
     <br>
-
-    <!-- Night theme switcher linked to javascript -->
+    <form>
+        {% else%}
+        <!-- Night theme switcher linked to javascript -->
     <label>Do you want to change theme?</label>
     <img src="/static/images/dark-mode-night-moon-svgrepo-com.svg" id="icon" class="theme-icon">
     <button onclick="window.location.href='{{ url_for('logout') }}'" class="submit">Logout</button>
+   {% endif%}
+   </form>
 </div>
 <script src="{{ url_for('static', filename='js/themeswitcher.js') }}"></script>
 {% endblock %}
