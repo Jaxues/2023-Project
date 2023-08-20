@@ -409,25 +409,31 @@ def info():
     # See if user has logged in
     if current_user.is_authenticated:
         form = YesNo()
-        total_user_achievements=UserAchievements.query.all()
-        achievement_percentage=int(len(total_user_achievements))/20*100
+        total_user_achievements=UserAchievements.query.filter_by(user_id=current_user.id).all()
+        print(len(total_user_achievements))
+        achievement_percentage=round(int(len(total_user_achievements))/20*100)
         print(achievement_percentage)
         if achievement_percentage >= 25.0 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=15).first() is None:
             bronze_progression=UserAchievements(user_id=current_user.id, achievement_id=15) 
             db.session.add(bronze_progression)
             db.session.commit()
-        if achievement_percentage >=50.0 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=15).first() is None:
+        if achievement_percentage >=45.0 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=16).first() is None:
             silver_progression=UserAchievements(user_id=current_user.id, achievement_id=16) 
             db.session.add(silver_progression)
             db.session.commit()
-        if achievement_percentage >=75.0 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=15).first() is None:
+        if achievement_percentage >=75.0 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=17).first() is None:
             gold_progression=UserAchievements(user_id=current_user.id, achievement_id=17) 
             db.session.add(gold_progression)
             db.session.commit()
-        if achievement_percentage ==95.0 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=15).first() is None:
+        if achievement_percentage ==95.0 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=18).first() is None:
             complete_progression=UserAchievements(user_id=current_user.id, achievement_id=18) 
             db.session.add(complete_progression)
             db.session.commit()
+        if current_user.user_points >= 10000 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=19).first() is None:
+            diamond_points=UserAchievements(user_id=current_user.id, achievement_id=19)
+            db.session.add(diamond_points)
+            db.session.commit()
+        
         if form.validate_on_submit():
             if form.submit.data:
                 email_perference = form.options.data

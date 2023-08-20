@@ -490,20 +490,23 @@ img.theme-icon {
     background-size: 20px 20px;
 }
 
-.comon_color{
+.comon_achievement{
     fill:var(--common_color)
 }
 
-.uncomon_color{
+.uncomon_achievement{
     fill:var(--uncommon_color)
+    stroke:var
 }
 
-.rare_color{
-    fill:var(--rare_color)
+.rare_achievement{
+    fill:var(--rare_color);
+    stroke: var(--rare_color);
 }
 
-.misc_color{
-    fill:var(--misc_color)
+.misc_achievement{
+    fill:var(--misc_color);
+    stroke:var(--misc_color)
 }
 
 .dash_links{
