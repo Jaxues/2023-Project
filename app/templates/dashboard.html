@@ -5,6 +5,11 @@
 <!-- If there are habits, display them -->
 {% if id == 1 %}
 <!-- If it's the first page, display 3 habits -->
+<!-- Include the required CSS and JavaScript files for the calendar heatmap -->
+<div id="dataJson" style="display: none;">
+{{frontend_data|safe}}
+</div>
+
 <div class="chartMenu">
 </div>
 <div class="chartCard">
@@ -12,8 +17,7 @@
         <canvas id="myChart"></canvas>
     </div>
 </div>
-<div id="heatmap-data" style="display: none;">{{ frontend_heatmap_data }}</div>
-<script type="text/javascript" src="htt:ps://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
 <script
     src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.1/dist/chartjs-chart-matrix.min.js"></script>
@@ -24,6 +28,12 @@
         wd = (wd + 6) % 7 + 1; // Start the week on Monday and end on Sunday
         return '' + wd; // String of weekdays to be parsed
     }
+
+    // Get the JSON data embedded in the HTML
+    const frontendDataElement = document.getElementById('dataJson');
+    const frontendDataText = frontendDataElement.textContent;
+    const frontendData = JSON.parse(frontendDataText);
+    console.log(frontendData);
 
     // setup calendar for 365 squares for days
     function generateData() {
@@ -38,11 +48,19 @@
                 x: iso,
                 y: isoDayOfWeek(dt),
                 d: iso,
-                v: Math.random() * 50,
+                v: 0, // Initialize all values to 0
             });
             dt = new Date(dt.setDate(dt.getDate() + 1));
         }
-        console.log(data2);
+
+        // Update values from frontendData
+        for (const entry of frontendData) {
+            const index = data2.findIndex(item => item.x === entry.x);
+            if (index !== -1) {
+                data2[index].v = entry.v;
+            }
+        }
+
         return data2;
     }
 

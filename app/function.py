@@ -2,8 +2,8 @@ from datetime import datetime
 from app import mail, db
 import pytz
 from flask_mail import Message
-from flask import url_for, flash
-from app.models import UserAchievements, Achievements
+from flask import url_for
+from collections import defaultdict
 
 # Get local date for location
 def get_local_date():
@@ -27,37 +27,36 @@ def check_consecutive(streak_parameter, user):
     else:
         return 1
 
-# Function to convert data to suitable for heatmap in javascript
-def heatmap_data(data):
-    heatmap_data_list = []
-    for i in data:
-        date_str = str(i.date)
-        streak_count = i.is_consecutive
-        date_obj = datetime.strptime(date_str, '%Y-%m-%d')  # Convert date string to date object
-        day_of_week = date_obj.weekday()
+from datetime import datetime
 
-        heatmap_data_list.append({
-            'date': date_obj,         # Date string
-            'week day': str(day_of_week),  # Convert day_of_week to string
-            'date_string': date_obj,         # Date string
-            'streak_count': streak_count      # Streak count
-        })
+def heatmap_converter(user_data):
+    # Initialize a dictionary to aggregate data
+    aggregated_data = {}
+    
+    # Iterate through user data
+    for entry in user_data:
+        date = entry.date
+        streak_id = entry.id
 
-    return heatmap_data_list
-
-"""
-Check data for multiple entries on the same days.
-If there are then add 1 to the total number of habits done.
-"""
-def heatmap_date_checker(data):
-    days_done = {}
-    for x in data:
-        date_str = x['date'].strftime('%Y-%m-%d')
-        if date_str in days_done:
-            days_done[date_str] += 1
+        if date in aggregated_data:
+            # Increment count if the date is already in the dictionary
+            aggregated_data[date]["v"] += 1
         else:
-            days_done[date_str] = 1
-    return days_done
+            # Create a new entry if the date is not in the dictionary
+            day_of_week = date.weekday() + 1  # 1 for Monday, 2 for Tuesday, etc.
+            aggregated_data[date] = {
+                "x": date.isoformat(),
+                "y": day_of_week,
+                "d": date.isoformat(),
+                "v": 1,  # Initial count
+            }
+
+    # Convert the values of the aggregated_data dictionary into a list
+    final_user_data = list(aggregated_data.values())
+
+    # Return the final user data as a list
+    return final_user_data
+
 
 # Define scoring for habits
 def habit_points(user_streak, type_of_habit, user):

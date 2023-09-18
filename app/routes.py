@@ -19,14 +19,14 @@ from flask_login import (
 from werkzeug.security import check_password_hash
 from sqlalchemy.exc import IntegrityError
 from app.function import (
-    get_local_date, check_consecutive, heatmap_data,
-    heatmap_date_checker, habit_points, email_verification,
+    get_local_date, check_consecutive, heatmap_converter,
+    habit_points, email_verification
 )
 from better_profanity import profanity
 from math import ceil
 from itsdangerous import SignatureExpired, BadSignature
 from datetime import datetime, timedelta
-
+from json import dumps
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -226,11 +226,11 @@ def dashboard(id):
             user_streaks[habit.id] = [0, 'No date recorded']
 
     form = StreakForm()
-    preprocess_data = heatmap_data(Streak.query.filter_by(user_id=current_user.id))
-    check_days = heatmap_date_checker(preprocess_data)
+    preprocess_data = Streak.query.filter_by(user_id=current_user.id)
+    frontend_heatmap_data=heatmap_converter(preprocess_data)
+    frontend_heatmap_json = dumps(frontend_heatmap_data)
+    print(frontend_heatmap_json)
     # convert data from the database to a suitable format for JSON
-    frontend_heatmap_data = check_days
-
     if form.validate_on_submit():
         habit_id = form.hidden_id.data
         if form.update.data:
@@ -323,7 +323,7 @@ def dashboard(id):
                     db.session.commit()
                     achievement_info=Achievements.query.get(id=7)
                     flash("achievement","You earned the {} achievement for {}".format(str(achievement_info.name).lower(), str(achievement_info.description).lower()))
-                if current_user.bad_habits_tracked == 14 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=8).firt() is None:
+                if current_user.bad_habits_tracked == 14 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=8).first() is None:
                     silverbadhabit=UserAchievements(user_id=current_user.id, achievement_id=8)
                     db.session.add(silverbadhabit)
                     db.session.commit()
@@ -333,7 +333,7 @@ def dashboard(id):
                     goldbadhabit=UserAchievements(user_id=current_user.id, achievement_id=9)
                     db.session.add(goldbadhabit)
                     db.session.commit()
-                    achievement_info=Achievements.query.get(id=9)
+                    achievement_info=Achievements.query.filter_by(id=9)
                     flash("achievement","You earned the {} achievement for {}".format(str(achievement_info.name).lower(), str(achievement_info.description).lower()))
             db.session.commit()
             db.session.add(new_entry)
@@ -343,9 +343,9 @@ def dashboard(id):
             return redirect(url_for('dashboard', id=1))
 
     if total_habits > 0:
-        return render_template("dashboard.html", Habits=habits, user_streak=user_streaks, form=form, id=id, habits_first_page=habits_first_page, habits_per_page=habits_pages, total_pages=total_pages, frontend_heatmap_data=frontend_heatmap_data)
+        return render_template("dashboard.html", Habits=habits, user_streak=user_streaks, form=form, id=id, habits_first_page=habits_first_page, habits_per_page=habits_pages, total_pages=total_pages, frontend_data=frontend_heatmap_json)
     else:
-        return render_template("dashboard.html", Habits=None, user_streak=None, form=form, id=id, habits_first_page=habits_first_page, habits_per_page=habits_pages, total_pages=total_pages, frontend_heatmap_data=frontend_heatmap_data)
+        return render_template("dashboard.html", Habits=None, user_streak=None, form=form, id=id, habits_first_page=habits_first_page, habits_per_page=habits_pages, total_pages=total_pages, frontend_data=frontend_heatmap_json)
 
 
 @app.route("/delete/<int:id>")
