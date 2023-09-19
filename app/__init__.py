@@ -4,8 +4,9 @@ from os import environ
 from flask_login import LoginManager
 from flask_mail import Mail
 from itsdangerous import URLSafeTimedSerializer
+from dotenv import load_dotenv
 app = Flask(__name__)
-
+load_dotenv()
 # Set up Database.
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///Hadit.db'
 app.config['SECRET_KEY'] = environ['secret_key']
@@ -32,7 +33,7 @@ app.config['MAIL_PASSWORD'] = environ['MAIL_PASSWORD']
 app.config['MAIL_DEFAULT_SENDER'] = environ['MAIL_USERNAME']
 
 mail = Mail(app)
-serializer_key = environ['serializer_key']
+serializer_key = environ.get('serializer_key')
 serializer = URLSafeTimedSerializer(serializer_key)
 
 # Import all app modules for app creation

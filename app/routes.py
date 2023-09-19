@@ -3,7 +3,7 @@ from app import (
     app, db, login_manager, serializer
 )
 from flask import (
-    render_template, url_for, redirect, flash, jsonify
+    render_template, url_for, redirect, flash
 )
 from app.models import (
     Habits, Users, Streak, UserTheme, Achievements, UserAchievements
@@ -27,6 +27,7 @@ from math import ceil
 from itsdangerous import SignatureExpired, BadSignature
 from datetime import datetime, timedelta
 from json import dumps
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -57,9 +58,11 @@ def login():
                     if elapsed_time > timedelta(1):
                         email_token = serializer.dumps(user.email)
                         email_verification(user.email, email_token)
-                        flash('error', 'Email not verified. Another token was sent to email address')
+                        flash('error',
+                              'Email not verified. Another token was sent.')
                         return redirect(url_for('register'))
-                    flash("error", "Please verify your email before logging in.")
+                    flash("error",
+                          "Please verify your email before logging in.")
                     return redirect(url_for("login"))
             else:
                 flash("error", "Invalid username or password.")
@@ -67,7 +70,6 @@ def login():
             flash("error", "User does not exist.")
 
     return render_template("login.html", form=form)
-
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -99,7 +101,8 @@ def register():
                 email = form.email.data
                 token = serializer.dumps(email)
                 email_verification(email, token)
-                flash('success', 'Email needs to be authenticated, an email was sent to {}'.format(email))
+                flash('success',
+                      'Email needs to be authenticated, an email was sent to {}'.format(email))
                 return redirect(url_for("login"))
             except IntegrityError:
                 db.session.rollback()
@@ -108,42 +111,46 @@ def register():
     
     return render_template("register.html", form=form)
 
-@app.route('/authenticate/<token>', methods=['get','post'])
+
+@app.route('/authenticate/<token>', methods=['get', 'post'])
 def authentication(token):
-    form=LoginForm()
+    form = LoginForm()
     if current_user.is_authenticated:
-        flash('error','You are already logged in.')
-        return redirect(url_for('dashboard',id=1))
+        flash('error', 'You are already logged in.')
+        return redirect(url_for('dashboard', id=1))
     if form.validate_on_submit():
-        authenticate_user=Users.query.filter_by(username=form.username.data).first()
+        authenticate_user = Users.query.filter_by(username=form.username.data).first()
         if authenticate_user:
             try:
-                email_token=serializer.loads(token, max_age=3600)
+                user_password = form.password.data
+                email_token = serializer.loads(token, max_age=3600)
                 if authenticate_user.email_authentication:
-                    flash('error','This user is already verified')
+                    flash('error', 'This user is already verified')
                     return redirect(url_for('login'))
-                if check_password_hash(authenticate_user.password_hash,form.password.data):
-                    authenticate_user.email_authentication=True
+                if check_password_hash(authenticate_user.password_hash, user_password):
+                    authenticate_user.email_authentication = True
                     db.session.commit()
-                    authenticated_achievement=UserAchievements(user_id=authenticate_user.id, achievement_id=20)
+                    new_user = authenticate_user.id
+                    authenticated_achievement = UserAchievements(user_id=new_user,
+                                                                 achievement_id=20)
                     db.session.add(authenticated_achievement)
                     db.session.commit()
                     login_user(authenticate_user)
-                    flash('success','Email Verified.')
-                    return redirect(url_for('dashboard',id=1))
+                    flash('success', 'Email Verified.')
+                    return redirect(url_for('dashboard', id=1))
                 else:
                     flash('error', "Password doesn't match please try again")
-                    return redirect(url_for('authentication',token=token))
+                    return redirect(url_for('authentication', token=token))
             except SignatureExpired:
-                flash('error','Token has expired')
+                flash('error', 'Token has expired')
                 return redirect(url_for('register'))
             except BadSignature:
-                flash('error','Invalid email token.')
+                flash('error', 'Invalid email token.')
                 return redirect(url_for('register'))
         else:
-                flash('error', "user doesn't exist please register first")
-                return redirect(url_for('register'))
-    return render_template('authenticate.html',form=form, token=token)
+            flash('error', "user doesn't exist please register first")
+            return redirect(url_for('register'))
+    return render_template('authenticate.html', form=form, token=token)
 
 
 @app.route("/")
@@ -157,32 +164,39 @@ def logout():
     logout_user()
     return redirect(url_for("index"))
 
+
 @app.route("/addhabit", methods=["GET", "POST"])
 @login_required
 def addhabit():
     form = HabitForm()
+    user_id = current_user.id
     if form.validate_on_submit():
         # See if habit exists if it does then flash message to stop duplicates
-        checkhabit = Habits.query.filter_by(user_id=current_user.id, name=form.name.data.title()).first()
-        print('Habit Added')
+        habit = form.name.data.title()
+        checkhabit = Habits.query.filter_by(user_id=user_id,
+                                            name=habit).first()
         if checkhabit:
             flash("error", "You already have this habit")
             return redirect(url_for("addhabit"))
         else:
             # Check for profanity and stop it
-            profanity_check_habit = profanity.contains_profanity(form.name.data)
-            profanity_check_reason = profanity.contains_profanity(form.reason.data)
-            profanitY_check_habit_censor = profanity.censor(form.name.data)
-            profanity_check_reason_censor = profanity.censor(form.reason.data)
+            check_habit = form.name.data
+            check_reason = form.reason.data
+            profanity_check_habit = profanity.contains_profanity(check_habit)
+            profanity_check_reason = profanity.contains_profanity(check_reason)
+            profanitY_check_habit_censor = profanity.censor(check_habit)
+            profanity_check_reason_censor = profanity.censor(check_reason)
             for test_character in profanity_check_reason_censor:
                 if test_character == '*':
                     flash(
-                        'error', 'This has profanity. That or you have entered an asterisk. Either is not allowed')
+                        'error',
+                        'This has profanity or you have entered an *. This was prevetened by profanity filter')
                     return redirect(url_for('addhabit'))
             for test_reason in profanitY_check_habit_censor:
-                # Loop to go through all words that users enter even if they space words out will censor it.
+                # Loop to go through all words to chec edge cases
                 if test_reason == '*':
-                    flash('error', 'This contains an asterisk. Either this was censored by the filter or you have entered an asterisk. Either way please remove this')
+                    flash('error',
+                          'This was censored by the filter or contains *.')
                     return redirect(url_for('addhabit'))
             if profanity_check_habit or profanity_check_reason:
                 flash('error', 'This contains profanity please remove this.')
@@ -192,12 +206,12 @@ def addhabit():
                     name=form.name.data.title(),
                     reason=form.reason.data.title(),
                     habit_type=form.type_of_habit.data,
-                    user_id=current_user.id
+                    user_id=user_id
                 )
                 db.session.add(NewHabit)
                 db.session.commit()
                 flash("success", "Habit added successfully!")
-                # Return first page of dashboard page. Dashboard indexed so the first page only has 3 habits on it.
+                # Returns first Dashboard page that has 3 habits.
                 return redirect(url_for("dashboard", id=1))
     return render_template("addHabit.html", form=form)
 
@@ -205,7 +219,8 @@ def addhabit():
 @app.route("/dashboard/<int:id>", methods=['GET', 'POST'])
 @login_required
 def dashboard(id):
-    habits = Habits.query.filter_by(user_id=current_user.id)
+    user_id = current_user.id
+    habits = Habits.query.filter_by(user_id=user_id)
     user_streaks = {}
     total_habits = habits.count() if habits else 0
     habits_first_page = 3
@@ -219,17 +234,18 @@ def dashboard(id):
         return redirect(url_for('dashboard', id=total_pages))
 
     for habit in habits:
-        Habit_streak = Streak.query.filter_by(habit_id=habit.id).order_by(Streak.date.desc())
+        Habit_streak = Streak.query.filter_by(habit_id=habit.id).order_by(
+            Streak.date.desc())
         if Habit_streak.first():
-            user_streaks[habit.id] = [Habit_streak.first().is_consecutive, Habit_streak.first().date]
+            user_streaks[habit.id] = [Habit_streak.first().is_consecutive,
+                                      Habit_streak.first().date]
         else:
             user_streaks[habit.id] = [0, 'No date recorded']
 
     form = StreakForm()
-    preprocess_data = Streak.query.filter_by(user_id=current_user.id)
-    frontend_heatmap_data=heatmap_converter(preprocess_data)
+    preprocess_data = Streak.query.filter_by(user_id=user_id)
+    frontend_heatmap_data = heatmap_converter(preprocess_data)
     frontend_heatmap_json = dumps(frontend_heatmap_data)
-    print(frontend_heatmap_json)
     # convert data from the database to a suitable format for JSON
     if form.validate_on_submit():
         habit_id = form.hidden_id.data
@@ -239,122 +255,157 @@ def dashboard(id):
             return redirect(url_for('delete', id=habit_id))
         else:
             current_date = get_local_date()
-            check_entry = Streak.query.filter_by(user_id=current_user.id, habit_id=habit_id, date=current_date).first()
+            check_entry = Streak.query.filter_by(user_id=user_id,
+                                                 habit_id=habit_id,
+                                                 date=current_date).first()
             # Query the streak database, so can't have multiple of the same entry
             if check_entry:
-                flash("error", "You have already recorded your habit for today.")
+                flash("error",
+                      "You have already recorded your habit for today.")
                 return redirect(url_for('dashboard', id=1))
 
             check_date = Streak.query.filter(
-                Streak.user_id == current_user.id,
+                Streak.user_id == user_id,
                 Streak.habit_id == habit_id,
                 Streak.date < current_date
             ).order_by(Streak.date.desc()).first()
             # See if the previous entry was the day before
             if check_date:
-                filtered_type_of_habit = Habits.query.filter_by(id=form.hidden_id.data).first()
-                streak_score = check_consecutive(streak_parameter=check_date, user=current_user)
-                new_entry = Streak(user_id=current_user.id,
-                                   habit_id=habit_id, date=current_date, is_consecutive=streak_score)
-                if streak_score == 7 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=1).first() is None:
-                    bronzestreakachievement=UserAchievements(user_id=current_user.id, achievement_id=1)
+                filtered_type_of_habit = Habits.query.filter_by(
+                    id=form.hidden_id.data).first()
+                streak_score = check_consecutive(streak_parameter=check_date,
+                                                 user=user_id)
+                new_entry = Streak(user_id=user_id,
+                                   habit_id=habit_id, date=current_date,
+                                   is_consecutive=streak_score)
+                if streak_score == 7 and UserAchievements.query.filter_by(user_id=user_id, achievement_id=1).first() is None:
+                    bronzestreakachievement = UserAchievements(user_id=user_id,
+                                                               achievement_id=1)
                     db.session.add(bronzestreakachievement)
                     db.session.commit()
-                if streak_score == 14 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=1).first() is None:
-                    bronzestreakachievement=UserAchievements(user_id=current_user.id, achievement_id=1)
+                if streak_score == 14 and UserAchievements.query.filter_by(
+                                                                        user_id=user_id,achievement_id=1).first() is None:
+                    bronzestreakachievement = UserAchievements(user_id=user_id, achievement_id=1)
                     db.session.add(bronzestreakachievement)
                     db.session.commit()
-                if streak_score == 30 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=1).first() is None:
-                    bronzestreakachievement=UserAchievements(user_id=current_user.id, achievement_id=1)
+                if streak_score == 30 and UserAchievements.query.filter_by(user_id=user_id,
+                                                                           achievement_id=1
+                                                                           ).first() is None:
+                    bronzestreakachievement = UserAchievements(user_id=user_id,
+                                                               achievement_id=1)
                     db.session.add(bronzestreakachievement)
                     db.session.commit()
-
-
-
             # If dates aren't consecutive, assign a streak of 1 for the first day of recording the habit
             else:
-                new_entry = Streak(user_id=current_user.id,
+                new_entry = Streak(user_id=user_id,
                                    habit_id=habit_id, date=current_date, is_consecutive=1)
 
-            user_streak = Streak.query.filter_by(id=current_user.id, habit_id=habit_id).order_by(
+            user_streak = Streak.query.filter_by(user_id=user_id, habit_id=habit_id).order_by(
                 Streak.date.desc()).first()
-            user_habit = Habits.query.filter_by(id=habit_id, user_id=current_user.id).first()
-
+            user_habit = Habits.query.filter_by(id=habit_id, user_id=user_id).first()
+            habit_type = user_habit.habit_type
             if user_streak:
                 # Give users points based on whether they have a streak already
-                print(user_habit.habit_type)
-                add_points = habit_points(user_streak.is_consecutive, user_habit.habit_type, user=current_user)
+                add_points = habit_points(user_streak.is_consecutive, 
+                                          habit_type, user=current_user)
             else:
                 # Assign points with no streak entries
-                add_points = habit_points(0, user_habit.habit_type, user=current_user)
+                add_points = habit_points(0, habit_type, user=user_id)
 
             current_user.user_points = current_user.user_points + add_points
-            if current_user.user_points== 10000 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=19).first() is None:
-                diamond_points=UserAchievements(user_id=current_user.id, achievement_id=19)
+            if current_user.user_points == 10000 and UserAchievements.query.filter_by(user_id=user_id, achievement_id=19).first() is None:
+                diamond_points = UserAchievements(user_id=user_id, achievement_id=19)
                 db.session.add(diamond_points)
                 db.session.commit()
-            type_habit=Habits.query.filter_by(id=form.hidden_id.data).first()
-            if type_habit.habit_type == 1:
+            if filtered_type_of_habit == 1:
                 current_user.good_habits_tracked += 1
-                if current_user.good_habits_tracked == 7 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=4).first() is None:
-                    bronzegoodhabit=UserAchievements(user_id=current_user.id, achievement_id=4)
+                if current_user.good_habits_tracked == 7 and UserAchievements.query.filter_by(user_id=user_id, achievement_id=4).first() is None:
+                    bronzegoodhabit = UserAchievements(user_id=user_id, achievement_id=4)
                     db.session.add(bronzegoodhabit)
                     db.session.commit()
-                    achievement_info=Achievements.query.get(id=4)
-                    flash("achievement","You earned the {} achievement for {}".format(str(achievement_info.name).lower(), str(achievement_info.description).lower()))
-                if current_user.good_habits_tracked == 14 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=5).first() is None:
-                    silvergoodhabit=UserAchievements(user_id=current_user.id, achievement_id=5)
+                    achievement_info = Achievements.query.get(id=4)
+                    flash("achievement", "You earned the {} achievement for {}".format(str(achievement_info.name).lower(), str(achievement_info.description).lower()))
+                if current_user.good_habits_tracked == 14 and UserAchievements.query.filter_by(
+                                                                                                user_id=user_id, achievement_id=5).first() is None:
+                    silvergoodhabit = UserAchievements(user_id=user_id,
+                                                       achievement_id=5)
                     db.session.add(silvergoodhabit)
                     db.session.commit()
-                    achievement_info=Achievements.query.get(id=5)
-                    flash("achievement","You earned the {} achievement for {}".format(str(achievement_info.name).lower(), str(achievement_info.description).lower()))
-                if current_user.good_habits_tracked ==30 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=6).first() is None:
-                    goldgoodhabit=UserAchievements(user_id=current_user.id, achievement_id=6)
+                    achievement_info = Achievements.query.get(id=5)
+                    flash("achievement", "You earned the {} achievement for {}".format(str(achievement_info.name).lower(), str(achievement_info.description).lower()))
+                if current_user.good_habits_tracked == 30 and UserAchievements.query.filter_by(user_id=user_id, achievement_id=6).first() is None:
+                    goldgoodhabit = UserAchievements(user_id=user_id,
+                                                     achievement_id=6)
                     db.session.add(goldgoodhabit)
                     db.session.commit()
-                    achievement_info=Achievements.query.get(id=6)
-                    flash("achievement","You earned the {} achievement for {}".format(str(achievement_info.name).lower(), str(achievement_info.description).lower()))
+                    achievement_info = Achievements.query.get(id=6)
+                    flash("achievement",
+                          "You earned the {} achievement for {}".format(
+                              str(achievement_info.name).lower(),
+                              str(achievement_info.description).lower()))
 
             else:
                 current_user.bad_habits_tracked +=1
-                if current_user.bad_habits_tracked == 7 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=7).first() is None:
-                    bronzebadhabit=UserAchievements(user_id=current_user.id, achievement_id=7)
+                if current_user.bad_habits_tracked == 7 and UserAchievements.query.filter_by(user_id=user_id, achievement_id=7).first() is None:
+                    bronzebadhabit = UserAchievements(user_id=user_id,
+                                                      achievement_id=7)
                     db.session.add(bronzebadhabit)
                     db.session.commit()
-                    achievement_info=Achievements.query.get(id=7)
-                    flash("achievement","You earned the {} achievement for {}".format(str(achievement_info.name).lower(), str(achievement_info.description).lower()))
-                if current_user.bad_habits_tracked == 14 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=8).first() is None:
-                    silverbadhabit=UserAchievements(user_id=current_user.id, achievement_id=8)
+                    achievement_info = Achievements.query.get(id=7)
+                    flash("achievement", 
+                          "You earned the {} achievement for {}".format(
+                              str(achievement_info.name).lower(),
+                              str(achievement_info.description).lower()))
+                if current_user.bad_habits_tracked == 14 and UserAchievements.query.filter_by(user_id=user_id, achievement_id=8).first() is None:
+                    silverbadhabit = UserAchievements(user_id=user_id,
+                                                      achievement_id=8)
                     db.session.add(silverbadhabit)
                     db.session.commit()
-                    achievement_info=Achievements.query.get(id=8)
-                    flash("achievement","You earned the {} achievement for {}".format(str(achievement_info.name).lower(), str(achievement_info.description).lower()))
-                if current_user.bad_habits_tracked ==30 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=9).first() is None:
-                    goldbadhabit=UserAchievements(user_id=current_user.id, achievement_id=9)
+                    achievement_info = Achievements.query.get(id=8)
+                    flash("achievement", 
+                          "You earned the {} achievement for {}".format(
+                              str(achievement_info.name).lower(),
+                              str(achievement_info.description).lower()))
+                if current_user.bad_habits_tracked == 30 and UserAchievements.query.filter_by(user_id=user_id, achievement_id=9).first() is None:
+                    goldbadhabit = UserAchievements(user_id=user_id,
+                                                    achievement_id=9)
                     db.session.add(goldbadhabit)
                     db.session.commit()
-                    achievement_info=Achievements.query.filter_by(id=9)
-                    flash("achievement","You earned the {} achievement for {}".format(str(achievement_info.name).lower(), str(achievement_info.description).lower()))
+                    achievement_info = Achievements.query.filter_by(id=9)
+                    flash("achievement", 
+                          "You earned the {} achievement for {}".format(str(achievement_info.name).lower(), str(achievement_info.description).lower()))
             db.session.commit()
             db.session.add(new_entry)
             db.session.commit()
             # Call the method to check consecutive streaks
-            flash('success', 'Streak successfully recorded. You earn {} points'.format(add_points))
+            flash('success', 
+                  'Streak successfully recorded. You earn {} points'.format(add_points))
             return redirect(url_for('dashboard', id=1))
 
     if total_habits > 0:
-        return render_template("dashboard.html", Habits=habits, user_streak=user_streaks, form=form, id=id, habits_first_page=habits_first_page, habits_per_page=habits_pages, total_pages=total_pages, frontend_data=frontend_heatmap_json)
+        return render_template("dashboard.html", Habits=habits,
+                               user_streak=user_streaks, form=form,
+                               id=id, habits_first_page=habits_first_page,
+                               habits_per_page=habits_pages,
+                               total_pages=total_pages,
+                               frontend_data=frontend_heatmap_json)
     else:
-        return render_template("dashboard.html", Habits=None, user_streak=None, form=form, id=id, habits_first_page=habits_first_page, habits_per_page=habits_pages, total_pages=total_pages, frontend_data=frontend_heatmap_json)
+        return render_template("dashboard.html", Habits=None, user_streak=None,
+                               form=form, id=id,
+                               habits_first_page=habits_first_page,
+                               habits_per_page=habits_pages,
+                               total_pages=total_pages,
+                               frontend_data=frontend_heatmap_json)
 
 
 @app.route("/delete/<int:id>")
 @login_required
 def delete(id):
+    user_id = current_user.id
     habit_to_delete = Habits.query.filter_by(
         id=id).first()
     # Stop unathorised users from deleting habits they don't own
-    if habit_to_delete.user_id != current_user.id:
+    if habit_to_delete.user_id != user_id:
         flash('error', "You don't own this habit. You can't delete it")
         return redirect(url_for('dashboard', id=1))
     try:
@@ -376,19 +427,20 @@ def delete(id):
 @app.route("/update/<int:id>", methods=['GET', 'POST'])
 @login_required
 def update(id):
+    user_id=current_user.id
     current_habit = Habits.query.filter_by(id=id).first()
     # Check if habit exists
     if current_habit is None:
         flash("error", "This habit doesn't exist you can't update it.")
         return redirect(url_for('dashboard', id=1))
     # See if user owns the habit they want to update
-    if current_habit.user_id != current_user.id:
+    if current_habit.user_id != user_id:
         flash('error', "You don't own this habit you can't update it.")
         return redirect(url_for('dashboard', id=1))
     form = UpdateForm()
     if form.validate_on_submit():
         habit = Habits.query.filter_by(id=id).first()
-        name=form.name.data
+        name = form.name.data
         updated_reason = form.reason.data
         check_profanity_reason = profanity.contains_profanity(updated_reason)
         # Check for profanity in user inputted reason
@@ -397,47 +449,48 @@ def update(id):
                 'error', 'This updated reason contains profanity please remove it if you wish to update it.')
             return redirect(url_for('dashboard', id=1))
         habit.reason = updated_reason
-        habit.name=name
+        habit.name = name
         db.session.commit()
         flash('success', 'Reason succesfully updated')
         return redirect(url_for('dashboard', id=1))
-    return render_template('Update.html', form=form, current_habit=current_habit)
+    return render_template('Update.html', form=form,
+                            current_habit=current_habit)
 
 
-@app.route("/info", methods=['get','post'])
+@app.route("/info", methods=['get', 'post'])
 def info():
     # See if user has logged in
     if current_user.is_authenticated:
+        user_id = current_user.id
         form = YesNo()
-        total_user_achievements=UserAchievements.query.filter_by(user_id=current_user.id).all()
-        print(len(total_user_achievements))
-        achievement_percentage=round(int(len(total_user_achievements))/20*100)
-        print(achievement_percentage)
-        if achievement_percentage >= 25.0 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=15).first() is None:
-            bronze_progression=UserAchievements(user_id=current_user.id, achievement_id=15) 
+        total_user_achievements = UserAchievements.query.filter_by(
+            user_id=user_id).all()
+        achievement_percentage = round(int(len(total_user_achievements))/20*100)
+        if achievement_percentage >= 25.0 and UserAchievements.query.filter_by(
+                                                                                user_id=user_id,
+                                                                                achievement_id=15).first() is None:
+            bronze_progression = UserAchievements(user_id=user_id, achievement_id=15) 
             db.session.add(bronze_progression)
             db.session.commit()
-        if achievement_percentage >=45.0 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=16).first() is None:
-            silver_progression=UserAchievements(user_id=current_user.id, achievement_id=16) 
+        if achievement_percentage >= 45.0 and UserAchievements.query.filter_by(user_id=user_id, achievement_id=16).first() is None:
+            silver_progression = UserAchievements(user_id=user_id, achievement_id=16) 
             db.session.add(silver_progression)
             db.session.commit()
-        if achievement_percentage >=75.0 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=17).first() is None:
-            gold_progression=UserAchievements(user_id=current_user.id, achievement_id=17) 
+        if achievement_percentage >= 75.0 and UserAchievements.query.filter_by(user_id=user_id, achievement_id=17).first() is None:
+            gold_progression = UserAchievements(user_id=user_id, achievement_id=17) 
             db.session.add(gold_progression)
             db.session.commit()
-        if achievement_percentage ==95.0 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=18).first() is None:
-            complete_progression=UserAchievements(user_id=current_user.id, achievement_id=18) 
+        if achievement_percentage == 95.0 and UserAchievements.query.filter_by(user_id=user_id, achievement_id=18).first() is None:
+            complete_progression = UserAchievements(user_id=user_id, achievement_id=18) 
             db.session.add(complete_progression)
             db.session.commit()
-        if current_user.user_points >= 10000 and UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=19).first() is None:
-            diamond_points=UserAchievements(user_id=current_user.id, achievement_id=19)
+        if current_user.user_points >= 10000 and UserAchievements.query.filter_by(user_id=user_id, achievement_id=19).first() is None:
+            diamond_points = UserAchievements(user_id=user_id, achievement_id=19)
             db.session.add(diamond_points)
             db.session.commit()
-        
         if form.validate_on_submit():
             if form.submit.data:
                 email_perference = form.options.data
-                print(email_perference)
                 if email_perference == 'y':
                     current_user.email_notifactions = True
                     db.session.commit()
@@ -447,21 +500,20 @@ def info():
                 flash('success','Email perferences successfully updated')
                 return redirect(url_for('info'))
             elif form.theme_toggle.data:
-                theme_toggle_select=form.options.data
+                theme_toggle_select = form.options.data
                 if theme_toggle_select == 'y':
-                    current_user.custom_theme= True
+                    current_user.custom_theme = True
                     db.session.commit()
-                    flash("success","Theme successfully enabled")
+                    flash("success", "Theme successfully enabled")
                     return redirect(url_for('info'))
                 elif theme_toggle_select == 'n':
-                    current_user.custom_theme= False
+                    current_user.custom_theme = False
                     db.session.commit()
-                    flash("success"," Theme successfully disabled")
+                    flash("success", " Theme successfully disabled")
                     return redirect(url_for('info'))
-                
         return render_template("info.html", form=form, achievement_percentage=achievement_percentage)
     else:
-        flash("error","You haven't logged on you can't access this page")
+        flash("error", "You haven't logged on you can't access this page")
         return redirect(url_for("login"))
 
 
@@ -500,63 +552,71 @@ def privacy():
     return render_template('pp.html', privacy_policy=privacy_policy)
 
 
-@app.route('/shop', methods=['get','post'])
+@app.route('/shop', methods=['get', 'post'])
 @login_required
 def shop():
+    user_id=current_user.id
     form = ShopForm()
     if form.validate_on_submit():
         if form.streak_freeze.data:
-            streak_freeze_user= Users.query.filter_by(id=current_user.id).first()
+            streak_freeze_user = Users.query.filter_by(id=user_id).first()
             if streak_freeze_user.streak_freeze:
-                flash('error','Streak freeze already purchased') 
+                flash('error', 'Streak freeze already purchased') 
                 return redirect(url_for('shop'))
-            elif streak_freeze_user.user_points >= 500:
+            elif streak_freeze_user.user_points >= 50:
                 if streak_freeze_user.streak_freeze:
                     flash("error","Streak freeze already active")
                     return redirect(url_for('shop'))
                 streak_freeze_user.user_points = current_user.user_points - 500
-                streak_freeze_user.streak_freeze= True
-                if UserAchievements.query.filter_by(id=current_user.id, achievement_id=14).first() is None:
-                    streak_freeze_achievement=UserAchievements(user_id=current_user.id,achievement_id=14)
+                streak_freeze_user.streak_freeze = True
+                if UserAchievements.query.filter_by(user_id=user_id,
+                                                    achievement_id=14).first() is None:
+                    streak_freeze_achievement = UserAchievements(user_id=user_id,
+                                                                 achievement_id=14)
                     db.session.add(streak_freeze_achievement)
                     db.session.commit()
-                flash('success','Streak freeze purchased')
+                flash('success', 'Streak freeze purchased')
                 db.session.commit()
                 return redirect(url_for('shop'))
                 
             else:
-                flash('error','Not enough points to purchase streak freeze only have {}'.format(streak_freeze_user.user_points))
+                flash('error',
+                      'Not enough points to purchase streak freeze only have {}'.format(streak_freeze_user.user_points))
                 return redirect(url_for('shop'))
         elif form.theme_customization.data:
-            theme_customization_user=Users.query.filter_by(id=current_user.id).first()
+            theme_customization_user = Users.query.filter_by(id=user_id).first()
 
             if theme_customization_user.user_points >= 4000:
-                flash('success','Enough points to purchase custom theme')
+                flash('success', 'Enough points to purchase custom theme')
                 return redirect(url_for('customize'))
             else:
-                flash('error','Not enough points to purchase theme customixation need 4000 only have {}'.format(theme_customization_user.user_points)) 
+                flash('error',
+                      'Not enough points to purchase theme customization need 4000 only have {}'.format(
+                                                                                                        theme_customization_user.user_points)) 
                 return redirect(url_for('shop'))
 
     return render_template('shop.html', form=form)
 
+
 @app.route('/achivements')
 @login_required
 def user_achievement():
-    total_achievements=[]
-    current_achievements=UserAchievements.query.all()
-    
+    total_achievements = []
+    current_achievements = UserAchievements.query.all()
     if current_achievements:
         for user_completed in current_achievements:
-            achievement=Achievements.query.filter_by(id=user_completed.achievement_id).first()
+            achievement = Achievements.query.filter_by(id=user_completed.achievement_id).first()
             total_achievements.append(achievement)
     else:
-        flash("error","no achievements created")
+        flash("error", "no achievements created")
 
     return render_template('achivements.html', achievements=total_achievements)
+
 
 @app.route('/theme', methods=['GET', 'POST'])
 @login_required
 def customize():
+    user_id = current_user.id
     """
     Customizes the theme for the user.
 
@@ -568,10 +628,9 @@ def customize():
     if current_user.user_points < 4000:
         flash('error', 'You need 4000 points to purchase theme customization. You only have {} points'.format(current_user.user_points))
         return redirect(url_for('shop'))
-    
     form = ThemeForm()
     if form.validate_on_submit():
-        user_custom_theme = Users.query.filter_by(id=current_user.id).first()
+        user_custom_theme = Users.query.filter_by(id=user_id).first()
         primary_color = form.primary_color.data
         secondary_color = form.secondary_color.data
         accent_color = form.accent_color.data
@@ -583,22 +642,24 @@ def customize():
 
         # Process the submitted colors as needed
         user_custom_theme.user_points -= 4000
-        print(primary_color, secondary_color, accent_color, background_color)
         theme_status = user_custom_theme.custom_theme
         if theme_status:
             # If the user already purchased a custom theme, delete the old entry to replace it.
-            theme_to_delete = UserTheme.query.filter_by(id=current_user.id).first()
+            theme_to_delete = UserTheme.query.filter_by(user_id=user_id).first()
             db.session.delete(theme_to_delete)
             db.session.commit()
-        
-        check_theme_achievement=UserAchievements.query.filter_by(user_id=current_user.id, achievement_id=13).first()
+        check_theme_achievement = UserAchievements.query.filter_by(user_id=user_id,
+                                                                   achievement_id=13).first()
         if check_theme_achievement is None:
-            award_theme_achievement=UserAchievements(user_id=current_user.id, achievement_id=13)
+            award_theme_achievement = UserAchievements(user_id=user_id, achievement_id=13)
             db.session.add(award_theme_achievement)
-            flash('achievement','You earned the custom theme achievement')
+            flash('achievement', 'You earned the custom theme achievement')
 
         # Pass user input values to store user's preferred choices in the theme
-        new_custom_theme = UserTheme(user_id=current_user.id, primary=primary_color, secondary=secondary_color, accent=accent_color, background=background_color)
+        new_custom_theme = UserTheme(user_id=user_id, primary=primary_color,
+                                     secondary=secondary_color,
+                                     accent=accent_color,
+                                     background=background_color)
         db.session.add(new_custom_theme)
         user_custom_theme.custom_theme = True
         db.session.commit()
@@ -608,6 +669,8 @@ def customize():
         return redirect(url_for('dashboard', id=1))
 
     return render_template('customtheme.html', form=form)
+
+
 """
 # Custom error handler for app
 def handle_bad_request(error):
@@ -618,9 +681,8 @@ def handle_bad_request(error):
             error_description="Bad Request",
             error_message="Sorry, there was a problem with your request.",
         ),
-        400,
-    )
-        
+        400)
+
 
 @app.errorhandler(401)
 def handle_unauthorized(error):
@@ -631,8 +693,7 @@ def handle_unauthorized(error):
             error_description="Unauthorized",
             error_message="Sorry, you don't have access to this page.",
         ),
-        401,
-    )
+        401)
 
 
 @app.errorhandler(403)
@@ -644,8 +705,7 @@ def handle_forbidden(error):
             error_description="Forbidden",
             error_message="Sorry, you don't have permission to access this page.",
         ),
-        403,
-    )
+        403)
 
 
 @app.errorhandler(404)
@@ -657,8 +717,7 @@ def handle_page_not_found(error):
             error_description="Page Not Found",
             error_message="Sorry, we couldn't find the page you were looking for.",
         ),
-        404,
-    )
+        404)
 
 
 @app.errorhandler(405)
@@ -669,8 +728,7 @@ def handle_method_not_allowed(error):
             error_description="Method Not Allowed",
             error_message="Sorry, the method you used to access this page is not allowed.",
         ),
-        405,
-    )
+        405)
 
 
 @app.errorhandler(500)
@@ -705,6 +763,5 @@ def handle_all_other_errors(error):
             error_description="Internal Server Error",
             error_message="Sorry, there was an internal server error.",
         ),
-        500,
-    )
+        500)
 """

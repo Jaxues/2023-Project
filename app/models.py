@@ -9,9 +9,6 @@ encryption_key = environ.get('encryption_key')
 
 
 class Habits(db.Model):
-    """
-    
-    """
     __tablename__ = "habits"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(EncryptedType(db.String(50), encryption_key))
@@ -20,22 +17,23 @@ class Habits(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     user = db.relationship("Users", secondary="streak",
                            backref="habits", overlaps="habits,user_streak")
-    streak = db.relationship(
-        'Streak', backref='related_habits', overlaps="habits", cascade='delete,all')
+    streak = db.relationship('Streak', backref='related_habits',
+                             overlaps="habits", cascade='delete,all')
 
 
 class Users(db.Model, UserMixin):
     """
     Table for storing all information for users
     Columns
-    id: Unique identifer for which user is which. Unique and is used as a foriegn key in other 
-    username: What the user logins in with. 
+    id: Unique identifer for which user is which.
+    Unique and is used as a foriegn key in other
+    username: What the user logins in with.
     password_hash: hashed verion of what the users password
-    email: Where all notifactions as well as links will be sent to. 
+    email: Where all notifactions as well as links will be sent to.
     email_notifactions: Whether or not a user wants notifactions
     email_authenticated: Neccesary to protect users account so that no one can use anothers email
-    streak_freeze: Whether or not a user has a streak freeze powerup active. 
-    custom_theme: Whether or not a user has custom theme enabled within the website. 
+    streak_freeze: Whether or not a user has a streak freeze powerup active.
+    custom_theme: Whether or not a user has custom theme enabled within the website.
     """
 
     __tablename__ = "users"
@@ -60,13 +58,13 @@ class Users(db.Model, UserMixin):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
-
     theme = db.relationship('UserTheme', backref='user', uselist=False)
     streak = db.relationship(
-        "Habits", secondary="streak", backref="user_streak", overlaps="habits,streak,user,user_streak", cascade="delete,all")
+        "Habits", secondary="streak", backref="user_streak",
+        overlaps="habits,streak,user,user_streak", cascade="delete,all")
     user_achievements_rel = db.relationship('UserAchievements', backref='user')
-    
-    #Code realting to tracker user progress towards achievements over time
+    # Code realting to tracker user progress towards achievements over time
+
     longest_streak = db.Column(db.Integer, default=0)
     bad_habits_tracked = db.Column(db.Integer, default=0)
     good_habits_tracked = db.Column(db.Integer, default=0)
@@ -121,9 +119,8 @@ class UserTheme(db.Model):
 
 class Achievements(db.Model):
     """
-    Storing all information relating to achievements. 
-    Including the name description, rarity and category as well as requirements. 
-
+    Storing all information relating to achievements.
+    Including the name description, rarity and category and requirements.
     """
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -131,7 +128,8 @@ class Achievements(db.Model):
     category = db.Column(db.String)
     description = db.Column(db.String)
     requirements = db.Column(db.Integer)
-    achievements_rel = db.relationship('UserAchievements', backref='achievements')
+    achievements_rel = db.relationship('UserAchievements',
+                                       backref='achievements')
 
 
 class UserAchievements(db.Model):
@@ -139,10 +137,14 @@ class UserAchievements(db.Model):
     Table for storing data relating to achievments users have completed
     Columns:
     id: Unique identifier for the table. Need to order table. Primary Key
-    user_id: Identifier of which user has achieved something. To be specific how has accomplished a certain achievement
-    achievement_id: Which Achievement the user has accomplished. Theese are from the achievements table. 
+    user_id: Identifier of which user has achieved something.
+    To be specific how has accomplished a certain achievement
+    achievement_id: Which Achievement the user has accomplished.
+    Theese are from the achievements table.
     """
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    achievement_id = db.Column(db.Integer, db.ForeignKey('achievements.id'), nullable=False)
+    achievement_id = db.Column(db.Integer,
+                               db.ForeignKey('achievements.id'),
+                               nullable=False)
     achievement = db.relationship('Achievements', backref="user_achievements")

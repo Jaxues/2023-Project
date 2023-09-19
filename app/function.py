@@ -3,15 +3,18 @@ from app import mail, db
 import pytz
 from flask_mail import Message
 from flask import url_for
-from collections import defaultdict
+
 
 # Get local date for location
+
 def get_local_date():
     # replace with your local timezone
     local_tz = pytz.timezone('Pacific/Auckland')
     return datetime.now(local_tz).date()
 
+
 # Streak to see if two habits are consecutive in days
+
 def check_consecutive(streak_parameter, user):
     previous_date = streak_parameter.date
     date = get_local_date()
@@ -27,23 +30,20 @@ def check_consecutive(streak_parameter, user):
     else:
         return 1
 
-from datetime import datetime
 
 def heatmap_converter(user_data):
     # Initialize a dictionary to aggregate data
     aggregated_data = {}
-    
     # Iterate through user data
     for entry in user_data:
         date = entry.date
-        streak_id = entry.id
 
         if date in aggregated_data:
             # Increment count if the date is already in the dictionary
             aggregated_data[date]["v"] += 1
         else:
             # Create a new entry if the date is not in the dictionary
-            day_of_week = date.weekday() + 1  # 1 for Monday, 2 for Tuesday, etc.
+            day_of_week = date.weekday() + 1  # 1 for Monday, 2 for Tuesday
             aggregated_data[date] = {
                 "x": date.isoformat(),
                 "y": day_of_week,
@@ -63,7 +63,7 @@ def habit_points(user_streak, type_of_habit, user):
     total_points = 100
     user.total_habits_tracked += 1
     db.session.commit()
-    # Award different points for breaking bad habit. To encourage with incentives certain behavior
+    # Award different points for breaking bad habit.
     if type_of_habit == 'bad':
         user.bad_habits_tracked += 1
         if user_streak:
@@ -77,19 +77,21 @@ def habit_points(user_streak, type_of_habit, user):
             total_points += user_streak * 15
     return total_points
 
+
 # function sends the user a verification email
 def email_verification(user_email, token):
     msg = Message("Authentication link", recipients=[user_email])
-    # send an email with the subject Authentication Link. Recipient will be what the user enters in the email field
+    # send an email with the subject Authentication Link.
     msg.body = ("This is your authentication link {}. \n Remember to log in with your defined username and password from registration.".format(url_for('authentication', token=token, _external=True)))
     # Includes a link to verify the account for the user
     return mail.send(msg)
+
 
 def email_reminders(user_email, username):
     msg = Message('Habit Reminder', recipients=[user_email])
     msg.body = (" Hi {}, \n Reminder to make sure to log on to hadit and track your habits today".format(username))
     return mail.send(msg)
 
+
 def streak_freezer(user_info):
     pass
-

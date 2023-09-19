@@ -1,6 +1,8 @@
 from flask_wtf import FlaskForm, Recaptcha, RecaptchaField
 from wtforms.validators import DataRequired, Email, EqualTo, Length
-from wtforms import StringField, SubmitField, PasswordField, TextAreaField, RadioField, HiddenField
+from wtforms import (StringField, 
+                     SubmitField, PasswordField, TextAreaField, 
+                     RadioField, HiddenField)
 from wtforms.widgets import ColorInput
 
 
@@ -61,7 +63,7 @@ class YesNo(FlaskForm):
     """
     options = RadioField(choices=[("y", "Yes"), ("n", "No")])
     submit = SubmitField("Submit")
-    theme_toggle= SubmitField("ThemeToggle")
+    theme_toggle = SubmitField("ThemeToggle")
 
 
 class StreakForm(FlaskForm):
