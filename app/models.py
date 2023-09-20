@@ -9,14 +9,23 @@ encryption_key = environ.get('encryption_key')
 
 
 class Habits(db.Model):
+    """
+    id identifier for what habit is.
+    name What the name of the habit
+    reason Why user does habit
+    habit_type Type of habit to break or build
+    user_id Who habit belongs to
+    """
     __tablename__ = "habits"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(EncryptedType(db.String(50), encryption_key))
     reason = db.Column(EncryptedType(db.String(128), encryption_key))
     habit_type = db.Column(db.String(4))
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    # Connect habit to user with one to many
     user = db.relationship("Users", secondary="streak",
                            backref="habits", overlaps="habits,user_streak")
+    # Establish many to many with streak
     streak = db.relationship('Streak', backref='related_habits',
                              overlaps="habits", cascade='delete,all')
 
@@ -52,13 +61,18 @@ class Users(db.Model, UserMixin):
 
     def get_id(self):
         return self.id
+    # Generate password hash
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
+    # See if password entered is correct
+
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+    # Establish theme to user one to one
     theme = db.relationship('UserTheme', backref='user', uselist=False)
+    # Establish streak many to many
     streak = db.relationship(
         "Habits", secondary="streak", backref="user_streak",
         overlaps="habits,streak,user,user_streak", cascade="delete,all")
@@ -77,11 +91,11 @@ class Streak(db.Model):
     """
     Table for storing all data related to tracking the habits users have done on certain days
     Columns
-    id
-    user_id
-    habit_id
-    date
-    is_consecutive
+    id Identifier of record
+    user_id Who streak is for
+    habit_id Which habit it is
+    date What date recorded was done
+    is_consecutive See if multiple days
     """
     __tablename__ = "streak"
     id = db.Column(db.Integer, primary_key=True)
@@ -102,12 +116,12 @@ class UserTheme(db.Model):
     """
     Table
     Column
-    id
-    user_id
-    primary
-    secondary
-    accent
-    background
+    id Identifier for theme
+    user_id Who theme belongs to
+    primary What should be used for primary Color
+    secondary What should be used for secondary Color
+    accent What should be used for accent
+    background What should be sued for background
     """
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
