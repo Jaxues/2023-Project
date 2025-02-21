@@ -1,3 +1,4 @@
+# *IMPORTANT NOTE THIS CODE IS OUTDATED AND NOT SECURE I AM KEEPING THIS UP TO SHOWCASE MY PREVIOUS PROGRAMMING SKILLS ONLY* 
 # 2023-Project
 Welcome to Hadit my project for level 3 Programming. 
 Hadit is a habit tracker for neurodivergent and people with pyschological conditions. 
